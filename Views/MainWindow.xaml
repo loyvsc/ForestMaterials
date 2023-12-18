@@ -1,0 +1,258 @@
+﻿<Window x:Class="BuildMaterials.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        WindowStartupLocation="CenterScreen"        
+        xmlns:windows="clr-namespace:System;assembly=mscorlib"
+        xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
+        mc:Ignorable="d"
+        Title="АРМ Менеджера Строительной Фирмы" MinHeight="450" MinWidth="760" Height="450" Width="760">
+    <Window.DataContext>
+        <viewmodels:MainWindowViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <CollectionViewSource x:Key="EmployeesList" Source="{Binding EmployeesList}"/>
+        <CollectionViewSource x:Key="MaterialsList" Source="{Binding MaterialsList}"/>
+        <CollectionViewSource x:Key="PayTypesList" Source="{Binding PayTypesList}"/>
+        <windows:Boolean x:Key="IsConfView">False</windows:Boolean>
+        <windows:Boolean x:Key="IsConfAddEdit">False</windows:Boolean>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20px"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Выйти" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Справка">
+                <MenuItem Header="О программме" Command="{Binding AboutProgrammCommand}"/>
+                <MenuItem Header="Настройки" Command="{Binding SettingsCommand}"/>
+            </MenuItem>
+        </Menu>
+        <TabControl Margin="5,3,5,5" Grid.Row="1" SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="Справочник" HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30px"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25px"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.RowSpan="2">
+                        <Button Command="{Binding AddRowCommand, Mode=OneWay}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/plus.ico" StretchDirection="DownOnly"/>
+                        </Button>
+                        <Button Command="{Binding DeleteRowCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/delete.ico"/>
+                        </Button>
+                        <Button Command="{Binding PrintCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/print.ico"/>
+                        </Button>
+                    </StackPanel>
+                    <TextBox Grid.Column="1" Margin="0,0,0,5" Text="{Binding SearchText,UpdateSourceTrigger=PropertyChanged}"/>
+                    <TabControl Grid.Column="1" Grid.Row="1" SelectionChanged="TabControl_SelectionChanged">
+                        <TabItem Header="Материалы" x:Name="materialsTab">
+                            <DataGrid ItemsSource="{Binding MaterialsList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                    <DataGridTextColumn Header="Наименование" Binding="{Binding Name,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Стоимость за единицу" Binding="{Binding Price,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Текущее количество" Binding="{Binding Count,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Ед. измерения" Binding="{Binding CountUnits,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Дата поступления" Binding="{Binding EnterDateAsString, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="Сотрудники" x:Name="employersTab">
+                            <DataGrid ItemsSource="{Binding EmployeesList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                    <DataGridTextColumn Header="Фамилия" Binding="{Binding SurName,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Имя" Binding="{Binding Name,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Отчество" Binding="{Binding Pathnetic,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Должность" Binding="{Binding Position,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Номер телефона" Binding="{Binding PhoneNumber,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Уровень доступа" Binding="{Binding AccessLevelInString,UpdateSourceTrigger=PropertyChanged}" Visibility="{DynamicResource IsConfView}"
+                                                        IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="Серия и номер пасспорта" Binding="{Binding PassportNumber,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Дата выдачи паспорта" Binding="{Binding DateInString,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridCheckBoxColumn Header="Материально ответственный"  Binding="{Binding FinResponsible,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Пароль" IsReadOnly="{DynamicResource IsConfView}" Binding="{Binding Password,UpdateSourceTrigger=PropertyChanged}" Visibility="{DynamicResource IsConfView}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="Организации" x:Name="orgTab">
+                            <DataGrid ItemsSource="{Binding OrganizationsList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}"
+                                      IsReadOnly="True" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
+                                    <DataGridTextColumn Header="УНП" Binding="{Binding UNP}"/>
+                                    <DataGridTextColumn Header="Наименование организации" Binding="{Binding CompanyName}"/>
+                                    <DataGridTextColumn Header="Краткое наименование организации" Binding="{Binding ShortCompamyName}"/>
+                                    <DataGridTextColumn Header="Адрес" Binding="{Binding Adress}"/>
+                                    <DataGridTextColumn Header="Номер МНС" Binding="{Binding MNSNumber}"/>
+                                    <DataGridTextColumn Header="Наименование МНС" Binding="{Binding MNSName}"/>
+                                    <DataGridTextColumn Header="Дата регистрации" Binding="{Binding RegistrationDateInString}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Учет" x:Name="uchetTab">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30px"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Vertical" Grid.Column="0">
+                        <Button Command="{Binding AddRowCommand, Mode=OneWay}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/plus.ico"/>
+                        </Button>
+                        <Button Command="{Binding DeleteRowCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/delete.ico"/>
+                        </Button>
+                        <Button Command="{Binding PrintCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/print.ico"/>
+                        </Button>
+                        </StackPanel>
+                        <DataGrid HorizontalScrollBarVisibility="Auto" Grid.Column="1" ItemsSource="{Binding TradesList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                            <DataGridTextColumn Header="Дата" Binding="{Binding DateInString}"/>
+                            <DataGridComboBoxColumn Header="ФИО сотрудника" ItemsSource="{Binding Source={StaticResource EmployeesList}}"
+                                                    DisplayMemberPath="FIO" SelectedValuePath="ID"
+                                                    SelectedValueBinding="{Binding SellerID, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridComboBoxColumn Header="Наименование товара" ItemsSource="{Binding Source={StaticResource MaterialsList}}"
+                                                    DisplayMemberPath="Name" SelectedValuePath="ID"
+                                                    SelectedValueBinding="{Binding MaterialID, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn Header="Количество" Binding="{Binding Count,UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn Header="Стоимость" Binding="{Binding Price,UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn Header="Сумма" IsReadOnly="True" Binding="{Binding Summ,UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridComboBoxColumn Header="Тип оплаты" SelectedValueBinding="{Binding PayTypeID,UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name"
+                                                    ItemsSource="{Binding Source={StaticResource PayTypesList}}" SelectedValuePath="ID"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Документы">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30px"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Vertical" Grid.Column="0">
+                        <Button Command="{Binding AddRowCommand, Mode=OneWay}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/plus.ico"/>
+                        </Button>
+                        <Button Command="{Binding DeleteRowCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/delete.ico"/>
+                        </Button>
+                        <Button Command="{Binding PrintCommand}" Style="{StaticResource ResourceKey=MainButtons}">
+                            <Image Source="/img/print.ico"/>
+                        </Button>
+                    </StackPanel>
+                    <TabControl Grid.Column="1" SelectionChanged="TabControl_SelectionChanged">
+                        <TabItem x:Name="ttnTab" Header="ТТН">
+                            <DataGrid Grid.Column="1" ItemsSource="{Binding TTNList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                    <DataGridTextColumn Header="Грузоотправитель" Binding="{Binding Shipper, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Грузополучатель" Binding="{Binding Consignee, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Плательщик" Binding="{Binding Payer, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Количество" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Цена" Binding="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridComboBoxColumn Header="Наименование материала"
+                                                            ItemsSource="{Binding Source={StaticResource MaterialsList}}"
+                                                            DisplayMemberPath="Name" SelectedValuePath="ID"
+                                                            SelectedValueBinding="{Binding MaterialID,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Ед. измерения" Binding="{Binding CountUnits, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Масса" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Сумма" Binding="{Binding Summ, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Дата" Binding="{Binding DateInString,UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem x:Name="accountTab" Header="Счет-фактура" >
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Visible">
+                                <DataGrid Grid.Column="1" ItemsSource="{Binding AccountsList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}" 
+          CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                        <DataGridTextColumn Header="Дата" Binding="{Binding DateInString, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Продавец" Binding="{Binding Seller, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Грузоотправитель" Binding="{Binding ShipperName, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Адрес грузоотправителя" Binding="{Binding ShipperAdress, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Грузополучатель" Binding="{Binding ConsigneeName, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Адрес грузополучателя" Binding="{Binding ConsigneeAdress, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Покупатель" Binding="{Binding Buyer, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridComboBoxColumn Header="Наименование материала"
+                        ItemsSource="{Binding Source={StaticResource MaterialsList}}"
+                        DisplayMemberPath="Name" SelectedValuePath="ID"
+                        SelectedValueBinding="{Binding Path=MaterialID, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Количество" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Ед. измерения" Binding="{Binding CountUnits, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Стоимость за единицу" Binding="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Налогагая ставка" Binding="{Binding Tax, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Сумма налога" Binding="{Binding TaxSumm, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <DataGridTextColumn Header="Сумма" Binding="{Binding FinalSumm, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem x:Name="contractTab" Header="Договор купли-продажи">
+                            <DataGrid Grid.Column="1" ItemsSource="{Binding ContractsList,UpdateSourceTrigger=PropertyChanged}" 
+                                     SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}" 
+CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                    <DataGridTextColumn Header="Продавец" Binding="{Binding Seller, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Покупатель" Binding="{Binding Buyer, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridComboBoxColumn Header="Наименование материала"
+                                                            ItemsSource="{Binding Source={StaticResource MaterialsList}}"
+                                                            DisplayMemberPath="Name" SelectedValuePath="ID"
+                                                            SelectedValueBinding="{Binding Path=MaterialID, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Количество" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Ед. измерения" Binding="{Binding CountUnits, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Стоимость" Binding="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Сумма" Binding="{Binding Summ, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Дата" Binding="{Binding DateInString, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem x:Name="materialResponsibleTab" Header="Материально-ответственный отчет">
+                            <DataGrid Grid.Column="1" ItemsSource="{Binding MaterialResponsesList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}" 
+                                      CanUserAddRows="False" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" IsReadOnly="True" Binding="{Binding ID}"/>
+                                    <DataGridComboBoxColumn Header="Наименование материала" ItemsSource="{Binding Source={StaticResource MaterialsList}}"
+                        DisplayMemberPath="Name" SelectedValuePath="ID"
+                        SelectedValueBinding="{Binding Path=MaterialID, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                    <DataGridTextColumn Header="Ед. измерения" Binding="{Binding CountUnits,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Приход" Binding="{Binding Prihod,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Расход" Binding="{Binding Rashod,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Баланс на начало" Binding="{Binding BalanceAtStart,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Баланс на конец" Binding="{Binding BalanceAtEnd, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridComboBoxColumn Header="Материально-ответственное лицо" ItemsSource="{Binding Source={StaticResource EmployeesList}}"
+                        DisplayMemberPath="FIO" SelectedValuePath="ID"
+                        SelectedValueBinding="{Binding Path=FinResponseEmployeeID, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

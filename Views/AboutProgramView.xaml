@@ -1,0 +1,46 @@
+﻿<Window x:Class="BuildMaterials.Views.AboutProgramView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
+        mc:Ignorable="d" ResizeMode="CanMinimize"
+        Title="О программе" Width="350" Height="300" WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <viewmodels:AboutProgrammViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25px"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40px"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/img/icon.ico" Width="32" Margin="0,5,5,5" VerticalAlignment="Center"/>
+                <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,7.4">АРМ Менеджера Строительной Фирмы</TextBlock>
+            </StackPanel>
+            <TextBlock Margin="0,0,5,0" TextWrapping="Wrap">
+                Приложение разработано для сотрудников строительной фирмы.
+                <LineBreak></LineBreak>
+                Для разработки использованы:<LineBreak></LineBreak>
+                • .NET 7<LineBreak></LineBreak>
+                • Windows Presentation Foundation (WPF)<LineBreak></LineBreak>
+                • СУБД MySQL<LineBreak></LineBreak>
+                • Библиотека MySQL.Data (подключение к СУБД)
+                <LineBreak/><LineBreak/>
+                Курсовая работа по предмету Базы данных и СУБД
+                <LineBreak/>Автор: Варакса Валерий Витальевич, группа 0К9392
+            </TextBlock>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <TextBlock Text="Версия: "></TextBlock>
+                <TextBlock Text="{Binding ApplicationVersion}"/>
+            </StackPanel>
+        </StackPanel>
+        <Button Grid.Row="1" Grid.Column="1" Margin="5,0,5,5" HorizontalAlignment="Right" MaxWidth="75" MinWidth="75"
+                Command="{Binding CloseCommand}">Закрыть</Button>
+    </Grid>
+</Window>
