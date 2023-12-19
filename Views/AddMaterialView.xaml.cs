@@ -9,5 +9,11 @@ namespace BuildMaterials.Views
             InitializeComponent();
             DataContext = new ViewModels.AddMaterialViewModel(this);
         }
+
+        public AddMaterialView(Models.Material material)
+        {
+            InitializeComponent();
+            DataContext = new ViewModels.AddMaterialViewModel(this, material);
+        }
     }
 }

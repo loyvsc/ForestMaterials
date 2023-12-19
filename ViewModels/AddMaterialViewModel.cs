@@ -1,6 +1,6 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Media3D;
 
 namespace BuildMaterials.ViewModels
 {
@@ -16,6 +16,12 @@ namespace BuildMaterials.ViewModels
         public AddMaterialViewModel()
         {
             Material = new Models.Material();
+        }
+
+        public AddMaterialViewModel(Window window, Models.Material material)
+        {
+            Material = material;
+            _window = window;
         }
 
         public AddMaterialViewModel(Window window) : this()

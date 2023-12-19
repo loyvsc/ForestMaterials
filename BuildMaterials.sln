@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNPRead", "..\UNPReader\UNPRead.csproj", "{F96C7AA3-A84F-4E80-9E91-99952F1B61BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilterDataGrid.Net", "..\FilterDataGrid\FilterDataGrid.Net.csproj", "{6F12EB99-D6B4-425C-9853-53BEDFD1522B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilterDataGrid", "..\FilterDataGrid\FilterDataGrid.csproj", "{6F12EB99-D6B4-425C-9853-53BEDFD1522B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,11 +1,15 @@
 ﻿using BuildMaterials.BD;
+using FilterDataGrid.Attributes;
 
 namespace BuildMaterials.Models
 {
     public class Material : ITable
-    {        
+    {
         private readonly bool UseBD;
-        public int ID { get; set; }
+
+        [ReadOnly] public int ID { get; set; }
+
+        [ColumnName("Наименование")]
         public string? Name
         {
             get => name;
@@ -15,9 +19,10 @@ namespace BuildMaterials.Models
                 if (UseBD)
                 {
                     App.DbContext.Query($"UPDATE Materials SET Name = '{value}' WHERE ID = {ID};");
-                }                
+                }
             }
         }
+        [ColumnName("Производитель")]
         public string? Manufacturer
         {
             get => manufacturer;
@@ -27,9 +32,10 @@ namespace BuildMaterials.Models
                 if (UseBD)
                 {
                     App.DbContext.Query($"UPDATE Materials SET Manufacturer = '{value}' WHERE ID = {ID};");
-                }                
+                }
             }
         }
+        [ColumnName("Цена")]
         public float Price
         {
             get => price;
@@ -42,6 +48,7 @@ namespace BuildMaterials.Models
                 }
             }
         }
+        [ColumnName("Количество")]
         public float Count
         {
             get => count;
@@ -54,6 +61,7 @@ namespace BuildMaterials.Models
                 }
             }
         }
+        [ColumnName("Ед. измерения")]
         public string? CountUnits
         {
             get => countUnits;
@@ -66,6 +74,7 @@ namespace BuildMaterials.Models
                 }
             }
         }
+        [NotVisible]
         public DateTime EnterDate
         {
             get => enterDate;
@@ -78,13 +87,14 @@ namespace BuildMaterials.Models
                 }
             }
         }
+        [ColumnName("Дата поставки")]
         public string EnterDateAsString
         {
             get => App.DbContext.Materials.Select($"SELECT * FROM MATERIALS WHERE ID = " + ID)[0].EnterDate.ToShortDateString();
             set
             {
                 DateTime date;
-                if (DateTime.TryParse(value.Trim(),out date))
+                if (DateTime.TryParse(value.Trim(), out date))
                 {
                     EnterDate = date;
                 }
@@ -131,6 +141,7 @@ namespace BuildMaterials.Models
             this.enterDate = enterDate;
         }
 
+        [NotVisible]
         public bool IsValid => Name != string.Empty &&
             Manufacturer != string.Empty &&
             CountUnits != string.Empty;

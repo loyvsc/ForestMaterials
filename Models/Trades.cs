@@ -124,6 +124,8 @@ namespace BuildMaterials.Models
             }
         }
 
+        public string PayTypeName => PayType.Name;
+
         public PayType? PayType
         {
             get => App.DbContext.PayTypes.Select($"SELECT * FROM PAYTYPES WHERE ID = {PayTypeID}")[0];

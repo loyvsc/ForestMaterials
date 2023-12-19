@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FilterDataGrid\FilterDataGrid.csproj" />
     <ProjectReference Include="..\UNPReader\UNPRead.csproj" />
   </ItemGroup>
 
@@ -55,10 +56,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Other\" />
   </ItemGroup>
 
 </Project>
