@@ -48,7 +48,7 @@ namespace BuildMaterials.ViewModels
                     }
                 case "orgTab":
                     {
-                        dc.OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers;");
+                        dc.OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
                         break;
                     }
                 case "uchetTab":

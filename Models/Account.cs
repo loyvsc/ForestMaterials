@@ -4,8 +4,6 @@ namespace BuildMaterials.Models
 {
     public class Account : NotifyPropertyChangedBase, ITable
     {
-        private readonly bool UseBD;
-
         public int ID { get; set; }
         public Employee? Seller
         {
@@ -15,7 +13,6 @@ namespace BuildMaterials.Models
                 if (value != null)
                 {
                     SellerID = value.ID;
-                    OnPropertyChanged(nameof(SellerID));
                     OnPropertyChanged(nameof(Seller));
                 }
             }
@@ -26,10 +23,7 @@ namespace BuildMaterials.Models
             set
             {
                 seller = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET Seller={value} WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(SellerID));
             }
         }
         public string? ShipperName
@@ -38,10 +32,7 @@ namespace BuildMaterials.Models
             set
             {
                 shipperName = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET ShipperName='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(ShipperName));
             }
         }
         public string? ShipperAdress
@@ -50,10 +41,7 @@ namespace BuildMaterials.Models
             set
             {
                 shipperAdress = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET ShipperAdress='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(ShipperAdress));
             }
         }
         public string? ConsigneeName
@@ -62,10 +50,7 @@ namespace BuildMaterials.Models
             set
             {
                 consigneeName = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET ConsigneeName='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(ConsigneeName));
             }
         }
         public string? ConsigneeAdress
@@ -74,10 +59,7 @@ namespace BuildMaterials.Models
             set
             {
                 consigneeAdress = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET ConsigneeAdress='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(ConsigneeAdress));
             }
         }
         public Employee? Buyer
@@ -99,10 +81,7 @@ namespace BuildMaterials.Models
             set
             {
                 buyer = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET Buyer={value} WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(BuyerID));
             }
         }
         public string? CountUnits
@@ -111,10 +90,7 @@ namespace BuildMaterials.Models
             set
             {
                 countUnits = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET CountUnits='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(CountUnits));
             }
         }
         public float Count
@@ -123,10 +99,6 @@ namespace BuildMaterials.Models
             set
             {
                 count = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET Count='{value}' WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Count));
                 OnPropertyChanged(nameof(Summ));
                 OnPropertyChanged(nameof(TaxSumm));
@@ -140,10 +112,6 @@ namespace BuildMaterials.Models
             set
             {
                 price = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET Price='{value}' WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Price));
                 OnPropertyChanged(nameof(Summ));
                 OnPropertyChanged(nameof(TaxSumm));
@@ -159,10 +127,6 @@ namespace BuildMaterials.Models
             {
                 if (value > 100 || value < 0) return;
                 tax = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET Tax='{value}' WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Tax));
                 OnPropertyChanged(nameof(TaxSumm));
                 OnPropertyChanged(nameof(FinalSumm));
@@ -176,10 +140,7 @@ namespace BuildMaterials.Models
             set
             {
                 date = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Date SET Date='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(Date));
             }
         }
         public float FinalSumm => Summ + TaxSumm;
@@ -191,10 +152,6 @@ namespace BuildMaterials.Models
             set
             {
                 matid = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Accounts SET MaterialID ={value} WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Material));
                 OnPropertyChanged(nameof(MaterialID));
             }
@@ -225,14 +182,10 @@ namespace BuildMaterials.Models
         private float price = 0;
         private float tax = 0;
 
-        public Account()
-        {
-            UseBD = false;
-        }
+        public Account() { }
 
         public Account(int iD, int? seller, string? shipperName, string? shipperAdress, string? consigneeName, string? consigneeAdress, int? buyer, string? countUnits, float count, float price, float tax, DateTime? date, int materialid)
         {
-            UseBD = false;
             ID = iD;
             SellerID = seller;
             ShipperName = shipperName;
@@ -246,7 +199,6 @@ namespace BuildMaterials.Models
             Tax = tax;
             Date = date;
             MaterialID = materialid;
-            UseBD = true;
         }
 
         public override string ToString()

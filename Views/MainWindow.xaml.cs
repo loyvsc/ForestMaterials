@@ -12,15 +12,14 @@ namespace BuildMaterials.Views
         public MainWindow()
         {
             InitializeComponent();
-            mainViewModel = new MainWindowViewModel();
+            mainViewModel = new MainWindowViewModel(this);
             DataContext = mainViewModel;
         }
 
         public MainWindow(Employee employee)
         {
             InitializeComponent();
-            mainViewModel = new MainWindowViewModel();
-            mainViewModel.CurrentEmployee = employee;
+            mainViewModel = new MainWindowViewModel(this,employee);
             DataContext = mainViewModel;
         }
 

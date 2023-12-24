@@ -1,10 +1,13 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
+using SpreadsheetLight;
 using System.ComponentModel;
+using BuildMaterials.Extensions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace BuildMaterials.ViewModels
 {
@@ -93,15 +96,26 @@ namespace BuildMaterials.ViewModels
                 OnPropertyChanged(nameof(PayTypesList));
             }
         }
+        public List<Individual> IndividualsList
+        {
+            get => invlst;
+            set
+            {
+                invlst = value;
+                OnPropertyChanged();
+            }
+        }
         #endregion
 
         #region Commands
-        public ICommand AboutProgrammCommand => new RelayCommand((sender) => OpenAboutProgram());
+        public ICommand AboutProgrammCommand => new RelayCommand(OpenAboutProgram);
         public ICommand ExitCommand => new RelayCommand((sener) => System.Windows.Application.Current.MainWindow.Close());
-        public ICommand SettingsCommand => new RelayCommand((sener) => OpenSettings());
-        public ICommand AddRowCommand => new RelayCommand((sender) => AddRow());
-        public ICommand DeleteRowCommand => new RelayCommand((sender) => DeleteRow());
-        public ICommand PrintCommand => new RelayCommand((sender) => PrintContract());
+        public ICommand SettingsCommand => new RelayCommand(OpenSettings);
+        public ICommand AddRowCommand => new RelayCommand(AddRow);
+        public ICommand EditRowCommand => new RelayCommand(EditRow);
+        public ICommand DeleteRowCommand => new RelayCommand(DeleteRow);
+        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave);
+        //public ICommand PrintCommand => new RelayCommand((sender) => PrintContract());
         #endregion
 
         public bool CanViewConfidentional => CurrentEmployee?.AccessLevel == 3;
@@ -110,9 +124,10 @@ namespace BuildMaterials.ViewModels
             get => _searchtext;
             set
             {
-                if (value.Trim() != _searchtext)
+                value = value.Trim();
+                if (value != _searchtext)
                 {
-                    _searchtext = value.Trim();
+                    _searchtext = value;
                     OnPropertyChanged(nameof(SearchText));
                     Search(_searchtext);
                 }
@@ -146,6 +161,7 @@ namespace BuildMaterials.ViewModels
         public string SelectedTabAsString => selectedTab;
 
         #region Private vars
+        private List<Individual> invlst;
         private Visibility isPrintEnabled;
         private List<PayType> paytypeslist;
         private string selectedTab = string.Empty;
@@ -160,13 +176,15 @@ namespace BuildMaterials.ViewModels
         private List<Account> accounts = null!;
         private List<Contract> contracts = null!;
         private List<MaterialResponse> materialResponses = null!;
+        private readonly MainWindow view;
         #endregion
 
         #region Constructors
+
         public MainWindowViewModel()
         {
             CurrentEmployee = new Employee();
-            OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers;");
+            OrganizationsList = App.DbContext.Organizations.ToList();
             MaterialsList = App.DbContext.Materials.ToList();
             EmployeesList = App.DbContext.Employees.ToList();
             TradesList = App.DbContext.Trades.ToList();
@@ -175,12 +193,17 @@ namespace BuildMaterials.ViewModels
             ContractsList = App.DbContext.Contracts.ToList();
             PayTypesList = App.DbContext.PayTypes.ToList();
             MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+            IndividualsList = App.DbContext.Individuals.ToList();
 
-            IsPrintEnabled = Visibility.Collapsed;
             Settings = new Settings();
         }
 
-        public MainWindowViewModel(Employee employee) : this()
+        public MainWindowViewModel(MainWindow view) : this()
+        {
+            this.view = view;
+        }
+
+        public MainWindowViewModel(MainWindow view, Employee employee) : this(view)
         {
             App.Current.Resources["IsConfView"] = CurrentEmployee?.AccessLevel > 1;
             App.Current.Resources["IsConfAddEdit"] = CurrentEmployee?.AccessLevel == 3;
@@ -188,28 +211,20 @@ namespace BuildMaterials.ViewModels
         }
         #endregion
 
-        private void PrintContract()
-        {
-            if (SelectedTableItem == null)
-            {
-                return;
-            }
-        }
-
         #region ApplicationFunctions
-        private void OpenAboutProgram()
+        private void OpenAboutProgram(object? obj)
         {
             AboutProgramView aboutWindow = new AboutProgramView();
             aboutWindow.ShowDialog();
         }
-        private void OpenSettings()
+        private void OpenSettings(object? obj)
         {
             SettingsView settingsWindow = new SettingsView();
             settingsWindow.ShowDialog();
         }
         public void ExitFromProgramm(CancelEventArgs e)
         {
-            MessageBoxResult result = System.Windows.MessageBox.Show("Выйти из программы?", "АРМ Менеджера Строительной Компании", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Question);
+            MessageBoxResult result = System.Windows.MessageBox.Show("Выйти из программы?", "АРМ Менеджера Строительной Компании", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
             if (result == MessageBoxResult.No)
             {
                 e.Cancel = true;
@@ -244,7 +259,7 @@ namespace BuildMaterials.ViewModels
                         }
                     case "orgTab":
                         {
-                            OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers");
+                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers");
                             break;
                         }
                     case "uchetTab":
@@ -270,13 +285,26 @@ namespace BuildMaterials.ViewModels
                 }
             }
         }
-        private void DeleteRow()
+
+        #region Private methods
+        private void DeleteRow(object? obj)
         {
             try
             {
                 if (SelectedTableItem == null) return;
                 switch (selectedTab)
                 {
+                    case "individualsTab":
+                        {
+                            if (IndividualsList.Count.Equals(0))
+                            {
+                                return;
+                            }
+                            Individual buf = (Individual)SelectedTableItem;
+                            App.DbContext.Individuals.Remove(buf);
+                            IndividualsList = App.DbContext.Individuals.ToList();
+                            break;
+                        }
                     case "materialResponsibleTab":
                         {
                             if (MaterialResponsesList.Count.Equals(0))
@@ -317,13 +345,13 @@ namespace BuildMaterials.ViewModels
                         }
                     case "orgTab":
                         {
-                            if(OrganizationsList.Count.Equals(0))
+                            if (OrganizationsList.Count.Equals(0))
                             {
                                 return;
                             }
                             Organization buf = (Organization)SelectedTableItem;
-                            App.DbContext.Sellers.Remove(buf);
-                            OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers;");
+                            App.DbContext.Organizations.Remove(buf);
+                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
                             break;
                         }
                     case "uchetTab":
@@ -381,7 +409,7 @@ namespace BuildMaterials.ViewModels
                 SelectedTableItem = null;
             }
         }
-        private void AddRow()
+        private void AddRow(object? obj)
         {
             switch (selectedTab)
             {
@@ -412,12 +440,21 @@ namespace BuildMaterials.ViewModels
                         }
                         break;
                     }
+                case "individualsTab":
+                    {
+                        AddIndividualView add = new AddIndividualView();
+                        if (add.ShowDialog() == true)
+                        {
+                            IndividualsList = App.DbContext.Individuals.ToList();
+                        }
+                        break;
+                    }
                 case "orgTab":
                     {
                         AddOrganizationView add = new AddOrganizationView();
                         if (add.ShowDialog() == true)
                         {
-                            OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers;");
+                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
                         }
                         break;
                     }
@@ -459,55 +496,164 @@ namespace BuildMaterials.ViewModels
                     }
             }
         }
-        public void Search(string text)
+        private void EditRow(object? obj)
         {
-            try
+            if (SelectedTableItem != null)
             {
-                if (text.Equals(string.Empty))
-                {
-                    switch (selectedTab)
-                    {
-                        case "materialsTab":
-                            {
-                                MaterialsList = App.DbContext.Materials.ToList();
-                                break;
-                            }
-                        case "employersTab":
-                            {
-                                EmployeesList = App.DbContext.Employees.ToList();
-                                break;
-                            }
-                        case "orgTab":
-                            {
-                                OrganizationsList = App.DbContext.Sellers.Select("SELECT * FROM sellers;");
-                                break;
-                            }
-                    }
-                    return;
-                }
+                int id = SelectedTableItem.ID;
                 switch (selectedTab)
                 {
+                    case "individualsTab":
+                        {
+                            AddIndividualView add = new AddIndividualView(App.DbContext.Individuals.ElementAt(id));
+                            if (add.ShowDialog() == true)
+                            {
+                                IndividualsList = App.DbContext.Individuals.ToList();
+                            }
+                            break;
+                        }
                     case "materialsTab":
                         {
-                            MaterialsList = App.DbContext.Materials.Search(text);
+                            var window = new AddMaterialView(App.DbContext.Materials.ElementAt(id));
+                            window.ShowDialog();
+                            if (window != null)
+                            {
+                                MaterialsList = App.DbContext.Materials.ToList();
+                            }
                             break;
                         }
                     case "employersTab":
                         {
-                            EmployeesList = App.DbContext.Employees.Search(text);
+                            var window = new AddEmployeeView(App.DbContext.Employees.ElementAt(id));
+                            window.ShowDialog();
+                            if (window != null)
+                            {
+                                EmployeesList = App.DbContext.Employees.ToList();
+                            }
                             break;
                         }
                     case "orgTab":
                         {
-                            OrganizationsList = App.DbContext.Sellers.Search(text);
+                            var window = new AddOrganizationView(App.DbContext.Organizations.ElementAt(id));
+                            window.ShowDialog();
+                            if (window != null)
+                            {
+                                OrganizationsList = App.DbContext.Organizations.ToList();
+                            }
+                            break;
+                        }
+                    case "uchetTab":
+                        {
+                            var window = new AddTradeView(App.DbContext.Trades.ElementAt(id));
+                            window.ShowDialog();
+                            if (window != null)
+                            {
+                                TradesList = App.DbContext.Trades.ToList();
+                            }
                             break;
                         }
                 }
             }
-            catch (System.ArgumentNullException)
+        }
+        private async void ExportExcelWithSave(object? obj)
+        {
+            SaveFileDialog savefile = new SaveFileDialog()
             {
-                return;
+                Filter = "Файлы Excel(*.xlsx)|*.xlsx|All files(*.*)|*.*",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = false,
+            };
+            if (savefile.ShowDialog() == DialogResult.OK)
+            {
+                await Task.Run(() => ExportToExcel(savefile.FileName));
             }
         }
+
+        private void ExportToExcel(string filename)
+        {
+            switch (selectedTab)
+            {
+                case "materialsTab":
+                    {
+                        var materials = view.materialsDataGrid.CollectionViewSource.Cast<Material>().ToArray();
+                        using (SLDocument document = new SLDocument())
+                        {                       
+                            string[] header = new string[7]
+                            { "№","Наименование","Производитель","Цена","Количество","Ед. измерения","Дата поставки"};                            
+                            for (int ind = 1; ind < 7; ind++)
+                            {
+                                document.SetCellValueNumeric(1, ind, header[ind - 1]);
+                            }
+                            int matCount = materials.Length;
+                            for (int i = 0; i < matCount; i++)
+                            {
+                                Material material = materials[i];
+                                document.SetCellValueNumeric(i + 2, 1, material.ID.ToString());
+                                document.SetCellValueNumeric(i + 2, 2, material.Name);
+                                document.SetCellValueNumeric(i + 2, 3, material.Manufacturer);
+                                document.SetCellValueNumeric(i + 2, 4, material.Price.ToString());
+                                document.SetCellValueNumeric(i + 2, 5, material.Count.ToString());
+                                document.SetCellValueNumeric(i + 2, 6, material.CountUnits);
+                                document.SetCellValueNumeric(i + 2, 7, material.EnterDate.ToMySQLDate());
+                            }
+                            try
+                            {
+                                document.SaveAs(filename);
+                            }
+                            catch (System.IO.IOException)
+                            {
+                                System.Windows.MessageBox.Show("Произошла ошибка при сохранении файла", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
+                            }
+                        }
+                        break;
+                    }
+            }
+        }
+        private void Search(string text)
+        {
+            if (text.Equals(string.Empty))
+            {
+                switch (selectedTab)
+                {
+                    case "materialsTab":
+                        {
+                            MaterialsList = App.DbContext.Materials.ToList();
+                            break;
+                        }
+                    case "employersTab":
+                        {
+                            EmployeesList = App.DbContext.Employees.ToList();
+                            break;
+                        }
+                    case "orgTab":
+                        {
+                            OrganizationsList = App.DbContext.Organizations.ToList();
+                            break;
+                        }
+                }
+                return;
+            }
+            switch (selectedTab)
+            {
+                case "materialsTab":
+                    {
+                        MaterialsList = App.DbContext.Materials.Search(text);
+                        break;
+                    }
+                case "employersTab":
+                    {
+                        EmployeesList = App.DbContext.Employees.Search(text);
+                        break;
+                    }
+                case "orgTab":
+                    {
+                        OrganizationsList = App.DbContext.Organizations.Search(text);
+                        break;
+                    }
+            }
+        }
+
+        #endregion
     }
 }

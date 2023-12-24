@@ -9,5 +9,11 @@ namespace BuildMaterials.Views
             InitializeComponent();
             DataContext = new ViewModels.AddTradeViewModel(this);
         }
+
+        public AddTradeView(Models.Trade trade)
+        {
+            InitializeComponent();
+            DataContext = new ViewModels.AddTradeViewModel(this,trade);
+        }
     }
 }

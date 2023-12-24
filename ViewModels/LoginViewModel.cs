@@ -32,7 +32,7 @@ namespace BuildMaterials.ViewModels
                     using (MySqlDataReader reader = _command.ExecuteMySqlReaderAsync())
                         while (reader.Read())
                         {
-                            employees.Add(new Employee(reader.GetString(0), reader.GetInt32(1), reader.GetInt32(2)));
+                            employees.Add(new Employee(reader.GetString(0), reader.GetString(1), reader.GetInt32(2)));
                         }
                     _connection.CloseAsync().Wait();
                 }
@@ -40,7 +40,10 @@ namespace BuildMaterials.ViewModels
             return employees;
         }
 
-        public LoginViewModel() { }
+        public LoginViewModel()
+        {
+            EnteredPassword = "";
+        }
 
         public LoginViewModel(Window parentWindow) : this()
         {
@@ -51,30 +54,19 @@ namespace BuildMaterials.ViewModels
         private string? _enteredPassword;
 
         private bool IsSelectedTypeValid => SelectedTypeIndex.Equals(-1);
-        private bool IsEnteredPasswordValid => EnteredPassword?.Trim().Length == 0;
 
         public void Autorize()
         {
             try
             {
-                if (IsSelectedTypeValid && IsEnteredPasswordValid)
-                {
-                    throw new AutorizeException("Выберите тип пользователя\nи введите пароль!");
-                }
                 if (IsSelectedTypeValid)
                 {
-                    throw new AutorizeException("Выберите тип пользователя!");
+                    throw new AutorizeException("Выберите пользователя!");
                 }
-                if (IsEnteredPasswordValid)
-                {
-                    throw new AutorizeException("Введите пароль!");
-                }
-
-                int enteredPassword = Convert.ToInt32(EnteredPassword);
 
                 Employee findedEmployee = Employees[SelectedTypeIndex];
 
-                if (enteredPassword.Equals(findedEmployee.Password) || findedEmployee!.Password.Equals(0))
+                if (EnteredPassword == findedEmployee.Password)
                 {
                     MainWindow mainWindow = new MainWindow(findedEmployee);
                     mainWindow.Show();
@@ -83,7 +75,7 @@ namespace BuildMaterials.ViewModels
                 }
                 else
                 {
-                    throw new AutorizeException("Введенный пароль неверен!");
+                    throw new AutorizeException("Неверный пароль!");
                 }
             }
             catch (AutorizeException aEx)

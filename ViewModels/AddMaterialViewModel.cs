@@ -8,8 +8,8 @@ namespace BuildMaterials.ViewModels
     {
         public Models.Material Material { get; set; }
 
-        public ICommand CancelCommand => new RelayCommand((sender) => _window.Close());
-        public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());
+        public ICommand CancelCommand => new RelayCommand(Close);
+        public ICommand AddCommand => new RelayCommand(AddMaterial);
 
         private readonly Window _window = null!;
 
@@ -29,17 +29,37 @@ namespace BuildMaterials.ViewModels
             _window = window;
         }
 
-        private void AddMaterial()
+        private void Close(object? obj = null) => _window.DialogResult = true;
+
+        private void AddMaterial(object? obj)
         {
-            if (Material.IsValid)
+            if (Material.ID != 0)
             {
-                Material.Count = Material.Count;
-                Material.EnterDate = DateTime.Now.Date;
-                App.DbContext.Materials.Add(Material);
-                _window.DialogResult = true;
-                return;
+                try
+                {
+                    App.DbContext.Materials.Update(Material);
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений...\nОшибка: "+ex.Message, "Редактирование материала", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                Close();
             }
-            System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый материал", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+            {
+                if (Material.IsValid())
+                {
+                    Material.Count = Material.Count;
+                    Material.EnterDate = DateTime.Now.Date;
+                    App.DbContext.Materials.Add(Material);
+                    Close();
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Введена не вся требуемая информация!", "Добавление материала", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

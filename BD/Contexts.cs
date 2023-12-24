@@ -1,5 +1,8 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
+using System.Windows.Forms;
+using YesSql;
 
 namespace BuildMaterials.BD
 {
@@ -14,23 +17,23 @@ namespace BuildMaterials.BD
         void Remove(T obj);
         void Remove(int id);
         public List<T> Select(string query);
-    }
-    public static class Extension
-    {
-        public static string ToMySQLDate(this DateTime obj) => $"{obj.Date.Year}-{obj.Date.Month}-{obj.Date.Day}";
+        public void Update(T obj);
     }
 
     public class ApplicationContext
     {
+        public ContactTable Contacts { get; set; } = null!;
         public MaterialsTable Materials { get; set; } = null!;
         public EmployeesTable Employees { get; set; } = null!;
-        public SellersTable Sellers { get; set; } = null!;
+        public OrganizationsTable Organizations { get; set; } = null!;
         public TradesTable Trades { get; set; } = null!;
         public TTNSTable TTNs { get; set; } = null!;
         public AccountsTable Accounts { get; set; } = null!;
         public ContractsTable Contracts { get; set; } = null!;
         public MaterialResponsesTable MaterialResponse { get; set; } = null!;
         public PayTypesTable PayTypes { get; set; } = null!;
+        public PassportsTable Passports { get; set; } = null!;
+        public IndividualsTable Individuals { get; set; } = null!;
 
         public readonly string[] AccessLevel = new string[4] { "Минимальный", "Низкий", "Средний", "Максимальный" };
 
@@ -50,15 +53,18 @@ namespace BuildMaterials.BD
 
         public ApplicationContext()
         {
+            Contacts = new ContactTable();
             PayTypes = new PayTypesTable();
             Employees = new EmployeesTable();
-            Sellers = new SellersTable();
+            Organizations = new OrganizationsTable();
             Materials = new MaterialsTable();
             Trades = new TradesTable();
             TTNs = new TTNSTable();
             Accounts = new AccountsTable();
             Contracts = new ContractsTable();
             MaterialResponse = new MaterialResponsesTable();
+            Individuals = new IndividualsTable();
+            Passports = new PassportsTable();
             CreateDatabase();
         }
 
@@ -67,7 +73,7 @@ namespace BuildMaterials.BD
             if (!CheckBDCreated())
             {
                 InitializeDatabase();
-                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", "BM3132131", DateTime.Now));
+                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234",new Passport(0,"BM1234567", new DateTime(2016,3,12))," "));
                 PayTypes.Add(new PayType(-1, "Наличный расчет"));
                 PayTypes.Add(new PayType(-1, "Безналичный расчет"));
             }
@@ -81,9 +87,9 @@ namespace BuildMaterials.BD
 
         private void InitTables()
         {
-            Query(EmployeesTable.CreateQuery + SellersTable.CreateQuery + MaterialsTable.CreateQuery +
+            Query(EmployeesTable.CreateQuery + OrganizationsTable.CreateQuery + MaterialsTable.CreateQuery +
                 TradesTable.CreateQuery + TTNSTable.CreateQuery + AccountsTable.CreateQuery + ContractsTable.CreateQuery
-                + MaterialResponsesTable.CreateQuery + PayTypesTable.CreateQuery);
+                + MaterialResponsesTable.CreateQuery + PayTypesTable.CreateQuery + ContactTable.CreateQuery + IndividualsTable.CreateQuery + PassportsTable.CreateQuery);
             CreateFKs();
         }
 
@@ -100,7 +106,9 @@ namespace BuildMaterials.BD
                 "ALTER TABLE accounts add foreign key (Buyer) references sellers(id) on delete set null;" +
                 "ALTER TABLE contracts add foreign key (Buyer) references sellers(id) on delete set null;" +
                 "ALTER TABLE contracts add foreign key (seller) references sellers(id) on delete set null;" +
-                "ALTER TABLE contracts add foreign key (MaterialID) references materials(id) on delete set null;";
+                "ALTER TABLE contracts add foreign key (MaterialID) references materials(id) on delete set null;" +
+                "ALTER TABLE individuals add foreign key (passportid) references passports(id) on delete cascade;" +
+                "ALTER TABLE employees add foreign key (passportid) references passports(id) on delete cascade;";
             Query(FKsQuery);
         }
 
@@ -128,6 +136,121 @@ namespace BuildMaterials.BD
                 }
                 _connection.CloseAsync().Wait();
             }
+        }
+    }
+
+    public class ContactTable : IDBSetBase<Contact>
+    {
+        private readonly MySqlConnection _connection;
+        public const string CreateQuery = "CREATE TABLE IF NOT EXISTS contacts " +
+                "(ID int NOT NULL AUTO_INCREMENT, organizationid int not null, contacttypeid int not null, text varchar(200) null," +
+                "PRIMARY KEY (ID));";
+
+        public ContactTable()
+        {
+            _connection = new MySqlConnection(StaticValues.ConnectionString);
+        }
+
+        private int getContactTypeIndex(ContactType type)
+        {
+            switch (type)
+            {
+                case ContactType.Email:
+                    {
+                        return 1;
+                    }
+                case ContactType.Phonenumber:
+                    {
+                        return 2;
+                    }
+                default:
+                    {
+                        return 0;
+                    }
+            }
+        }
+        private ContactType getContactTypeByIndex(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    {
+                        return ContactType.Email;
+                    }
+                case 2:
+                    {
+                        return ContactType.Phonenumber;
+                    }
+                default:
+                    {
+                        return 0;
+                    }
+            }
+        }
+        public void Add(Contact obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand("INSERT INTO contacts " +
+                "(organizationid, contacttypeid, text) VALUES" +
+                $"({obj.OrganizationID},{getContactTypeIndex(obj.ContactType)},'{obj.Text}');", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
+        public void Remove(Contact obj) => Remove(obj.ID);
+
+        public void Remove(int id)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"DELETE FROM Contacts WHERE ID = {id};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
+        public List<Contact> Select(string query)
+        {
+            List<Contact> materials = new List<Contact>();
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand(query, _connection))
+                {
+                    MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
+                    while (reader.Read())
+                    {
+                        materials.Add(GetContact(reader));
+                    }
+                }
+                _connection.CloseAsync().Wait();
+            }
+            return materials;
+        }
+
+        public List<Contact> ToList() => Select("SELECT * FROM CONTACTS");
+
+        private Contact GetContact(MySqlDataReader reader)
+        {
+            int id = (int)reader[0];
+            int orgid = (int)reader[1];
+            ContactType type = getContactTypeByIndex((int)reader[2]);
+            string text = (string)reader[3];
+
+            return new Contact(id, orgid, type, text);
+        }
+
+        public void Update(Contact obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE contacts SET organizationid = {obj.OrganizationID}," +
+                $"contacttypeid = {getContactTypeIndex(obj.ContactType)}, text = '{obj.Text}' WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
         }
     }
 
@@ -168,6 +291,18 @@ namespace BuildMaterials.BD
                 _connection.CloseAsync().Wait();
             }
             return material;
+        }
+
+        public void Update(MaterialResponse obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE materialresponses SET MaterialID = '{obj.MaterialID}', CountUnits = '{obj.CountUnits}'," +
+                $"BalanceAtStart = {obj.BalanceAtStart}, Prihod = {obj.Prihod}," +
+                $"Rashod = {obj.Rashod}, FinResponseEmployeeID = {obj.FinResponseEmployeeID} WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
         }
 
         public void Add(MaterialResponse obj)
@@ -281,6 +416,17 @@ namespace BuildMaterials.BD
             _connection.CloseAsync().Wait();
         }
 
+        public void Update(Material obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE materials SET Name = '{obj.Name}', Manufacturer= '{obj.Manufacturer}'," +
+                $"Price = {obj.Price}, Count = {obj.Count}, CountUnits = '{obj.CountUnits}', EnterDate = '{obj.EnterDate.ToMySQLDate()}' WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
         public void Remove(Material obj)
         {
             _connection.OpenAsync().Wait();
@@ -340,12 +486,11 @@ namespace BuildMaterials.BD
     {
         private readonly MySqlConnection _connection;
 
-        public const string CreateQuery = "CREATE TABLE IF NOT EXISTS employees" +
+        public const string CreateQuery = "CREATE TABLE IF NOT EXISTS employees " +
                 "(ID int NOT NULL AUTO_INCREMENT, Name varchar(50), Surname varchar(50)," +
                 "Pathnetic varchar(70), Position varchar(100), PhoneNumber varchar(14)," +
-                "Password int NOT NULL, AccessLevel int NOT NULL, FinResponsible boolean,PassportNumber varchar(9)," +
-                "PassportIssueDate date, PRIMARY KEY (ID));";
-
+                "Password varchar(100), AccessLevel int NOT NULL, FinResponsible boolean, passportid int, PRIMARY KEY (ID));";
+        
         public EmployeesTable()
         {
             _connection = new MySqlConnection(StaticValues.ConnectionString);
@@ -369,8 +514,18 @@ namespace BuildMaterials.BD
 
         private Employee GetEmployee(MySqlDataReader reader)
         {
-            return new Employee(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4),
-                reader.GetString(5), reader.GetString(9), reader.GetDateTime(10), reader.GetInt32(6), reader.GetInt32(7), reader.GetBoolean(8));
+            int id = (int)reader[0];
+            string name = (string)reader[1];
+            string surname = (string)reader[2];
+            string pathnetic = (string)reader[3];
+            string position = (string)reader[4];
+            string phonenumber = (string)reader[5];
+            string password = (string)reader[6];
+            int aclevel = (int)reader[7];
+            bool finresp = (bool)reader[8];
+            int pasid = (int)reader[9];
+            Passport passport = App.DbContext.Passports.ElementAt(pasid);
+            return new Employee(id, name, surname, pathnetic, position, phonenumber, passport, password, aclevel, finresp);
         }
 
         public Employee ElementAt(int id)
@@ -389,13 +544,46 @@ namespace BuildMaterials.BD
             return employee;
         }
 
+        public void Update(Employee obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE employees SET Name = '{obj.Name}', Surname = '{obj.Surname}'," +
+                $"pathnetic = '{obj.Pathnetic}', position = '{obj.Position}', phonenumber = '{obj.PhoneNumber}'," +
+                $"password = {obj.Password}, AccessLevel = {obj.AccessLevel}, FinResponsible = {obj.FinResponsible} WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
         public void Add(Employee obj)
         {
-            using (MySqlCommand command = new MySqlCommand("INSERT INTO employees " +
-                "(Name, Surname, pathnetic, position, phonenumber, password, AccessLevel, FinResponsible,PassportIssueDate,PassportNumber) VALUES" +
-                $"('{obj.Name}','{obj.SurName}'," +
-                $"'{obj.Pathnetic}','{obj.Position}','{obj.PhoneNumber}',{obj.Password},{obj.AccessLevel},{obj.FinResponsible}," +
-                $"'{obj.PassportIssueDate?.ToMySQLDate()}','{obj.PassportNumber}');", _connection))
+            using (MySqlCommand command = new MySqlCommand(
+                $"INSERT INTO passports(number, issuedate) VALUES('{obj.Passport.Number}', '{obj.Passport.IssueDate?.ToMySQLDate()}');", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                command.ExecuteNonQueryAsync().Wait();
+                _connection.CloseAsync().Wait();
+            }
+            int id = 0;
+            using (MySqlCommand command = new MySqlCommand(
+                $"SELECT ID FROM PASSPORTS WHERE NUMBER = '{obj.Passport.Number}'", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                var reader = command.ExecuteMySqlReaderAsync();
+                while (reader.Read())
+                {
+                    id = (int) reader[0];
+                }
+                _connection.CloseAsync().Wait();
+            }
+            
+            using (MySqlCommand command = new MySqlCommand(
+                "INSERT INTO employees " +
+                $"(Name, Surname, pathnetic, position, phonenumber, password, AccessLevel, FinResponsible,passportid) VALUES" +
+                $"('{obj.Name}','{obj.Surname}'," +
+                $"'{obj.Pathnetic}','{obj.Position}','{obj.PhoneNumber}','{obj.Password}',{obj.AccessLevel},{(obj.FinResponsible ? 1 : 0)}," +
+                $"{id});", _connection))
             {
                 _connection.OpenAsync().Wait();
                 command.ExecuteNonQueryAsync().Wait();
@@ -461,16 +649,16 @@ namespace BuildMaterials.BD
             return employees;
         }
     }
-    public class SellersTable : IDBSetBase<Organization>
+    public class OrganizationsTable
     {
         private readonly MySqlConnection _connection;
 
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS sellers " +
                 "(ID int NOT NULL AUTO_INCREMENT, CompanyName varchar(200), Adress varchar(50)," +
                 "ShortCompanyName varchar(70), RegistrationDate date, mnsnumber varchar(5)," +
-                "mnsname varchar(100) NOT NULL, UNP varchar(100) NOT NULL, PRIMARY KEY (ID));";
+                "mnsname varchar(100) NOT NULL, UNP varchar(100) NOT NULL, rasch varchar(200), cbu varchar(100), PRIMARY KEY (ID));";
 
-        public SellersTable()
+        public OrganizationsTable()
         {
             _connection = new MySqlConnection(StaticValues.ConnectionString);
         }
@@ -491,7 +679,7 @@ namespace BuildMaterials.BD
             }
         }
 
-        private Organization GetSeller(MySqlDataReader reader)
+        private Organization GetSeller(MySqlDataReader reader, bool init = false)
         {
             int id = (int)reader["id"];
             string compName = reader.IsDBNull(1) ? string.Empty : (string)reader[1];
@@ -501,8 +689,10 @@ namespace BuildMaterials.BD
             string mnsnum = reader.IsDBNull(5) ? string.Empty : (string)reader[5];
             string mnsname = reader.IsDBNull(6) ? string.Empty : (string)reader[6];
             string unp = reader.IsDBNull(7) ? string.Empty : (string)reader[7];
+            string rasch = reader.IsDBNull(8) ? string.Empty : (string)reader[8];
+            string cbu = reader.IsDBNull(9) ? string.Empty : (string)reader[9];
 
-            return new Organization(id, compName, shortcmpname, address,regdate,mnsnum,mnsname, unp);
+            return new Organization(id, compName, shortcmpname, address, regdate, mnsnum, mnsname, unp, rasch, cbu, init);
         }
 
         public Models.Organization ElementAt(int id)
@@ -524,12 +714,24 @@ namespace BuildMaterials.BD
             return obj;
         }
 
+        public void Update(Organization obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE Sellers SET companyname = '{obj.CompanyName}', adress = '{obj.Adress}'," +
+                $"ShortCompanyName = '{obj.ShortCompamyName}', RegistrationDate = '{obj.RegistrationDate.Value.ToMySQLDate()}'," +
+                $"mnsnumber = '{obj.MNSNumber}', mnsname = '{obj.MNSName}', UNP = '{obj.UNP}', rasch = '{obj.RascSchet}', cbu = '{obj.CBU}' WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
         public void Add(Organization obj)
         {
             using (MySqlCommand command = new MySqlCommand("INSERT INTO Sellers " +
-                "(companyname, adress, ShortCompanyName, RegistrationDate, mnsnumber, mnsname, UNP) VALUES" +
+                "(companyname, adress, ShortCompanyName, RegistrationDate, mnsnumber, mnsname, UNP, rasch, cbu) VALUES" +
                 $"('{obj.CompanyName}','{obj.Adress}'," +
-                $"'{obj.ShortCompamyName}','{obj.RegistrationDate.Value.ToMySQLDate()}','{obj.MNSNumber}','{obj.MNSName}','{obj.UNP}');", _connection))
+                $"'{obj.ShortCompamyName}','{obj.RegistrationDate.Value.ToMySQLDate()}','{obj.MNSNumber}','{obj.MNSName}','{obj.UNP}','{obj.RascSchet}','{obj.CBU}');", _connection))
             {
                 _connection.OpenAsync().Wait();
                 command.ExecuteNonQueryAsync().Wait();
@@ -553,14 +755,14 @@ namespace BuildMaterials.BD
         }
 
         public List<Organization> Search(string text, bool iscustomer = false) =>
-            Select($"SELECT * FROM Sellers WHERE CONCAT(companyname,' ', adress,' ', companyperson,' ',bank,' ',bankprop,' ', unp) like '%{text}%' and iscustomer = {iscustomer};");
+            Select($"SELECT * FROM Sellers WHERE CONCAT(companyname,' ', adress,' ', companyperson,' ',bank,' ',bankprop,' ', unp,' ',rasch,' ', cbu) like '%{text}%' and iscustomer = {iscustomer};");
 
-        public List<Organization> ToList(bool iscustomer = false)
+        public List<Organization> ToList(bool initContacts = false)
         {
-            return Select($"SELECT * FROM sellers where iscustomer = {iscustomer};");
+            return Select($"SELECT * FROM sellers;", initContacts);
         }
 
-        public List<Organization> Select(string query)
+        public List<Organization> Select(string query, bool init = false)
         {
             List<Organization> providers = new List<Organization>(64);
             using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
@@ -571,7 +773,7 @@ namespace BuildMaterials.BD
                     MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
                     while (reader.Read())
                     {
-                        providers.Add(GetSeller(reader));
+                        providers.Add(GetSeller(reader, init));
                     }
                 }
                 _connection.CloseAsync().Wait();
@@ -579,6 +781,7 @@ namespace BuildMaterials.BD
             return providers;
         }
     }
+
     public class TradesTable : IDBSetBase<Trade>
     {
         private readonly MySqlConnection _connection;
@@ -613,12 +816,16 @@ namespace BuildMaterials.BD
             int id = (int)reader["id"];
             DateTime date = (DateTime)reader["Date"];
             int? sellerid = reader.IsDBNull(2) ? null : (int)reader["sellerid"];
+            Employee empl = App.DbContext.Employees.Select($"SELECT * FROM employees WHERE ID = {sellerid};")[0];
             int? materialid = reader.IsDBNull(3) ? null : (int)reader["materialid"];
+            Material mat = App.DbContext.Materials.ElementAt((int)materialid);
             float? count = reader.IsDBNull(4) ? null : (float)reader["count"];
             float? price = reader.IsDBNull(5) ? null : (float)reader["price"];
             int paytypeid = (int)reader[6];
-            return new Trade(id, date, sellerid, materialid, count, price, paytypeid);
+            PayType? paytype = App.DbContext.PayTypes.Select($"SELECT * FROM PAYTYPES WHERE ID = {paytypeid}")[0];
+            return new Trade(id, date, sellerid, materialid, count, price, paytypeid, empl) { Material = mat, PayType = paytype };
         }
+
 
         public Trade ElementAt(int id)
         {
@@ -667,7 +874,7 @@ namespace BuildMaterials.BD
         }
 
         public void Update(Trade obj) => App.DbContext.Query($"UPDATE Trades SET Count = {obj.Count}, Date = '{obj.Date.ToMySQLDate()}'," +
-            $"MaterialID = {obj.MaterialID},PayTypeID = {obj.PayTypeID},Price = {obj.Price},SellerID = {obj.SellerID},Summ = {obj.Summ} " +
+            $"MaterialID = {obj.MaterialID},PayTypeID = {obj.PayTypeID},Price = {obj.Price},SellerID = {obj.SellerID} " +
             $"WHERE ID = {obj.ID};");
 
         public List<Trade> Search(string text)
@@ -761,6 +968,17 @@ namespace BuildMaterials.BD
                 _connection.CloseAsync().Wait();
             }
             return obj;
+        }
+
+        public void Update(TTN obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE ttns SET shipper = '{obj.Shipper}', Consignee= '{obj.Consignee}'," +
+                $"Payer = '{obj.Payer}', Count = {obj.Count}, Price = {obj.Price}, EnterDate = '{obj.Date.Value.ToMySQLDate()}', materialid = {obj.MaterialID}, CountUnits = '{obj.CountUnits}' WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
         }
 
         public void Add(TTN obj)
@@ -887,6 +1105,20 @@ namespace BuildMaterials.BD
             return obj;
         }
 
+        public void Update(Account obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE accounts SET Seller = {obj.SellerID}, ShipperName = '{obj.ShipperName}'," +
+                $"ShipperAdress = '{obj.ShipperAdress}', ConsigneeName = '{obj.ConsigneeName}'," +
+                $"ConsigneeAdress = '{obj.ConsigneeAdress}', Buyer = {obj.BuyerID}, Date = '{obj.Date?.ToMySQLDate()}'," +
+                $"CountUnits = '{obj.CountUnits}', Count = {obj.Count}, Price = {obj.Price}, Tax = {obj.Tax}, MaterialID = {obj.MaterialID}" +
+                $" WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
         public void Add(Account obj)
         {
             using (MySqlCommand command = new MySqlCommand("INSERT INTO accounts " +
@@ -1009,12 +1241,24 @@ namespace BuildMaterials.BD
             return obj;
         }
 
+        public void Update(Contract obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE contracts SET Seller = {obj.SellerID}, Buyer = {obj.BuyerID}," +
+                $"MaterialID = {obj.MaterialID}, Count = {obj.Count}," +
+                $"CountUnits = '{obj.CountUnits}', Price = {obj.Price}, Date = '{obj.Date?.ToMySQLDate()}' WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
         public void Add(Contract obj)
         {
             using (MySqlCommand command = new MySqlCommand("INSERT INTO contracts " +
                 "(Seller, Buyer, MaterialID, Count, CountUnits," +
                 "Price, Date) VALUES" +
-                $"('{obj.SellerID}','{obj.BuyerID}','{obj.MaterialID}',{obj.Count}," +
+                $"({obj.SellerID},{obj.BuyerID},'{obj.MaterialID}',{obj.Count}," +
                 $"'{obj.CountUnits}',{obj.Price},'{obj.Date?.ToMySQLDate()}');", _connection))
             {
                 _connection.OpenAsync().Wait();
@@ -1154,6 +1398,272 @@ namespace BuildMaterials.BD
             string name = (string)reader[1];
 
             return new PayType(id, name);
+        }
+    }
+    public class IndividualsTable : IDBSetBase<Individual>
+    {
+        private readonly MySqlConnection _connection;
+
+        public const string CreateQuery = "CREATE TABLE IF NOT EXISTS individuals" +
+                "(ID int NOT NULL AUTO_INCREMENT, Name varchar(50), Surname varchar(50)," +
+                "Pathnetic varchar(70), PhoneNumber varchar(14), passportid int not null, PRIMARY KEY (ID));";
+
+        public IndividualsTable()
+        {
+            _connection = new MySqlConnection(StaticValues.ConnectionString);
+        }
+
+        public int Count()
+        {
+            using (MySqlCommand _command = new MySqlCommand("SELECT COUNT(ID) FROM individual;", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                int readedCount = 0;
+                using (MySqlDataReader reader = _command.ExecuteMySqlReaderAsync())
+                    while (reader.Read())
+                    {
+                        readedCount = reader.GetInt32(0);
+                    }
+                _connection.CloseAsync().Wait();
+                return readedCount;
+            }
+        }
+
+        private Individual GetIndividual(MySqlDataReader reader, MySqlConnection? connection = null)
+        {
+            int id = (int)reader[0];
+            string name = (string)reader[1];
+            string surname = (string)reader[2];
+            string pathnetic = (string)reader[3];
+            string phonenumber = (string)reader[4];
+            int pasid = (int)reader[5];
+            Passport passport = connection != null ? App.DbContext.Passports.ElementAt(pasid, connection) : App.DbContext.Passports.ElementAt(pasid);
+            return new Individual(id, name, surname, pathnetic, phonenumber, passport);
+        }
+
+        public Individual ElementAt(int id)
+        {
+            Individual item = new Individual();
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"SELECT * FROM individuals WHERE id={id};", _connection))
+            {
+                using (MySqlDataReader reader = command.ExecuteMySqlReaderAsync())
+                    while (reader.Read())
+                    {
+                        item = GetIndividual(reader, _connection);
+                    }
+            }
+            _connection.CloseAsync().Wait();
+            return item;
+        }
+
+        public void Update(Individual obj)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"UPDATE individuals SET Name = '{obj.Name}', Surname = '{obj.Surname}'," +
+                $"pathnetic = '{obj.Pathnetic}', phonenumber = '{obj.PhoneNumber}'," +
+                $"passportid = {obj.Passport.ID} WHERE ID = {obj.ID};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
+        public void Add(Individual obj)
+        {
+            using (MySqlCommand command = new MySqlCommand(
+                $"INSERT INTO passports(number, issuedate) VALUES('{obj.Passport.Number}', '{obj.Passport.IssueDate?.ToMySQLDate()}');", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                command.ExecuteNonQueryAsync().Wait();
+                _connection.CloseAsync().Wait();
+            }
+            int id = 0;
+            using (MySqlCommand command = new MySqlCommand(
+                $"SELECT ID FROM PASSPORTS WHERE NUMBER = '{obj.Passport.Number}'", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                var reader = command.ExecuteMySqlReaderAsync();
+                while (reader.Read())
+                {
+                    id = (int)reader[0];
+                }
+                _connection.CloseAsync().Wait();
+            }
+            using (MySqlCommand command = new MySqlCommand("INSERT INTO individuals " +
+                "(Name, Surname, pathnetic, phonenumber, passportid) VALUES" +
+                $"('{obj.Name}','{obj.Surname}'," +
+                $"'{obj.Pathnetic}','{obj.PhoneNumber}'," +
+                $"{id});", _connection))
+            {
+                _connection.OpenAsync().Wait();
+                command.ExecuteNonQueryAsync().Wait();
+                _connection.CloseAsync().Wait();
+            }
+        }
+
+        public void Remove(Individual obj) => Remove(obj.ID);
+
+        public void Remove(int id)
+        {
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"DELETE FROM individuals WHERE id={id};", _connection))
+            {
+                command.ExecuteNonQueryAsync().Wait();
+            }
+            _connection.CloseAsync().Wait();
+        }
+
+        public List<Individual> Search(string text)
+        {
+            List<Individual> employees = new List<Individual>(64);
+            _connection.OpenAsync().Wait();
+            using (MySqlCommand command = new MySqlCommand($"SELECT * FROM individuals WHERE " +
+                $"CONCAT(name,' ', surname,' ', pathnetic,' ',phonenumber) like '%{text}%';", _connection))
+            {
+                MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
+                while (reader.Read())
+                {
+                    employees.Add(GetIndividual(reader, _connection));
+                }
+            }
+            _connection.CloseAsync().Wait();
+            return employees;
+        }
+
+        public List<Individual> ToList() => Select("SELECT * FROM individuals;");
+
+        public List<Individual> Select(string query)
+        {
+            List<Individual> employees = new List<Individual>(64);
+            _connection.Open();
+            using (MySqlCommand command = new MySqlCommand(query, _connection))
+            {
+                MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
+                while (reader.Read())
+                {
+                    employees.Add(GetIndividual(reader, _connection));
+                }
+            }
+            _connection.CloseAsync().Wait();
+            return employees;
+        }
+    }
+    public class PassportsTable : IDBSetBase<Passport>
+    {
+        public const string CreateQuery = "CREATE TABLE passports " +
+            "(ID INT NOT NULL auto_increment, number VARCHAR(9) NOT NULL, issuedate date, PRIMARY KEY(ID));";
+
+        private readonly MySqlConnection connection;
+
+        public PassportsTable()
+        {
+            connection = new MySqlConnection(StaticValues.ConnectionString);
+        }
+
+        public void Add(Passport item)
+        {
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand($"INSERT INTO passports (number,issuedate) VALUES ('{item.Number}','{item.IssueDate?.ToMySQLDate()}');", _connection))
+                {
+                    command.ExecuteNonQueryAsync().Wait();
+                }
+                _connection.CloseAsync().Wait();
+            }
+        }
+
+        public void Update(Passport item)
+        {
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand($"update passports set number = '{item.Number}', issuedate = '{item.IssueDate?.ToMySQLDate()}' where id = {item.ID};", _connection))
+                {
+                    command.ExecuteNonQueryAsync().Wait();
+                }
+                _connection.CloseAsync().Wait();
+            }
+        }
+
+        public void Remove(Passport item) => Remove(item.ID);
+
+
+        public List<Passport> ToList() => Select("SELECT * FROM passports;");
+
+        public List<Passport> Select(string query)
+        {
+            List<Passport> list = new List<Passport>(64);
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand(query, _connection))
+                {
+                    MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
+                    while (reader.Read())
+                    {
+                        list.Add(GetPassport(reader));
+                    }
+                }
+                _connection.CloseAsync().Wait();
+            }
+            return list;
+        }
+
+        private Passport GetPassport(MySqlDataReader reader)
+        {
+            int id = (int)reader[0];
+            string num = (string)reader[1];
+            DateTime isdat = (DateTime)reader[2];
+
+            return new Passport(id, num, isdat);
+        }
+
+        public Passport ElementAt(int id)
+        {
+            Passport passport = new Passport();
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand("SELECT * FROM passports where id = " + id, _connection))
+                {
+                    MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
+                    while (reader.Read())
+                    {
+                        passport = GetPassport(reader);
+                    }
+                }
+                _connection.CloseAsync().Wait();
+            }
+            return passport;
+        }
+
+        public Passport ElementAt(int id, MySqlConnection _connection)
+        {
+            Passport passport = new Passport();
+            using (MySqlCommand command = new MySqlCommand("SELECT * FROM passports where id = " + id, _connection))
+            {
+                MySqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    passport = GetPassport(reader);
+                }
+            }
+            return passport;
+        }
+
+        public void Remove(int id)
+        {
+            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            {
+                _connection.OpenAsync().Wait();
+                using (MySqlCommand command = new MySqlCommand($"delete from passports where id = {id};", _connection))
+                {
+                    command.ExecuteNonQueryAsync().Wait();
+                }
+                _connection.CloseAsync().Wait();
+            }
         }
     }
 }

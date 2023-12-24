@@ -5,7 +5,6 @@ namespace BuildMaterials.Models
 
     public class MaterialResponse : NotifyPropertyChangedBase, ITable
     {
-        public bool UseBD;
         public int ID { get; set; }
 
         public int MaterialID
@@ -14,10 +13,7 @@ namespace BuildMaterials.Models
             set
             {
                 matId = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET MaterialID = {value} WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         private int matId;
@@ -28,10 +24,7 @@ namespace BuildMaterials.Models
             set
             {
                 countUnits = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET CountUnits = '{value}' WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float BalanceAtStart
@@ -40,10 +33,7 @@ namespace BuildMaterials.Models
             set
             {
                 balStart = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET BalanceAtStart = '{value}' WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float Prihod
@@ -52,10 +42,7 @@ namespace BuildMaterials.Models
             set
             {
                 prihod = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET Prihod = '{value}' WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float Rashod
@@ -64,10 +51,7 @@ namespace BuildMaterials.Models
             set
             {
                 rashod = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET Rashod = '{value}' WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float BalanceAtEnd
@@ -76,10 +60,7 @@ namespace BuildMaterials.Models
             set
             {
                 balEnd = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET BalanceAtEnd = '{value}' WHERE ID ={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public int FinResponseEmployeeID
@@ -88,10 +69,6 @@ namespace BuildMaterials.Models
             set
             {
                 finRespEmpID = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE MaterialResponses SET FinResponseEmployeeID = '{value}' WHERE ID = {ID};");
-                }
                 OnPropertyChanged(nameof(FinResponseEmployeeID));
                 OnPropertyChanged(nameof(FinReponseEmployee));
             }
@@ -117,14 +94,11 @@ namespace BuildMaterials.Models
         private string countUnits = string.Empty;
         private string name = string.Empty;
 
-        public MaterialResponse()
-        {
-            UseBD = false;
-        }
+        public MaterialResponse() { }
+
         public MaterialResponse(int iD, int matId, string countUnits, float balStart, float prihod,
             float rashod, float balEnd, int finRespId)
         {
-            UseBD = true;
             ID = iD;
             CountUnits = countUnits;
             BalanceAtStart = balStart;
@@ -137,7 +111,7 @@ namespace BuildMaterials.Models
         }
 
         public override string ToString() =>
-            $"Материально-ответственный отчет №{ID}\nМатериально-ответственный сотрудник: {FinReponseEmployee.SurName} {FinReponseEmployee.Name} {FinReponseEmployee.Pathnetic}\nПриход: {prihod}\nРасход: {rashod}\nБаланс на начало: {balStart}\nБаланс на конец: {balEnd}\nНаименование материала: {name}\nЕд. измерения: {countUnits}";
+            $"Материально-ответственный отчет №{ID}\nМатериально-ответственный сотрудник: {FinReponseEmployee.Surname} {FinReponseEmployee.Name} {FinReponseEmployee.Pathnetic}\nПриход: {prihod}\nРасход: {rashod}\nБаланс на начало: {balStart}\nБаланс на конец: {balEnd}\nНаименование материала: {name}\nЕд. измерения: {countUnits}";
 
         public bool IsValid => BalanceAtStart >= 0 &&
              Prihod >= 0 && Rashod >= 0 && FinResponseEmployeeID != -1 && MaterialID != -1;

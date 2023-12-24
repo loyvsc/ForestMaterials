@@ -4,7 +4,6 @@ namespace BuildMaterials.Models
 {
     public class TTN : NotifyPropertyChangedBase, ITable
     {
-        private readonly bool UseBD;
         public int ID { get; set; }
         public string? Shipper
         {
@@ -12,10 +11,7 @@ namespace BuildMaterials.Models
             set
             {
                 shipper = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Shipper = '{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public string? Consignee
@@ -24,10 +20,7 @@ namespace BuildMaterials.Models
             set
             {
                 consignee = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Consignee = '{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public string? Payer
@@ -36,10 +29,7 @@ namespace BuildMaterials.Models
             set
             {
                 payer = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Payer = '{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float Count
@@ -48,10 +38,6 @@ namespace BuildMaterials.Models
             set
             {
                 count = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Count={value} WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Count));
                 OnPropertyChanged(nameof(Summ));
             }
@@ -62,10 +48,6 @@ namespace BuildMaterials.Models
             set
             {
                 price = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Price={value} WHERE ID={ID};");
-                }
                 OnPropertyChanged(nameof(Price));
                 OnPropertyChanged(nameof(Summ));
             }
@@ -76,10 +58,6 @@ namespace BuildMaterials.Models
             set
             {
                 matid = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET MaterialID = {value} WHERE ID = {ID};");
-                }
                 OnPropertyChanged(nameof(MaterialID));
                 OnPropertyChanged(nameof(Material));
             }
@@ -103,10 +81,7 @@ namespace BuildMaterials.Models
             set
             {
                 countUnits = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET CountUnits = '{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float Weight
@@ -115,10 +90,7 @@ namespace BuildMaterials.Models
             set
             {
                 weight = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Weight = {value} WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
         public float? Summ => Count * Price;
@@ -128,10 +100,7 @@ namespace BuildMaterials.Models
             set
             {
                 date = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE TTNS SET Date = '{value.Value.ToMySQLDate()}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
 
@@ -157,10 +126,9 @@ namespace BuildMaterials.Models
             }
         }
 
-        public TTN() { UseBD = false; }
-        public TTN(int iD, string? shipper, string? consignee, string? payer, float count, float? price, int? matid, string countUnit, float weight, DateTime? date)
+        public TTN() { }
+        public TTN(int iD, string? shipper, string? consignee, string? payer, float count, float? price, int? matid, string? countUnit, float weight, DateTime? date)
         {
-            UseBD = false;
             ID = iD;
             Shipper = shipper;
             Consignee = consignee;
@@ -171,7 +139,6 @@ namespace BuildMaterials.Models
             CountUnits = countUnit;
             Weight = weight;
             Date = date;
-            UseBD = true;
         }
 
         public override string ToString()

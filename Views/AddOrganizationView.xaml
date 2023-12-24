@@ -4,9 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BuildMaterials.Views"
+        xmlns:controls="http://filterdatagrid.control.com/2021"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window" 
+        xmlns:converters="clr-namespace:BuildMaterials.Converters"
+        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window" Height="350"
         Title="Добавление организации" Width="300" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <converters:ContractTypeStringConverter x:Key="ContractTypeStringConverter"/>
+    </Window.Resources>
     <Window.DataContext>
         <viewmodels:AddOrganizationViewModel/>
     </Window.DataContext>
@@ -16,9 +21,40 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Margin="5,5,5,5">
+            <TextBlock>Расчетный счет</TextBlock>
+            <TextBox Text="{Binding Organization.RascSchet}"/>
+            <TextBlock>ЦБУ</TextBlock>
+            <TextBox Text="{Binding Organization.CBU}"/>
             <TextBlock>УНП</TextBlock>
-            <TextBox Text="{Binding Path=Provider.UNP}"/>
+            <TextBox Text="{Binding Organization.UNP}"/>
             <TextBlock TextWrapping="Wrap" FontStyle="Italic">Для добавления информации об организации необходимо ввести УНП, информация об организации будет добавлена в автоматическом режиме</TextBlock>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25px"/>
+                    <RowDefinition Height="245px"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <Button Grid.Row="0" Width="25" Content="Add" Command="{Binding AddContactCommand}"/>
+                    <Button Grid.Row="0" Width="25" Content="Edit" Command="{Binding EditContactCommand}"/>
+                    <Button Grid.Row="0" Width="25" Content="Del" Command="{Binding DeleteContactCommand}"/>
+                </StackPanel>
+                <controls:FilterDataGrid ItemsSource="{Binding Organization.Contacts, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource FilterDataGridStyle}" SelectedValue="{Binding SelectedContact, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1">
+                    <controls:FilterDataGrid.Columns>
+                        <controls:DataGridTemplateColumn
+                    FieldName="ContactType" Header="Тип контакта" IsColumnFiltered="True" SortMemberPath="ContactType">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="sharedModelView:Employe">
+                                    <TextBlock Padding="2,0" Text="{Binding ContactType, Converter={StaticResource ContractTypeStringConverter}}" />
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        
+                        <controls:DataGridTextColumn IsColumnFiltered="True" Header="Описание" Binding="{Binding Text, UpdateSourceTrigger=PropertyChanged}"/>
+                    </controls:FilterDataGrid.Columns>
+                </controls:FilterDataGrid>
+            </Grid>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>

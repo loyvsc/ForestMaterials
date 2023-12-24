@@ -9,7 +9,7 @@ namespace BuildMaterials.Models
 
         public Organization? Seller
         {
-            get => SellerID != null ? App.DbContext.Sellers.ElementAt((int)SellerID) : null;
+            get => SellerID != null ? App.DbContext.Organizations.ElementAt((int)SellerID) : null;
             set
             {
                 if (value != null)
@@ -23,7 +23,7 @@ namespace BuildMaterials.Models
 
         public Organization Buyer
         {
-            get => BuyerID != null ? App.DbContext.Sellers.ElementAt((int)BuyerID) : null;
+            get => BuyerID != null ? App.DbContext.Organizations.ElementAt((int)BuyerID) : null;
             set
             {
                 if (value != null)

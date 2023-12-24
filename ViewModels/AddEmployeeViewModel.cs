@@ -7,11 +7,11 @@ namespace BuildMaterials.ViewModels
     {
         public Models.Employee Employee { get; set; }
 
-        public ICommand CancelCommand => new RelayCommand((sender) => _window.Close());
-        public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());        
+        public ICommand CancelCommand => new RelayCommand(Close);
+        public ICommand AddCommand => new RelayCommand(AddMaterial);        
 
         private readonly Window _window = null!;
-        public string[] EmployeeAccessLevel => App.DbContext.AccessLevel;
+        public List<string> EmployeeAccessLevel => App.DbContext.AccessLevel.ToList();
         public int SelectedAccessLevel { get; set; }
 
         public AddEmployeeViewModel()
@@ -24,16 +24,40 @@ namespace BuildMaterials.ViewModels
             _window = window;
         }
 
-        private void AddMaterial()
+        public AddEmployeeViewModel(Window window,  Models.Employee employee)
+        {
+            _window = window;
+            Employee = employee;
+            SelectedAccessLevel = employee.AccessLevel;
+        }
+
+        private void Close(object? obj = null) => _window.DialogResult = true;
+
+        private void AddMaterial(object? obj)
         {
             Employee.AccessLevel = SelectedAccessLevel;
-            if (Employee.IsValid)
+            if (Employee.ID != 0)
             {
-                App.DbContext.Employees.Add(Employee);
-                _window.DialogResult = true;
-                return;
+                try
+                {
+                    App.DbContext.Employees.Update(Employee);
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("При сохранении изменений произошла ошибка...\nСообщение: "+ex.Message, "Новый сотрудник", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый сотрудник", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+            {
+                if (Employee.IsValid)
+                {
+                    App.DbContext.Employees.Add(Employee);
+                    Close();
+                    return;
+                }
+                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый сотрудник", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

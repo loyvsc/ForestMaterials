@@ -1,6 +1,8 @@
-﻿namespace BuildMaterials.Models
+﻿using BuildMaterials.BD;
+
+namespace BuildMaterials.Models
 {
-    public class PayType
+    public class PayType : ITable
     {
         public int ID { get; set; }
 

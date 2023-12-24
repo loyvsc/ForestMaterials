@@ -9,5 +9,10 @@ namespace BuildMaterials.Views
             InitializeComponent();
             DataContext = new ViewModels.AddTTNViewModel(this);
         }
+        public AddTTNView(Models.TTN ttn)
+        {
+            InitializeComponent();
+            DataContext = new ViewModels.AddTTNViewModel(this,ttn);
+        }
     }
 }

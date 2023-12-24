@@ -3,7 +3,7 @@ using FilterDataGrid.Attributes;
 
 namespace BuildMaterials.Models
 {
-    public class Material : ITable
+    public class Material : NotifyPropertyChangedBase, ITable
     {
         private readonly bool UseBD;
 
@@ -16,10 +16,7 @@ namespace BuildMaterials.Models
             set
             {
                 name = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET Name = '{value}' WHERE ID = {ID};");
-                }
+                OnPropertyChanged();
             }
         }
         [ColumnName("Производитель")]
@@ -29,10 +26,7 @@ namespace BuildMaterials.Models
             set
             {
                 manufacturer = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET Manufacturer = '{value}' WHERE ID = {ID};");
-                }
+                OnPropertyChanged();
             }
         }
         [ColumnName("Цена")]
@@ -42,10 +36,7 @@ namespace BuildMaterials.Models
             set
             {
                 price = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET Price = '{value}' WHERE ID = {ID};");
-                }
+                OnPropertyChanged();
             }
         }
         [ColumnName("Количество")]
@@ -55,10 +46,7 @@ namespace BuildMaterials.Models
             set
             {
                 count = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET Count = '{value}' WHERE ID = {ID};");
-                }
+                OnPropertyChanged();
             }
         }
         [ColumnName("Ед. измерения")]
@@ -68,36 +56,17 @@ namespace BuildMaterials.Models
             set
             {
                 countUnits = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET CountUnits = '{value}' WHERE ID = {ID};");
-                }
+                OnPropertyChanged();
             }
         }
-        [NotVisible]
+        [ColumnName("Дата поставки")]
         public DateTime EnterDate
         {
             get => enterDate;
             set
             {
                 enterDate = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Materials SET EnterDate = '{value}' WHERE ID = {ID};");
-                }
-            }
-        }
-        [ColumnName("Дата поставки")]
-        public string EnterDateAsString
-        {
-            get => App.DbContext.Materials.Select($"SELECT * FROM MATERIALS WHERE ID = " + ID)[0].EnterDate.ToShortDateString();
-            set
-            {
-                DateTime date;
-                if (DateTime.TryParse(value.Trim(), out date))
-                {
-                    EnterDate = date;
-                }
+                OnPropertyChanged();
             }
         }
 
@@ -108,47 +77,36 @@ namespace BuildMaterials.Models
         private string? countUnits;
         private DateTime enterDate;
 
-        public string AsString()
-        {
-            return $"Материал #{ID}\nНаименование: {Name}\nПроизводитель: {Manufacturer}\nПоступление {EnterDate.Date.ToShortDateString()}\nКоличетсво: {Count} {CountUnits}\nСтоимость: {Price}";
-        }
-
         public Material()
         {
-            UseBD = false;
-            name = string.Empty;
+            Name = string.Empty;
             Manufacturer = string.Empty;
             CountUnits = string.Empty;
             Price = 0;
             Count = 0;
+            ID = 0;
         }
 
         public Material(int id)
         {
-            UseBD = false;
             ID = id;
         }
 
         public Material(int id, string name, string manufacturer, float price, float count, string countUnits, DateTime enterDate)
         {
-            UseBD = true;
             ID = id;
-            this.name = name;
-            this.manufacturer = manufacturer;
-            this.price = price;
-            this.count = count;
-            this.countUnits = countUnits;
-            this.enterDate = enterDate;
+            Name = name;
+            Manufacturer = manufacturer;
+            Price = price;
+            Count = count;
+            CountUnits = countUnits;
+            EnterDate = enterDate;
         }
 
-        [NotVisible]
-        public bool IsValid => Name != string.Empty &&
+        public bool IsValid() => Name != string.Empty &&
             Manufacturer != string.Empty &&
             CountUnits != string.Empty;
 
-        public override string ToString()
-        {
-            return Name!;
-        }
+        public override string ToString() => Name!;
     }
 }

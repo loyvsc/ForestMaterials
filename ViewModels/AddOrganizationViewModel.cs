@@ -1,54 +1,199 @@
 ﻿using BuildMaterials.Models;
+using BuildMaterials.Views;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Input;
 using UNPRead;
 
 namespace BuildMaterials.ViewModels
 {
-    public static partial class Extensions
+    public static class UNPExtensions
     {
-        public static Organization ToProvider(this UNPRead.UNP unp)
+        public static Organization UnpToOrganization(this UNPRead.UNP unp)
         {
-            return new Organization(0, unp.FullName, unp.ShortName, unp.Adress, unp.RegistrationDate, unp.MNSNumber, unp.MNSName, unp.UNPCode);
+            if (unp.FullName == null) unp.FullName = string.Empty;
+            return new Organization(0, unp.FullName, unp.ShortName, unp.Adress, unp.RegistrationDate, unp.MNSNumber, unp.MNSName, unp.UNPCode, "", "");
         }
     }
 
-    public class AddOrganizationViewModel
+    public class AddOrganizationViewModel : NotifyPropertyChangedBase
     {
-        public Models.Organization Provider { get; set; }
-
-        public ICommand CancelCommand => new RelayCommand((sender) => _window.Close());
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
-
-        private readonly Window _window = null!;
-
-        public AddOrganizationViewModel()
+        public static List<object> Operations { get; set; } = new List<object>(16);
+        public Organization Organization { get; set; }
+        public List<Contact> Contacts
         {
-            Provider = new Models.Organization();
+            get => organizationContacts;
+            set
+            {
+                organizationContacts = value;
+                OnPropertyChanged(nameof(Contacts));
+            }
+        }
+        public Contact? SelectedContact
+        {
+            get => cntct;
+            set
+            {
+                cntct = value;
+                OnPropertyChanged(nameof(SelectedContact));
+            }
         }
 
+        #region Commands
+        public ICommand CancelCommand => new RelayCommand(Close);
+        public ICommand AddCommand => new RelayCommand(AddMaterial);
+
+        public ICommand AddContactCommand => new RelayCommand(AddContact);
+        public ICommand EditContactCommand => new RelayCommand(EditContact);
+        public ICommand DeleteContactCommand => new RelayCommand(DeleteContact);
+        #endregion
+
+        private Contact? cntct;
+        private List<Contact> organizationContacts;
+        private readonly Window _window = null!;
+
+        #region Constructors
+        public AddOrganizationViewModel()
+        {
+            Organization = new Models.Organization();
+            Operations = new List<object>(16);
+            Contacts = new List<Contact>();
+        }
         public AddOrganizationViewModel(Window window) : this()
         {
             _window = window;
         }
-
-        private async void AddMaterial(object obj)
+        public AddOrganizationViewModel(Window window, Organization organization)
         {
-            if (Provider.UNP!="")
+            _window = window;
+            Organization = organization;
+            Organization.Contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + Organization.ID);
+        }
+        #endregion
+
+        private void AddContact(object? obj)
+        {
+            AddContactView contact = new AddContactView(Organization);
+            if (contact.ShowDialog() == true)
+            {
+                Contact last = (Contact)Operations.Last();
+                Organization.Contacts.Add(last);
+                Organization.Contacts = Organization.Contacts.ToList();
+            }
+        }
+
+        private void DeleteContact(object? obj)
+        {
+            if (SelectedContact == null) return;
+            SelectedContact.ForDelete = true;
+            Organization.Contacts.Remove(SelectedContact);
+            Operations.Add(SelectedContact);
+
+            var items = Organization.Contacts.ToList();
+            Organization.Contacts = items;
+        }
+
+        private void EditContact(object? obj)
+        {
+            if (SelectedContact != null)
+            {
+                AddContactView contact = new AddContactView(SelectedContact);
+                if (contact.ShowDialog() == true)
+                {
+                    Contact last = (Contact)Operations.Last();
+                    Organization.Contacts[Organization.Contacts.FindIndex(x => x.ID == last.ID)] = last;
+                    Organization.Contacts = Organization.Contacts.ToList();
+                }
+            }
+        }
+
+        private void Close(object? obj = null) => _window.DialogResult = true;
+
+        private void CheckOperations()
+        {
+            foreach (var item in Operations)
+            {
+                switch (item)
+                {
+                    case Contact contact:
+                        {
+                            if (contact.ForDelete)
+                            {
+                                App.DbContext.Contacts.Remove(contact);
+                                break;
+                            }
+                            if (contact.ID != 0)
+                            {
+                                App.DbContext.Contacts.Update(contact);
+                            }
+                            else
+                            {
+                                contact.OrganizationID = Organization.ID;
+                                App.DbContext.Contacts.Add(contact);
+                            }
+                            break;
+                        }
+                    case Organization organization:
+                        {
+                            if (organization.ForDelete)
+                            {
+                                App.DbContext.Organizations.Remove(organization);
+                                break;
+                            }
+                            if (organization.ID != 0)
+                            {
+                                App.DbContext.Organizations.Update(organization);
+                            }
+                            else
+                            {
+                                App.DbContext.Organizations.Add(organization);
+                            }
+                            break;
+                        }
+                }
+            }
+        }
+
+        private void AddMaterial(object? obj)
+        {
+            Organization.UNP = Organization.UNP?.Trim();
+            if (Organization.UNP != null && Organization.UNP != string.Empty)
             {
                 UNPReader reader = new UNPReader();
+                Organization org;
                 try
                 {
-                    var converted = reader.GetInfoByUNP(Provider.UNP).ToProvider();
-                    Provider = converted;
+                    org = reader.GetInfoByUNP(Organization.UNP).UnpToOrganization();
                 }
                 catch (ArgumentException nEx)
                 {
                     System.Windows.MessageBox.Show(nEx.Message, "Ошибка при получении информации", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                App.DbContext.Sellers.Add(Provider);
-                _window.DialogResult = true;
+                org.ID = Organization.ID;
+                org.CBU = Organization.CBU;
+                org.RascSchet = Organization.RascSchet;
+
+                if (org.ID != 0)
+                {
+                    try
+                    {
+                        App.DbContext.Organizations.Update(org);
+                    }
+                    catch
+                    {
+                        System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений!", "Ошибка при получении информации", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    App.DbContext.Organizations.Add(org);
+                    var orgs = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
+                    Organization = orgs;
+                }
+                CheckOperations();
+                Close();
             }
             else
             {

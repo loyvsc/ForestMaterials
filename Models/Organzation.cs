@@ -2,20 +2,17 @@
 
 namespace BuildMaterials.Models
 {
-    public class Organization : ITable
+    public class Organization : NotifyPropertyChangedBase, ITable
     {
-        public bool UseBD;
         public int ID { get; set; }
+        public bool ForDelete { get; set; } = false;
         public string? UNP
         {
             get => unp;
             set
             {
                 unp = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET UNP ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(UNP));
             }
         }
         public string? CompanyName
@@ -24,10 +21,7 @@ namespace BuildMaterials.Models
             set
             {
                 companyName = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET CompanyName ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(CompanyName));
             }
         }
         public string? ShortCompamyName
@@ -36,10 +30,7 @@ namespace BuildMaterials.Models
             set
             {
                 shtrcmpname = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET ShortCompamyName ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(ShortCompamyName));
             }
         }
         public string? Adress
@@ -48,10 +39,7 @@ namespace BuildMaterials.Models
             set
             {
                 adress = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET Adress ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(Adress));
             }
         }
         public DateTime? RegistrationDate
@@ -60,10 +48,7 @@ namespace BuildMaterials.Models
             set
             {
                 regdat = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET RegistrationDate ='{value.Value.ToMySQLDate()}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(RegistrationDate));
             }
         }
         public string? RegistrationDateInString => RegistrationDate?.ToString("d");
@@ -73,10 +58,7 @@ namespace BuildMaterials.Models
             set
             {
                 msnnum = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET mnsnumber ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(MNSNumber));
             }
         }
         public string? MNSName
@@ -85,13 +67,41 @@ namespace BuildMaterials.Models
             set
             {
                 msnname = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Sellers SET mnsname ='{value}' WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(MNSName));
+
             }
         }
+        public string? RascSchet
+        {
+            get => raschScht;
+            set
+            {
+                raschScht = value;
+                OnPropertyChanged(nameof(RascSchet));
+            }
+        }
+        public string? CBU
+        {
+            get => cbu;
+            set
+            {
+                cbu = value;
+                OnPropertyChanged(nameof(CBU));
+            }
+        }
+        public List<Contact> Contacts
+        {
+            get => contacts;
+            set
+            {
+                contacts = value;
+                OnPropertyChanged(nameof(Contacts));
+            }
+        }        
 
+        private List<Contact> contacts;
+        private string? cbu;
+        private string? raschScht;
         private string? msnname;
         private string? msnnum;
         private string? shtrcmpname;
@@ -103,12 +113,11 @@ namespace BuildMaterials.Models
         public Organization()
         {
             UNP = "";
-            UseBD = false;
+            Contacts = new List<Contact>();
         }
 
-        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP)
+        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, bool initContacts = false)
         {
-            UseBD = false;
             ID = iD;
             CompanyName = companyName;
             Adress = adress;
@@ -117,7 +126,18 @@ namespace BuildMaterials.Models
             MNSName = mnsName;
             MNSNumber = mnsNum;
             UNP = uNP;
-            UseBD = true;
+            RascSchet = rasch;
+            CBU = cbu;
+            if (initContacts)
+            {
+                Contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + ID);
+            }
+            else
+            {
+                Contacts = new List<Contact>();
+            }
         }
+
+        public override string ToString() => CompanyName!;
     }
 }
