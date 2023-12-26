@@ -21,7 +21,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <TextBlock Text="Пароль"/>
-            <PasswordBox PasswordChar="*" PreviewTextInput="PasswordBox_PreviewTextInput" PasswordChanged="PasswordBox_PasswordChanged"/>
+            <PasswordBox PasswordChar="*" PasswordChanged="PasswordBox_PasswordChanged"/>
             <Button Command="{Binding AutorizeCommand}" Margin="0,5,0,5">Войти</Button>
         </StackPanel>
     </Grid>

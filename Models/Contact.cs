@@ -47,6 +47,26 @@ namespace BuildMaterials.Models
             Text = text;
         }
 
+        public override string ToString()
+        {
+            string value = "";
+            switch (ContactType)
+            {
+                case ContactType.Email:
+                    {
+                        value += "Эл. почта: ";
+                        break;
+                    }
+                case ContactType.Phonenumber:
+                    {
+                        value += "Контактный номер телефона: ";
+                        break;
+                    }
+            }
+            value += Text + ";";
+            return value;
+        }
+            
         public bool IsValid => Text !="" &&
             ContactType != 0;
     }

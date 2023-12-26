@@ -1,10 +1,12 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Account : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
+        
         public Employee? Seller
         {
             get => SellerID != null ? App.DbContext.Employees.ElementAt((int)SellerID) : null;
@@ -17,6 +19,7 @@ namespace BuildMaterials.Models
                 }
             }
         }
+        [IgnoreProperty]
         public int? SellerID
         {
             get => seller;
@@ -26,6 +29,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(SellerID));
             }
         }
+        [ExportColumnName("")]
         public string? ShipperName
         {
             get => shipperName;

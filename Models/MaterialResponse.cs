@@ -1,4 +1,5 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
@@ -7,6 +8,7 @@ namespace BuildMaterials.Models
     {
         public int ID { get; set; }
 
+        [IgnoreProperty]
         public int MaterialID
         {
             get => matId;

@@ -1,20 +1,18 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
-using SpreadsheetLight;
 using System.ComponentModel;
-using BuildMaterials.Extensions;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace BuildMaterials.ViewModels
 {
     public class MainWindowViewModel : NotifyPropertyChangedBase
     {
         #region Lists
-        public bool CanUserEditEmployeeConf => CurrentEmployee?.AccessLevel == 3;
         public List<Material> MaterialsList
         {
             get => materials;
@@ -110,15 +108,13 @@ namespace BuildMaterials.ViewModels
         #region Commands
         public ICommand AboutProgrammCommand => new RelayCommand(OpenAboutProgram);
         public ICommand ExitCommand => new RelayCommand((sener) => System.Windows.Application.Current.MainWindow.Close());
-        public ICommand SettingsCommand => new RelayCommand(OpenSettings);
         public ICommand AddRowCommand => new RelayCommand(AddRow);
         public ICommand EditRowCommand => new RelayCommand(EditRow);
         public ICommand DeleteRowCommand => new RelayCommand(DeleteRow);
-        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave);
-        //public ICommand PrintCommand => new RelayCommand((sender) => PrintContract());
-        #endregion
+        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave); 
+        public ICommand AddCopyRowCommand => new RelayCommand(AddRowCopy);
+        #endregion        
 
-        public bool CanViewConfidentional => CurrentEmployee?.AccessLevel == 3;
         public string SearchText
         {
             get => _searchtext;
@@ -141,12 +137,9 @@ namespace BuildMaterials.ViewModels
             {
                 currentEmployee = value;
                 OnPropertyChanged(nameof(CurrentEmployee));
-                OnPropertyChanged(nameof(CanViewConfidentional));
             }
         }
-        public Settings Settings { get; private set; }
 
-        public Visibility IsConfidentionNotView => CurrentEmployee?.AccessLevel < 2 ? Visibility.Collapsed : Visibility.Visible;
         public Visibility IsPrintEnabled
         {
             get => isPrintEnabled;
@@ -180,7 +173,6 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region Constructors
-
         public MainWindowViewModel()
         {
             CurrentEmployee = new Employee();
@@ -194,8 +186,6 @@ namespace BuildMaterials.ViewModels
             PayTypesList = App.DbContext.PayTypes.ToList();
             MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
             IndividualsList = App.DbContext.Individuals.ToList();
-
-            Settings = new Settings();
         }
 
         public MainWindowViewModel(MainWindow view) : this()
@@ -205,8 +195,6 @@ namespace BuildMaterials.ViewModels
 
         public MainWindowViewModel(MainWindow view, Employee employee) : this(view)
         {
-            App.Current.Resources["IsConfView"] = CurrentEmployee?.AccessLevel > 1;
-            App.Current.Resources["IsConfAddEdit"] = CurrentEmployee?.AccessLevel == 3;
             CurrentEmployee = employee;
         }
         #endregion
@@ -217,11 +205,7 @@ namespace BuildMaterials.ViewModels
             AboutProgramView aboutWindow = new AboutProgramView();
             aboutWindow.ShowDialog();
         }
-        private void OpenSettings(object? obj)
-        {
-            SettingsView settingsWindow = new SettingsView();
-            settingsWindow.ShowDialog();
-        }
+
         public void ExitFromProgramm(CancelEventArgs e)
         {
             MessageBoxResult result = System.Windows.MessageBox.Show("Выйти из программы?", "АРМ Менеджера Строительной Компании", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
@@ -289,6 +273,11 @@ namespace BuildMaterials.ViewModels
         #region Private methods
         private void DeleteRow(object? obj)
         {
+            if (CurrentEmployee.CanUserDelete == false)
+            {
+                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
             try
             {
                 if (SelectedTableItem == null) return;
@@ -411,6 +400,11 @@ namespace BuildMaterials.ViewModels
         }
         private void AddRow(object? obj)
         {
+            if (CurrentEmployee.CanUserAdd == false)
+            {
+                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
             switch (selectedTab)
             {
                 case "materialResponsibleTab":
@@ -436,6 +430,11 @@ namespace BuildMaterials.ViewModels
                         AddEmployeeView add = new AddEmployeeView();
                         if (add.ShowDialog() == true)
                         {
+                            if (CurrentEmployee.IsUserAdmin)
+                            {
+                                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                return;
+                            }
                             EmployeesList = App.DbContext.Employees.ToList();
                         }
                         break;
@@ -498,6 +497,11 @@ namespace BuildMaterials.ViewModels
         }
         private void EditRow(object? obj)
         {
+            if (CurrentEmployee.CanUserEdit == false)
+            {
+                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
             if (SelectedTableItem != null)
             {
                 int id = SelectedTableItem.ID;
@@ -555,7 +559,7 @@ namespace BuildMaterials.ViewModels
                 }
             }
         }
-        private async void ExportExcelWithSave(object? obj)
+        private void ExportExcelWithSave(object? obj)
         {
             SaveFileDialog savefile = new SaveFileDialog()
             {
@@ -565,51 +569,183 @@ namespace BuildMaterials.ViewModels
             };
             if (savefile.ShowDialog() == DialogResult.OK)
             {
-                await Task.Run(() => ExportToExcel(savefile.FileName));
+                FilterDataGrid.FilterDataGrid fdatagrid = null!;
+                switch (selectedTab)
+                {
+                    case "materialsTab":
+                        {
+                            fdatagrid = view.materialsDataGrid;
+                            break;
+                        }
+                    case "employersTab":
+                        {
+                            fdatagrid = view.employersDataGrid;
+                            break;
+                        }
+                    case "orgTab":
+                        {
+                            fdatagrid = view.organizationsDataGrid;
+                            break;
+                        }
+                    case "uchetTab":
+                        {
+                            fdatagrid = view.uchetDataGrid;
+                            break;
+                        }
+                    case "ttnTab":
+                        {
+                            fdatagrid = view.ttnsDataGrid;
+                            break;
+                        }
+                    case "accountTab":
+                        {
+                            fdatagrid = view.accountsDataGrid;
+                            break;
+                        }
+                    case "contractTab":
+                        {
+                            fdatagrid = view.contractsDataGrid;
+                            break;
+                        }
+                    case "materialResponsibleTab":
+                        {
+                            fdatagrid = view.materialresponsesDataGrid;
+                            break;
+                        }
+                }
+
+                var myClassType = fdatagrid.ItemsSource.GetType().GetGenericArguments().Single();
+
+                var method = typeof(ExportToExcel).GetMethod("ExportFromDataGrid", BindingFlags.Static | BindingFlags.Public);
+                var genericMethod = method.MakeGenericMethod(myClassType);
+
+                try
+                {
+                    // вызов статического метода
+                    genericMethod.Invoke(null, new object[2] { savefile.FileName, fdatagrid });
+                }
+                catch
+                {
+                    System.Windows.MessageBox.Show("Во время экспорта произошла ошибка...", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                System.Windows.MessageBox.Show("Экспорт успешно завершен", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
-        private void ExportToExcel(string filename)
+        private void AddRowCopy(object? obj)
         {
+            if (CurrentEmployee.CanUserAdd == false || (CurrentEmployee.IsUserAdmin && selectedTab == "employersTab") == false)
+            {
+                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
             switch (selectedTab)
             {
+                case "materialResponsibleTab":
+                    {
+                        var copy = SelectedTableItem as MaterialResponse;
+                        copy.ID = 0;
+                        AddMaterialResponseView addMaterial = new AddMaterialResponseView();
+                        (addMaterial.DataContext as AddMaterialResponseViewModel).MaterialResponse = copy;
+                        if (addMaterial.ShowDialog() == true)
+                        {
+                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                        }
+                        break;
+                    }
                 case "materialsTab":
                     {
-                        var materials = view.materialsDataGrid.CollectionViewSource.Cast<Material>().ToArray();
-                        using (SLDocument document = new SLDocument())
-                        {                       
-                            string[] header = new string[7]
-                            { "№","Наименование","Производитель","Цена","Количество","Ед. измерения","Дата поставки"};                            
-                            for (int ind = 1; ind < 7; ind++)
-                            {
-                                document.SetCellValueNumeric(1, ind, header[ind - 1]);
-                            }
-                            int matCount = materials.Length;
-                            for (int i = 0; i < matCount; i++)
-                            {
-                                Material material = materials[i];
-                                document.SetCellValueNumeric(i + 2, 1, material.ID.ToString());
-                                document.SetCellValueNumeric(i + 2, 2, material.Name);
-                                document.SetCellValueNumeric(i + 2, 3, material.Manufacturer);
-                                document.SetCellValueNumeric(i + 2, 4, material.Price.ToString());
-                                document.SetCellValueNumeric(i + 2, 5, material.Count.ToString());
-                                document.SetCellValueNumeric(i + 2, 6, material.CountUnits);
-                                document.SetCellValueNumeric(i + 2, 7, material.EnterDate.ToMySQLDate());
-                            }
-                            try
-                            {
-                                document.SaveAs(filename);
-                            }
-                            catch (System.IO.IOException)
-                            {
-                                System.Windows.MessageBox.Show("Произошла ошибка при сохранении файла", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Error);
-                                return;
-                            }
+                        var copy = SelectedTableItem as Material;
+                        copy.ID = 0;
+                        AddMaterialView addMaterial = new AddMaterialView(copy);
+                        if (addMaterial.ShowDialog() == true)
+                        {
+                            MaterialsList = App.DbContext.Materials.ToList();
+                        }
+                        break;
+                    }
+                case "employersTab":
+                    {
+                        var copy = SelectedTableItem as Employee;
+                        copy.ID = 0;
+                        AddEmployeeView add = new AddEmployeeView(copy);
+                        if (add.ShowDialog() == true)
+                        {
+                            EmployeesList = App.DbContext.Employees.ToList();
+                        }
+                        break;
+                    }
+                case "individualsTab":
+                    {
+                        var copy = SelectedTableItem as Individual;
+                        copy.ID = 0;
+                        AddIndividualView add = new AddIndividualView(copy);
+                        if (add.ShowDialog() == true)
+                        {
+                            IndividualsList = App.DbContext.Individuals.ToList();
+                        }
+                        break;
+                    }
+                case "orgTab":
+                    {
+                        var copy = SelectedTableItem as Organization;
+                        copy.ID = 0;
+                        AddOrganizationView add = new AddOrganizationView(copy);
+                        if (add.ShowDialog() == true)
+                        {
+                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
+                        }
+                        break;
+                    }
+                case "uchetTab":
+                    {
+                        var copy = SelectedTableItem as Trade;
+                        copy.ID = 0;
+                        AddTradeView add = new AddTradeView(copy);
+                        if (add.ShowDialog() == true)
+                        {
+                            TradesList = App.DbContext.Trades.ToList();
+                        }
+                        break;
+                    }
+                case "ttnTab":
+                    {
+                        var copy = SelectedTableItem as TTN;
+                        copy.ID = 0;
+                        AddTTNView add = new AddTTNView(copy);
+                        if (add.ShowDialog() == true)
+                        {
+                            TTNList = App.DbContext.TTNs.ToList();
+                        }
+                        break;
+                    }
+                case "accountTab":
+                    {
+                        var copy = SelectedTableItem as Account;
+                        copy.ID = 0;
+                        AddAccountView add = new AddAccountView();
+                        (add.DataContext as AddAccountViewModel).Account = copy;
+                        if (add.ShowDialog() == true)
+                        {
+                            AccountsList = App.DbContext.Accounts.ToList();
+                        }
+                        break;
+                    }
+                case "contractTab":
+                    {
+                        var copy = SelectedTableItem as Contact;
+                        copy.ID = 0;
+                        AddContractView add = new AddContractView();
+                        (add.DataContext as AddContactViewModel).Contact = copy;
+                        if (add.ShowDialog() == true)
+                        {
+                            ContractsList = App.DbContext.Contracts.ToList();
                         }
                         break;
                     }
             }
         }
+
         private void Search(string text)
         {
             if (text.Equals(string.Empty))

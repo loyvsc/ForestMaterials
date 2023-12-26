@@ -1,12 +1,15 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Contract : NotifyPropertyChangedBase, ITable
     {
+        [IgnoreProperty]
         private readonly bool UseBD;
         public int ID { get; set; }
 
+        [ExportColumnName("")]
         public Organization? Seller
         {
             get => SellerID != null ? App.DbContext.Organizations.ElementAt((int)SellerID) : null;

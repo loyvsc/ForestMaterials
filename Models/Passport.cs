@@ -1,11 +1,13 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
+using System.Numerics;
 
 namespace BuildMaterials.Models
 {
     public class Passport : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
-
+        [ExportColumnName("Номер пасспорта")]
         public string? Number
         {
             get => number;
@@ -19,6 +21,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Дата выдачи")]
         public DateTime? IssueDate
         {
             get => isdat;
@@ -39,6 +42,8 @@ namespace BuildMaterials.Models
         }
 
         public bool IsValid => Number != null && IssueDate != null;
+
+        public override string ToString() => Number + " " + IssueDate?.ToShortDateString();
 
         private DateTime? isdat;
         private string? number;

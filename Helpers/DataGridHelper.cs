@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace BuildMaterials.Helpers
 {
-    static class DataGridHelper
+    public static class DataGridHelper
     {
         static public DataGridCell GetCell(DataGrid dg, int row, int column)
         {

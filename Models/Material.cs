@@ -1,15 +1,13 @@
 ﻿using BuildMaterials.BD;
-using FilterDataGrid.Attributes;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Material : NotifyPropertyChangedBase, ITable
     {
-        private readonly bool UseBD;
+        public int ID { get; set; }
 
-        [ReadOnly] public int ID { get; set; }
-
-        [ColumnName("Наименование")]
+        [ExportColumnName("Наименование")]
         public string? Name
         {
             get => name;
@@ -19,7 +17,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ColumnName("Производитель")]
+        [ExportColumnName("Производитель")]
         public string? Manufacturer
         {
             get => manufacturer;
@@ -29,7 +27,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ColumnName("Цена")]
+        [ExportColumnName("Цена")]
         public float Price
         {
             get => price;
@@ -39,7 +37,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ColumnName("Количество")]
+        [ExportColumnName("Количество")]
         public float Count
         {
             get => count;
@@ -49,7 +47,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ColumnName("Ед. измерения")]
+        [ExportColumnName("Ед. измерения")]
         public string? CountUnits
         {
             get => countUnits;
@@ -59,7 +57,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ColumnName("Дата поставки")]
+        [ExportColumnName("Дата поставки")]
         public DateTime EnterDate
         {
             get => enterDate;
@@ -103,6 +101,7 @@ namespace BuildMaterials.Models
             EnterDate = enterDate;
         }
 
+        [IgnoreProperty]
         public bool IsValid() => Name != string.Empty &&
             Manufacturer != string.Empty &&
             CountUnits != string.Empty;

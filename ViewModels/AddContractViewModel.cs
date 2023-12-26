@@ -19,7 +19,6 @@ namespace BuildMaterials.ViewModels
         public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());
 
         private readonly Window _window = null!;
-        public readonly Settings Settings;
         public Contract contr;
 
         public List<Material> Materials => App.DbContext.Materials.ToList();
@@ -31,7 +30,6 @@ namespace BuildMaterials.ViewModels
 
         public AddContractViewModel()
         {
-            Settings = new Settings();
             Contract = new Contract();
         }
 

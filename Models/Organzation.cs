@@ -1,11 +1,14 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Organization : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
+        [IgnoreProperty]
         public bool ForDelete { get; set; } = false;
+        [ExportColumnName("УНП")]
         public string? UNP
         {
             get => unp;
@@ -15,6 +18,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(UNP));
             }
         }
+        [ExportColumnName("Полное наименование компании")]
         public string? CompanyName
         {
             get => companyName;
@@ -24,6 +28,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(CompanyName));
             }
         }
+        [ExportColumnName("Краткое наименование компании")]
         public string? ShortCompamyName
         {
             get => shtrcmpname;
@@ -33,6 +38,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(ShortCompamyName));
             }
         }
+        [ExportColumnName("Адрес")]
         public string? Adress
         {
             get => adress;
@@ -42,6 +48,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(Adress));
             }
         }
+        [ExportColumnName("Дата регистрации")]
         public DateTime? RegistrationDate
         {
             get => regdat;
@@ -51,7 +58,9 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(RegistrationDate));
             }
         }
+        [IgnoreProperty]
         public string? RegistrationDateInString => RegistrationDate?.ToString("d");
+        [ExportColumnName("Номер МНС")]
         public string? MNSNumber
         {
             get => msnnum;
@@ -61,6 +70,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(MNSNumber));
             }
         }
+        [ExportColumnName("Наименование МНС")]
         public string? MNSName
         {
             get => msnname;
@@ -71,6 +81,7 @@ namespace BuildMaterials.Models
 
             }
         }
+        [ExportColumnName("Расчетный счет")]
         public string? RascSchet
         {
             get => raschScht;
@@ -80,6 +91,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(RascSchet));
             }
         }
+        [ExportColumnName("ЦБУ")]
         public string? CBU
         {
             get => cbu;
@@ -89,6 +101,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(CBU));
             }
         }
+        [ExportColumnName("Контакты")]
         public List<Contact> Contacts
         {
             get => contacts;
@@ -97,7 +110,7 @@ namespace BuildMaterials.Models
                 contacts = value;
                 OnPropertyChanged(nameof(Contacts));
             }
-        }        
+        }
 
         private List<Contact> contacts;
         private string? cbu;
@@ -116,7 +129,7 @@ namespace BuildMaterials.Models
             Contacts = new List<Contact>();
         }
 
-        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, bool initContacts = false)
+        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, List<Contact> contacts = null!)
         {
             ID = iD;
             CompanyName = companyName;
@@ -128,14 +141,8 @@ namespace BuildMaterials.Models
             UNP = uNP;
             RascSchet = rasch;
             CBU = cbu;
-            if (initContacts)
-            {
-                Contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + ID);
-            }
-            else
-            {
-                Contacts = new List<Contact>();
-            }
+            if (contacts != null) Contacts = contacts;
+            else Contacts = new List<Contact>();
         }
 
         public override string ToString() => CompanyName!;

@@ -12,31 +12,8 @@ namespace BuildMaterials.ViewModels
         public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());
 
         private readonly Window _window = null!;
-        public readonly Settings Settings;
 
-        public List<Organization> CustomersList
-        {
-            get
-            {
-                List<Organization> customers = new List<Organization>(128);
-                using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
-                {
-                    _connection.Open();
-                    using (MySqlCommand _command = new MySqlCommand
-                        ("SELECT CompanyName, Adress FROM customers union SELECT CompanyName, Adress FROM providers;", _connection))
-                    {
-                        using (MySqlDataReader reader = _command.ExecuteMySqlReaderAsync())
-                            while (reader.Read())
-                            {
-                                customers.Add(new Organization() { CompanyName = reader.GetString(0), Adress = reader.GetString(1) });
-                            }
-                    }
-                    _connection.Close();
-                }
-                customers.Add(new Organization() { CompanyName = Settings.CompanyName, Adress = Settings.CompanyAdress });
-                return customers;
-            }
-        }
+        public List<Organization> CustomersList => App.DbContext.Organizations.ToList();
 
         public List<Employee> Employees => App.DbContext.Employees.ToList();
 
@@ -44,10 +21,7 @@ namespace BuildMaterials.ViewModels
         public int SelectedConsigneeIndex { get; set; } = -1;
         public List<Material> Materials => App.DbContext.Materials.ToList();
 
-        public AddAccountViewModel()
-        {
-            Settings = new Settings();
-        }
+        public AddAccountViewModel() { }
 
         public AddAccountViewModel(Window window) : this()
         {

@@ -26,13 +26,13 @@ namespace BuildMaterials.ViewModels
             List<Employee> employees = new List<Employee>(32);
             using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
             {
-                using (MySqlCommand _command = new MySqlCommand("SELECT concat(surname,' ', name,' ',pathnetic), Password, AccessLevel FROM Employees;", _connection))
+                using (MySqlCommand _command = new MySqlCommand("SELECT concat(surname,' ', name,' ',pathnetic), Password, canadd, canedit, candel, isadmin FROM Employees;", _connection))
                 {
                     _connection.OpenAsync().Wait();
                     using (MySqlDataReader reader = _command.ExecuteMySqlReaderAsync())
                         while (reader.Read())
                         {
-                            employees.Add(new Employee(reader.GetString(0), reader.GetString(1), reader.GetInt32(2)));
+                            employees.Add(new Employee(reader.GetString(0), reader.GetString(1), (reader.GetInt32(2) == 1 ? true : false), (reader.GetInt32(3) == 1 ? true : false), (reader.GetInt32(4) == 1 ? true : false), (reader.GetInt32(5) == 1 ? true : false)));
                         }
                     _connection.CloseAsync().Wait();
                 }

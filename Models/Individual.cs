@@ -1,10 +1,12 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Individual : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
+        [ExportColumnName("Имя")]
         public string? Name
         {
             get => name;
@@ -14,6 +16,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ExportColumnName("Фамилия")]
         public string? Surname
         {
             get => surname;
@@ -23,6 +26,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ExportColumnName("Отчество")]
         public string? Pathnetic
         {
             get => pathnetic;
@@ -32,6 +36,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ExportColumnName("Контактный номер телефона")]
         public string? PhoneNumber
         {
             get => phoneNumber;
@@ -42,6 +47,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Пасспортные данные")]
         public Passport Passport
         {
             get => passport;
@@ -74,8 +80,10 @@ namespace BuildMaterials.Models
             Passport = passport;
         }
 
+        [IgnoreProperty]
         public string FIO => $"{Surname} {Name} {Pathnetic}";
 
+        [IgnoreProperty]
         public bool IsValid =>
             Passport.IsValid &&
             Name != string.Empty &&

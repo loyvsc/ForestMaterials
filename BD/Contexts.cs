@@ -1,8 +1,6 @@
 ﻿using BuildMaterials.Extensions;
 using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
-using System.Windows.Forms;
-using YesSql;
 
 namespace BuildMaterials.BD
 {
@@ -34,8 +32,6 @@ namespace BuildMaterials.BD
         public PayTypesTable PayTypes { get; set; } = null!;
         public PassportsTable Passports { get; set; } = null!;
         public IndividualsTable Individuals { get; set; } = null!;
-
-        public readonly string[] AccessLevel = new string[4] { "Минимальный", "Низкий", "Средний", "Максимальный" };
 
         private bool CheckBDCreated()
         {
@@ -70,10 +66,10 @@ namespace BuildMaterials.BD
 
         public void CreateDatabase()
         {
-            if (!CheckBDCreated())
+            if (CheckBDCreated() == false)
             {
                 InitializeDatabase();
-                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234",new Passport(0,"BM1234567", new DateTime(2016,3,12))," "));
+                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12)), "",false,true,true,true,true));
                 PayTypes.Add(new PayType(-1, "Наличный расчет"));
                 PayTypes.Add(new PayType(-1, "Безналичный расчет"));
             }
@@ -489,8 +485,8 @@ namespace BuildMaterials.BD
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS employees " +
                 "(ID int NOT NULL AUTO_INCREMENT, Name varchar(50), Surname varchar(50)," +
                 "Pathnetic varchar(70), Position varchar(100), PhoneNumber varchar(14)," +
-                "Password varchar(100), AccessLevel int NOT NULL, FinResponsible boolean, passportid int, PRIMARY KEY (ID));";
-        
+                "Password varchar(100), FinResponsible boolean, passportid int, canadd boolean, canedit boolean, candel boolean, isadmin boolean, PRIMARY KEY (ID));";
+
         public EmployeesTable()
         {
             _connection = new MySqlConnection(StaticValues.ConnectionString);
@@ -513,7 +509,7 @@ namespace BuildMaterials.BD
         }
 
         private Employee GetEmployee(MySqlDataReader reader)
-        {
+        {            
             int id = (int)reader[0];
             string name = (string)reader[1];
             string surname = (string)reader[2];
@@ -521,11 +517,15 @@ namespace BuildMaterials.BD
             string position = (string)reader[4];
             string phonenumber = (string)reader[5];
             string password = (string)reader[6];
-            int aclevel = (int)reader[7];
-            bool finresp = (bool)reader[8];
-            int pasid = (int)reader[9];
+            bool finresp = (bool)reader[7];
+            int pasid = (int)reader[8];
+            bool canadd = (bool)reader[9];
+            bool canedit = (bool)reader[10];
+            bool candel = (bool)reader[11];
+            bool isadmin = (bool)reader[12];
             Passport passport = App.DbContext.Passports.ElementAt(pasid);
-            return new Employee(id, name, surname, pathnetic, position, phonenumber, passport, password, aclevel, finresp);
+            return new Employee(id, name, surname, pathnetic, position, phonenumber, passport, password, finresp,
+                canadd, canedit, candel, isadmin);
         }
 
         public Employee ElementAt(int id)
@@ -549,7 +549,8 @@ namespace BuildMaterials.BD
             _connection.OpenAsync().Wait();
             using (MySqlCommand command = new MySqlCommand($"UPDATE employees SET Name = '{obj.Name}', Surname = '{obj.Surname}'," +
                 $"pathnetic = '{obj.Pathnetic}', position = '{obj.Position}', phonenumber = '{obj.PhoneNumber}'," +
-                $"password = {obj.Password}, AccessLevel = {obj.AccessLevel}, FinResponsible = {obj.FinResponsible} WHERE ID = {obj.ID};", _connection))
+                $"password = '{obj.Password}', FinResponsible = {obj.FinResponsible}, canadd = {obj.CanUserAdd}, canedit = {obj.CanUserEdit}," +
+                $"candel = {obj.CanUserDelete}, isadmin = {obj.IsUserAdmin} WHERE ID = {obj.ID};", _connection))
             {
                 command.ExecuteNonQueryAsync().Wait();
             }
@@ -573,17 +574,17 @@ namespace BuildMaterials.BD
                 var reader = command.ExecuteMySqlReaderAsync();
                 while (reader.Read())
                 {
-                    id = (int) reader[0];
+                    id = (int)reader[0];
                 }
                 _connection.CloseAsync().Wait();
             }
-            
+
             using (MySqlCommand command = new MySqlCommand(
                 "INSERT INTO employees " +
-                $"(Name, Surname, pathnetic, position, phonenumber, password, AccessLevel, FinResponsible,passportid) VALUES" +
+                $"(Name, Surname, pathnetic, position, phonenumber, password, FinResponsible,passportid, canadd, canedit, candel, isadmin) VALUES" +
                 $"('{obj.Name}','{obj.Surname}'," +
-                $"'{obj.Pathnetic}','{obj.Position}','{obj.PhoneNumber}','{obj.Password}',{obj.AccessLevel},{(obj.FinResponsible ? 1 : 0)}," +
-                $"{id});", _connection))
+                $"'{obj.Pathnetic}','{obj.Position}','{obj.PhoneNumber}','{obj.Password}',{(obj.FinResponsible ? 1 : 0)}," +
+                $"{id},{obj.CanUserAdd},{obj.CanUserEdit},{obj.CanUserDelete},{obj.IsUserAdmin});", _connection))
             {
                 _connection.OpenAsync().Wait();
                 command.ExecuteNonQueryAsync().Wait();
@@ -628,10 +629,7 @@ namespace BuildMaterials.BD
             return employees;
         }
 
-        public List<Employee> ToList()
-        {
-            return Select("SELECT * FROM employees;");
-        }
+        public List<Employee> ToList() => Select("SELECT * FROM employees;");
 
         public List<Employee> Select(string query)
         {
@@ -679,7 +677,7 @@ namespace BuildMaterials.BD
             }
         }
 
-        private Organization GetSeller(MySqlDataReader reader, bool init = false)
+        private Organization GetSeller(MySqlDataReader reader)
         {
             int id = (int)reader["id"];
             string compName = reader.IsDBNull(1) ? string.Empty : (string)reader[1];
@@ -692,7 +690,9 @@ namespace BuildMaterials.BD
             string rasch = reader.IsDBNull(8) ? string.Empty : (string)reader[8];
             string cbu = reader.IsDBNull(9) ? string.Empty : (string)reader[9];
 
-            return new Organization(id, compName, shortcmpname, address, regdate, mnsnum, mnsname, unp, rasch, cbu, init);
+            List<Contact> contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + id);
+
+            return new Organization(id, compName, shortcmpname, address, regdate, mnsnum, mnsname, unp, rasch, cbu, contacts);
         }
 
         public Models.Organization ElementAt(int id)
@@ -754,12 +754,12 @@ namespace BuildMaterials.BD
             _connection.CloseAsync().Wait();
         }
 
-        public List<Organization> Search(string text, bool iscustomer = false) =>
-            Select($"SELECT * FROM Sellers WHERE CONCAT(companyname,' ', adress,' ', companyperson,' ',bank,' ',bankprop,' ', unp,' ',rasch,' ', cbu) like '%{text}%' and iscustomer = {iscustomer};");
+        public List<Organization> Search(string text) =>
+            Select($"SELECT * FROM Sellers WHERE CONCAT(companyname,' ', adress,' ', companyperson,' ',bank,' ',bankprop,' ', unp,' ',rasch,' ', cbu) like '%{text}%';");
 
-        public List<Organization> ToList(bool initContacts = false)
+        public List<Organization> ToList()
         {
-            return Select($"SELECT * FROM sellers;", initContacts);
+            return Select($"SELECT * FROM sellers;");
         }
 
         public List<Organization> Select(string query, bool init = false)
@@ -773,7 +773,7 @@ namespace BuildMaterials.BD
                     MySqlDataReader reader = command.ExecuteMySqlReaderAsync();
                     while (reader.Read())
                     {
-                        providers.Add(GetSeller(reader, init));
+                        providers.Add(GetSeller(reader));
                     }
                 }
                 _connection.CloseAsync().Wait();
@@ -1437,7 +1437,7 @@ namespace BuildMaterials.BD
             string pathnetic = (string)reader[3];
             string phonenumber = (string)reader[4];
             int pasid = (int)reader[5];
-            Passport passport = connection != null ? App.DbContext.Passports.ElementAt(pasid, connection) : App.DbContext.Passports.ElementAt(pasid);
+            Passport passport = App.DbContext.Passports.ElementAt(pasid);
             return new Individual(id, name, surname, pathnetic, phonenumber, passport);
         }
 

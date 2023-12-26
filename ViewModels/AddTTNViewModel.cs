@@ -18,8 +18,6 @@ namespace BuildMaterials.ViewModels
 
         private readonly Window _window = null!;
         public List<Material> Materials => App.DbContext.Materials.ToList();
-
-        public readonly Settings Settings = new Settings();
         public List<Organization>? CustomersList { get; set; }
 
         private void Close(object? obj = null) => _window.DialogResult = true;
