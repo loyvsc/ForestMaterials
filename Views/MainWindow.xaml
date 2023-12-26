@@ -18,9 +18,6 @@
         <converters:MaterialResponseStringConverter x:Key="MaterialResponseStringConverter"/>
         <converters:BoolToVisibility x:Key="BoolToVisibility"/>
     </Window.Resources>
-    <Window.InputBindings>
-        <KeyBinding Key="F2" Modifiers="Control" Command="{Binding AddRowCommand}"/>
-    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20px"/>
