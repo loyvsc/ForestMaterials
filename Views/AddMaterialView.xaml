@@ -3,9 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BuildMaterials.Views"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" SizeToContent="Height" MaxHeight="250" MinHeight="250" MinWidth="250" x:Name="window"
+        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
         Title="Новый материал" Width="250" WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <viewmodels:AddMaterialViewModel/>
@@ -16,16 +15,23 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Наименование материала</TextBlock>
+            <TextBlock>Наименование лесопродукции</TextBlock>
             <TextBox Text="{Binding Path=Material.Name}"/>
-            <TextBlock>Производитель</TextBlock>
-            <TextBox Text="{Binding Path=Material.Manufacturer}"/>
+            <TextBlock>Сорт</TextBlock>
+            <TextBox Text="{Binding Path=Material.Sort}"/>
             <TextBlock>Стоимость за единицу</TextBlock>
             <TextBox Text="{Binding Path=Material.Price}"/>
             <TextBlock>Количество</TextBlock>
             <TextBox Text="{Binding Path=Material.Count}"/>
             <TextBlock>Ед. измерения</TextBlock>
-            <TextBox Text="{Binding Path=Material.CountUnits}"/>
+            <ComboBox ItemsSource="{Binding CountUnits}" SelectedValue="{Binding Material.CountUnits}"/>
+            <TextBlock>Длина</TextBlock>
+            <TextBox Text="{Binding Path=Material.Dlina}"/>
+            <TextBlock>Ширина</TextBlock>
+            <TextBox Text="{Binding Path=Material.Shirina}"/>
+
+            <TextBlock>НДС</TextBlock>
+            <TextBox Text="{Binding Path=Material.NDS}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>

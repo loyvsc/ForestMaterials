@@ -1,5 +1,6 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Export;
+using BuildMaterials.Extensions;
 
 namespace BuildMaterials.Models
 {
@@ -42,8 +43,13 @@ namespace BuildMaterials.Models
             get => phoneNumber;
             set
             {
-                phoneNumber = value;
-                OnPropertyChanged();
+                if (value == null) return;
+                value = value!.Trim();
+                if (value.CheckPhoneNumber())
+                {
+                    phoneNumber = value;
+                    OnPropertyChanged();
+                }
             }
         }
 

@@ -17,7 +17,7 @@ namespace BuildMaterials.ViewModels
             set
             {
                 _enteredPassword = value;
-                OnPropertyChanged(nameof(EnteredPassword));
+                OnPropertyChanged();
             }
         }
 
@@ -112,6 +112,7 @@ namespace BuildMaterials.ViewModels
             execute(parameter);
         }
     }
+
     public class AutorizeException : Exception
     {
         public readonly new string Message;

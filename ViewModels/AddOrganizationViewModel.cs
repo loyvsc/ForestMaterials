@@ -1,6 +1,5 @@
 ﻿using BuildMaterials.Models;
 using BuildMaterials.Views;
-using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Input;
 using UNPRead;
@@ -11,8 +10,8 @@ namespace BuildMaterials.ViewModels
     {
         public static Organization UnpToOrganization(this UNPRead.UNP unp)
         {
-            if (unp.FullName == null) unp.FullName = string.Empty;
-            return new Organization(0, unp.FullName, unp.ShortName, unp.Adress, unp.RegistrationDate, unp.MNSNumber, unp.MNSName, unp.UNPCode, "", "");
+            unp.FullName ??= string.Empty;
+            return new Organization(0, unp.FullName, unp.ShortName, unp.Adress, unp.RegistrationDate, unp.MNSNumber, unp.MNSName, unp.UNPCode, "", "", "", "");
         }
     }
 
@@ -156,8 +155,7 @@ namespace BuildMaterials.ViewModels
 
         private void AddMaterial(object? obj)
         {
-            Organization.UNP = Organization.UNP?.Trim();
-            if (Organization.UNP != null && Organization.UNP != string.Empty)
+            if (Organization.IsValid)
             {
                 UNPReader reader = new UNPReader();
                 Organization org;
@@ -173,6 +171,8 @@ namespace BuildMaterials.ViewModels
                 org.ID = Organization.ID;
                 org.CBU = Organization.CBU;
                 org.RascSchet = Organization.RascSchet;
+                org.BIK = Organization.BIK;
+                org.CurrentSchet = Organization.CurrentSchet;
 
                 if (org.ID != 0)
                 {
@@ -189,8 +189,7 @@ namespace BuildMaterials.ViewModels
                 else
                 {
                     App.DbContext.Organizations.Add(org);
-                    var orgs = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
-                    Organization = orgs;
+                    Organization = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
                 }
                 CheckOperations();
                 Close();

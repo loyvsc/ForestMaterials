@@ -9,16 +9,28 @@ namespace BuildMaterials.ViewModels
         public static MySqlDataReader ExecuteMySqlReaderAsync(this MySqlCommand command) => command.ExecuteReader();
     }
 
-    public class AddTTNViewModel
+    public class AddTTNViewModel : NotifyPropertyChangedBase
     {
-        public Models.TTN TTN { get; set; }
+        private readonly Window _window = null!;
+        public TTN TTN
+        {
+            get=> ttn;
+            set
+            {
+                ttn = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ICommand CancelCommand => new RelayCommand(Close);
         public ICommand AddCommand => new RelayCommand(AddMaterial);
 
-        private readonly Window _window = null!;
-        public List<Material> Materials => App.DbContext.Materials.ToList();
-        public List<Organization>? CustomersList { get; set; }
+        public List<Contract> Contracts { get; } = App.DbContext.Contracts.ToList();
+        public List<Automobile> Automobiles { get; } = App.DbContext.Automobiles.ToList();
+        public List<Employee> Employees { get; } = App.DbContext.Employees.ToList();
+        public List<Organization>? CustomersList { get; } = App.DbContext.Organizations.ToList();
+
+        private TTN ttn;
 
         private void Close(object? obj = null) => _window.DialogResult = true;
 
@@ -30,43 +42,39 @@ namespace BuildMaterials.ViewModels
         public AddTTNViewModel(Window window) : this()
         {
             _window = window;
-            CustomersList = App.DbContext.Organizations.ToList();
         }
         public AddTTNViewModel(Window window, Models.TTN ttn) : this(window)
         {
             TTN = ttn;
         }
 
-        ~AddTTNViewModel()
-        {
-            CustomersList = null;
-        }
-
         private void AddMaterial(object? obj)
         {
-            if (TTN.ID != 0)
+            if (TTN.IsValid)
             {
                 try
                 {
-                    App.DbContext.TTNs.Update(TTN);
+
+                    if (TTN.ID != 0)
+                    {
+                        App.DbContext.TTNs.Update(TTN);
+                    }
+                    else
+                    {
+                        App.DbContext.TTNs.Add(TTN);
+                    }
+                    Close();
                 }
                 catch
                 {
-                    System.Windows.MessageBox.Show("При сохранении изменений произошла ошибка...", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Произошла ошибка. Попробуйте позже", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
             {
-                if (TTN.IsValid)
-                {
-                    App.DbContext.TTNs.Add(TTN);
-                    Close();
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            
         }
     }
 }

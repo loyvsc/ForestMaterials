@@ -1,5 +1,6 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Export;
+using BuildMaterials.Export.Documents;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.ComponentModel;
@@ -13,6 +14,24 @@ namespace BuildMaterials.ViewModels
     public class MainWindowViewModel : NotifyPropertyChangedBase
     {
         #region Lists
+        public List<Automobile> AutomobilesList
+        {
+            get => automobs;
+            set
+            {
+                automobs = value;
+                OnPropertyChanged();
+            }
+        }
+        public List<TN> TNsList
+        {
+            get => tns;
+            set
+            {
+                tns = value;
+                OnPropertyChanged();
+            }
+        }
         public List<Material> MaterialsList
         {
             get => materials;
@@ -111,8 +130,9 @@ namespace BuildMaterials.ViewModels
         public ICommand AddRowCommand => new RelayCommand(AddRow);
         public ICommand EditRowCommand => new RelayCommand(EditRow);
         public ICommand DeleteRowCommand => new RelayCommand(DeleteRow);
-        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave); 
+        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave);
         public ICommand AddCopyRowCommand => new RelayCommand(AddRowCopy);
+        public ICommand ExportCommand => new RelayCommand(ExportDocument);
         #endregion        
 
         public string SearchText
@@ -129,7 +149,6 @@ namespace BuildMaterials.ViewModels
                 }
             }
         }
-
         public Employee? CurrentEmployee
         {
             get => currentEmployee;
@@ -139,7 +158,6 @@ namespace BuildMaterials.ViewModels
                 OnPropertyChanged(nameof(CurrentEmployee));
             }
         }
-
         public Visibility IsPrintEnabled
         {
             get => isPrintEnabled;
@@ -150,15 +168,25 @@ namespace BuildMaterials.ViewModels
             }
         }
         public ITable? SelectedTableItem { get; set; }
-
         public string SelectedTabAsString => selectedTab;
+        public Visibility IsDocumentSelect
+        {
+            get => isdocsel;
+            set
+            {
+                isdocsel = value;
+                OnPropertyChanged();
+            }
+        }
 
         #region Private vars
+        private List<Automobile> automobs;
+        private List<TN> tns;
+        private Visibility isdocsel;
         private List<Individual> invlst;
         private Visibility isPrintEnabled;
         private List<PayType> paytypeslist;
         private string selectedTab = string.Empty;
-        private List<Organization> provlist;
         private List<Organization> custlist;
         private string _searchtext = string.Empty;
         private Employee? currentEmployee;
@@ -186,6 +214,9 @@ namespace BuildMaterials.ViewModels
             PayTypesList = App.DbContext.PayTypes.ToList();
             MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
             IndividualsList = App.DbContext.Individuals.ToList();
+            TNsList = App.DbContext.TNs.ToList();
+            AutomobilesList = App.DbContext.Automobiles.ToList();
+            IsDocumentSelect = Visibility.Collapsed;
         }
 
         public MainWindowViewModel(MainWindow view) : this()
@@ -221,14 +252,16 @@ namespace BuildMaterials.ViewModels
             if (e.AddedItems.Count == 0) return;
             if (e.AddedItems[0] is TabItem)
             {
+                SelectedTableItem = null;
                 string tabName = (e.AddedItems[0] as TabItem)!.Name;
                 selectedTab = tabName;
                 SearchText = string.Empty;
+                IsDocumentSelect = Visibility.Collapsed;
                 switch (selectedTab)
                 {
-                    case "materialResponsibleTab":
+                    case "automobilesTab":
                         {
-                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            AutomobilesList = App.DbContext.Automobiles.ToList();
                             break;
                         }
                     case "materialsTab":
@@ -253,17 +286,32 @@ namespace BuildMaterials.ViewModels
                         }
                     case "ttnTab":
                         {
+                            IsDocumentSelect = Visibility.Visible;
                             TTNList = App.DbContext.TTNs.ToList();
                             break;
                         }
                     case "accountTab":
                         {
+                            IsDocumentSelect = Visibility.Visible;
                             AccountsList = App.DbContext.Accounts.ToList();
                             break;
                         }
                     case "contractTab":
                         {
+                            IsDocumentSelect = Visibility.Visible;
                             ContractsList = App.DbContext.Contracts.ToList();
+                            break;
+                        }
+                    case "materialResponsibleTab":
+                        {
+                            IsDocumentSelect = Visibility.Visible;
+                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            break;
+                        }
+                    case "tnTab":
+                        {
+                            IsDocumentSelect = Visibility.Visible;
+                            TNsList = App.DbContext.TNs.ToList();
                             break;
                         }
                 }
@@ -271,6 +319,53 @@ namespace BuildMaterials.ViewModels
         }
 
         #region Private methods
+        private void ExportDocument(object? obj)
+        {
+            if (SelectedTableItem == null)
+            {
+                System.Windows.MessageBox.Show("Выбрите документ", "Экспорт документа", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            SaveFileDialog save = new SaveFileDialog()
+            {
+                Filter = "Файл Word(*.docx)|*.docx",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                RestoreDirectory = false,
+            };
+            if (save.ShowDialog() != DialogResult.OK) return;
+
+            string path = save.FileName;
+
+            DocumentExport export = new DocumentExport();
+            switch (selectedTab)
+            {                
+                case "tnTab":
+                    {
+                        export.SaveReport(path, SelectedTableItem as TN);
+                        break;
+                    }
+                case "ttnTab":
+                    {
+                        export.SaveReport(path, SelectedTableItem as TTN);
+                        break;
+                    }
+                case "accountTab":
+                    {
+
+                        break;
+                    }
+                case "contractTab":
+                    {
+                        export.SaveReport(path, SelectedTableItem as Contract);
+                        break;
+                    }
+                case "materialResponsibleTab":
+                    {
+                        break;
+                    }
+            }
+        }
         private void DeleteRow(object? obj)
         {
             if (CurrentEmployee.CanUserDelete == false)
@@ -283,6 +378,28 @@ namespace BuildMaterials.ViewModels
                 if (SelectedTableItem == null) return;
                 switch (selectedTab)
                 {
+                    case "automobilesTab":
+                        {
+                            if (AutomobilesList.Count.Equals(0))
+                            {
+                                return;
+                            }
+                            Automobile buf = (Automobile)SelectedTableItem;
+                            App.DbContext.Automobiles.Remove(buf);
+                            AutomobilesList = App.DbContext.Automobiles.ToList();
+                            break;
+                        }
+                    case "tnTab":
+                        {
+                            if (TNsList.Count.Equals(0))
+                            {
+                                return;
+                            }
+                            TN buf = (TN)SelectedTableItem;
+                            App.DbContext.TNs.Remove(buf);
+                            TNsList = App.DbContext.TNs.ToList();
+                            break;
+                        }
                     case "individualsTab":
                         {
                             if (IndividualsList.Count.Equals(0))
@@ -318,14 +435,16 @@ namespace BuildMaterials.ViewModels
                         }
                     case "employersTab":
                         {
-                            if (EmployeesList.Count.Equals(0))
-                            {
-                                return;
-                            }
+                            if (EmployeesList.Count == 0) return;
                             Employee buf = (Employee)SelectedTableItem;
                             if (CurrentEmployee == buf)
                             {
-                                System.Windows.MessageBox.Show("Нельзя удалять пользователя под которым был выполнен вход!");
+                                System.Windows.MessageBox.Show("Нельзя удалять сотрудника под которым был выполнен вход!", "Удаление сотрудника", MessageBoxButton.OK);
+                                return;
+                            }
+                            if (buf.IsUserAdmin == true && CurrentEmployee.IsUserAdmin == false)
+                            {
+                                System.Windows.MessageBox.Show("Удаление администратора запрещено!", "Удаление сотрудника", MessageBoxButton.OK);
                                 return;
                             }
                             App.DbContext.Employees.Remove(buf);
@@ -407,6 +526,24 @@ namespace BuildMaterials.ViewModels
             }
             switch (selectedTab)
             {
+                case "automobilesTab":
+                    {
+                        AddAutomobileView addMaterial = new AddAutomobileView();
+                        if (addMaterial.ShowDialog() == true)
+                        {
+                            AutomobilesList = App.DbContext.Automobiles.ToList();
+                        }
+                        break;
+                    }
+                case "tnTab":
+                    {
+                        AddTNView addMaterial = new AddTNView();
+                        if (addMaterial.ShowDialog() == true)
+                        {
+                            TNsList = App.DbContext.TNs.ToList();
+                        }
+                        break;
+                    }
                 case "materialResponsibleTab":
                     {
                         AddMaterialResponseView addMaterial = new AddMaterialResponseView();
@@ -507,6 +644,24 @@ namespace BuildMaterials.ViewModels
                 int id = SelectedTableItem.ID;
                 switch (selectedTab)
                 {
+                    case "automobilesTab":
+                        {
+                            AddAutomobileView addMaterial = new AddAutomobileView(SelectedTableItem as Automobile);
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                AutomobilesList = App.DbContext.Automobiles.ToList();
+                            }
+                            break;
+                        }
+                    case "tnTab":
+                        {
+                            AddTNView addMaterial = new AddTNView(SelectedTableItem as TN);
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                TNsList = App.DbContext.TNs.ToList();
+                            }
+                            break;
+                        }
                     case "individualsTab":
                         {
                             AddIndividualView add = new AddIndividualView(App.DbContext.Individuals.ElementAt(id));
@@ -556,6 +711,15 @@ namespace BuildMaterials.ViewModels
                             }
                             break;
                         }
+                    case "contractTab":
+                        {
+                            AddContractView add = new AddContractView((Contract)SelectedTableItem);
+                            if (add.ShowDialog() == true)
+                            {
+                                ContractsList = App.DbContext.Contracts.ToList();
+                            }
+                            break;
+                        }
                 }
             }
         }
@@ -589,7 +753,7 @@ namespace BuildMaterials.ViewModels
                         }
                     case "uchetTab":
                         {
-                            fdatagrid = view.uchetDataGrid;
+                            //fdatagrid = view.uchetDataGrid;
                             break;
                         }
                     case "ttnTab":
@@ -634,13 +798,30 @@ namespace BuildMaterials.ViewModels
         }
         private void AddRowCopy(object? obj)
         {
-            if (CurrentEmployee.CanUserAdd == false || (CurrentEmployee.IsUserAdmin && selectedTab == "employersTab") == false)
+            if (CurrentEmployee.CanUserAdd == false)
             {
-                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            if (SelectedTableItem == null)
+            {
+                System.Windows.MessageBox.Show("Выберите запись", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
             switch (selectedTab)
             {
+                case "automobilesTab":
+                    {
+                        var copy = SelectedTableItem as Automobile;
+                        copy.ID = 0;
+                        AddAutomobileView addMaterial = new AddAutomobileView();
+                        (addMaterial.DataContext as AddAutomobileViewModel).Automobile = copy;
+                        if (addMaterial.ShowDialog() == true)
+                        {
+                            AutomobilesList = App.DbContext.Automobiles.ToList();
+                        }
+                        break;
+                    }
                 case "materialResponsibleTab":
                     {
                         var copy = SelectedTableItem as MaterialResponse;
@@ -666,6 +847,11 @@ namespace BuildMaterials.ViewModels
                     }
                 case "employersTab":
                     {
+                        if (CurrentEmployee.IsUserAdmin == false)
+                        {
+                            System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            return;
+                        }
                         var copy = SelectedTableItem as Employee;
                         copy.ID = 0;
                         AddEmployeeView add = new AddEmployeeView(copy);
@@ -719,8 +905,7 @@ namespace BuildMaterials.ViewModels
                         }
                         break;
                     }
-                case "accountTab":
-                    {
+                case "accountTab": {
                         var copy = SelectedTableItem as Account;
                         copy.ID = 0;
                         AddAccountView add = new AddAccountView();
@@ -733,19 +918,30 @@ namespace BuildMaterials.ViewModels
                     }
                 case "contractTab":
                     {
-                        var copy = SelectedTableItem as Contact;
+                        Contact copy = SelectedTableItem is Contact ? (Contact)SelectedTableItem : new Contact();
                         copy.ID = 0;
                         AddContractView add = new AddContractView();
-                        (add.DataContext as AddContactViewModel).Contact = copy;
+                        (add.DataContext as AddContactViewModel)!.Contact = copy;
                         if (add.ShowDialog() == true)
                         {
                             ContractsList = App.DbContext.Contracts.ToList();
                         }
                         break;
                     }
+                case "tnTab":
+                    {
+                        TN copy = SelectedTableItem is TN ? (TN)SelectedTableItem : new TN();
+                        copy.ID = 0;
+                        AddTNView add = new AddTNView();
+                        (add.DataContext as AddTNViewModel)!.TN = copy;
+                        if (add.ShowDialog() == true)
+                        {
+                            TNsList = App.DbContext.TNs.ToList();
+                        }
+                        break;
+                    }
             }
         }
-
         private void Search(string text)
         {
             if (text.Equals(string.Empty))
@@ -789,7 +985,6 @@ namespace BuildMaterials.ViewModels
                     }
             }
         }
-
         #endregion
     }
 }

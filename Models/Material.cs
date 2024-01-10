@@ -17,13 +17,13 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        [ExportColumnName("Производитель")]
-        public string? Manufacturer
+        [ExportColumnName("Сорт")]
+        public string? Sort
         {
-            get => manufacturer;
+            get => sort;
             set
             {
-                manufacturer = value;
+                sort = value;
                 OnPropertyChanged();
             }
         }
@@ -34,6 +34,16 @@ namespace BuildMaterials.Models
             set
             {
                 price = value;
+                OnPropertyChanged();
+            }
+        }
+        [ExportColumnName("НДС")]
+        public float NDS
+        {
+            get => nds;
+            set
+            {
+                nds = value;
                 OnPropertyChanged();
             }
         }
@@ -57,6 +67,26 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ExportColumnName("Длина")]
+        public string? Dlina
+        {
+            get => dlina;
+            set
+            {
+                dlina = value;
+                OnPropertyChanged();
+            }
+        }
+        [ExportColumnName("Ширина")]
+        public string? Shirina
+        {
+            get => shirina;
+            set
+            {
+                shirina = value;
+                OnPropertyChanged();
+            }
+        }
         [ExportColumnName("Дата поставки")]
         public DateTime EnterDate
         {
@@ -68,17 +98,19 @@ namespace BuildMaterials.Models
             }
         }
 
+        private string? sort;
+        private string? shirina;
+        private string? dlina;
         private string? name;
-        private string? manufacturer;
         private float price;
         private float count;
         private string? countUnits;
         private DateTime enterDate;
+        private float nds;
 
         public Material()
         {
             Name = string.Empty;
-            Manufacturer = string.Empty;
             CountUnits = string.Empty;
             Price = 0;
             Count = 0;
@@ -89,22 +121,24 @@ namespace BuildMaterials.Models
         {
             ID = id;
         }
-
-        public Material(int id, string name, string manufacturer, float price, float count, string countUnits, DateTime enterDate)
+          
+        public Material(int id, string name, float price, float count, string countUnits, DateTime enterDate, string shirina, string dlina,string sort, float nds)
         {
             ID = id;
             Name = name;
-            Manufacturer = manufacturer;
             Price = price;
             Count = count;
             CountUnits = countUnits;
             EnterDate = enterDate;
+            Shirina = shirina;
+            Dlina = dlina;
+            Sort = sort;
+            NDS = nds;
         }
 
         [IgnoreProperty]
         public bool IsValid() => Name != string.Empty &&
-            Manufacturer != string.Empty &&
-            CountUnits != string.Empty;
+            CountUnits != string.Empty && sort!=string.Empty;
 
         public override string ToString() => Name!;
     }

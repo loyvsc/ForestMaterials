@@ -15,7 +15,7 @@ namespace BuildMaterials.Views
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            viewModel.EnteredPassword = ((PasswordBox)sender).Password;
+            viewModel.EnteredPassword = (sender as PasswordBox)?.Password;
         }
     }
 }

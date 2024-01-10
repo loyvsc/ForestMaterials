@@ -41,11 +41,13 @@
                 <TextBlock>Материально ответственный</TextBlock>
                 <CheckBox IsChecked="{Binding Employee.FinResponsible}"/>
             </StackPanel>
-            <GroupBox Header="Пасспортные данные">
+            <GroupBox Header="Паспортные данные">
                 <StackPanel>
-                    <TextBlock Text="Серия и номер пасспорта"/>
+                    <TextBlock Text="Идентификационный номер паспорта"/>
                     <TextBox Text="{Binding Employee.Passport.Number}"/>
-                    <DatePicker Margin="0,5,0,0" Text="В" SelectedDate="{Binding Employee.Passport.IssueDate}"/>
+                    <DatePicker Margin="0,5,0,0" Text="Дата выдачи" SelectedDate="{Binding Employee.Passport.IssueDate}"/>
+                    <TextBlock Margin="0,5,0,0" Text="Кем выдан"/>
+                    <TextBox Text="{Binding Employee.Passport.IssuePunkt}"/>
                 </StackPanel>
             </GroupBox>
 

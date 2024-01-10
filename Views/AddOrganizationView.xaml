@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BuildMaterials.Views"
         xmlns:controls="http://filterdatagrid.control.com/2021"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         xmlns:converters="clr-namespace:BuildMaterials.Converters"
@@ -21,12 +20,16 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Расчетный счет</TextBlock>
-            <TextBox Text="{Binding Organization.RascSchet}"/>
             <TextBlock>ЦБУ</TextBlock>
             <TextBox Text="{Binding Organization.CBU}"/>
+            <TextBlock>Текущий счет</TextBlock>
+            <TextBox Text="{Binding Organization.CurrentSchet}"/>
+            <TextBlock>Расчетный счет</TextBlock>
+            <TextBox Text="{Binding Organization.RascSchet}"/>
             <TextBlock>УНП</TextBlock>
             <TextBox Text="{Binding Organization.UNP}"/>
+            <TextBlock>БИК</TextBlock>
+            <TextBox Text="{Binding Organization.BIK}"/>
             <TextBlock TextWrapping="Wrap" FontStyle="Italic">Для добавления информации об организации необходимо ввести УНП, информация об организации будет добавлена в автоматическом режиме</TextBlock>
 
             <Grid>

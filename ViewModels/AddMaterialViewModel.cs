@@ -1,10 +1,11 @@
-﻿using System.Windows;
+﻿using BuildMaterials.Models;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddMaterialViewModel
+    public class AddMaterialViewModel : NotifyPropertyChangedBase
     {
         public Models.Material Material { get; set; }
 
@@ -12,6 +13,17 @@ namespace BuildMaterials.ViewModels
         public ICommand AddCommand => new RelayCommand(AddMaterial);
 
         private readonly Window _window = null!;
+        private List<string> cul;
+
+        public List<string> CountUnits
+        {
+            get => cul;
+            set
+            {
+                cul = value;
+                OnPropertyChanged();
+            }
+        }
 
         public AddMaterialViewModel()
         {
@@ -22,11 +34,19 @@ namespace BuildMaterials.ViewModels
         {
             Material = material;
             _window = window;
+            CountUnits = new List<string>()
+        {
+            "Кубический метр", "Килограм"
+        };
         }
 
         public AddMaterialViewModel(Window window) : this()
         {
             _window = window;
+            CountUnits = new List<string>()
+        {
+            "Кубический метр", "Килограм"
+        };
         }
 
         private void Close(object? obj = null) => _window.DialogResult = true;
@@ -41,7 +61,7 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений...\nОшибка: "+ex.Message, "Редактирование материала", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, "Редактирование материала", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 Close();
@@ -50,7 +70,6 @@ namespace BuildMaterials.ViewModels
             {
                 if (Material.IsValid())
                 {
-                    Material.Count = Material.Count;
                     Material.EnterDate = DateTime.Now.Date;
                     App.DbContext.Materials.Add(Material);
                     Close();

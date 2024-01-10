@@ -26,12 +26,14 @@
 
             <TextBlock>Номер телефона</TextBlock>
             <TextBox Text="{Binding Path=Individual.PhoneNumber}"/>
-            
-            <GroupBox Header="Пасспортные данные">
+
+            <GroupBox Header="Паспортные данные">
                 <StackPanel>
-                    <TextBlock Text="Серия и номер пасспорта"/>
+                    <TextBlock Text="Идентификационный номер паспорта"/>
                     <TextBox Text="{Binding Individual.Passport.Number}"/>
-                    <DatePicker Margin="0,5,0,0" Text="В" SelectedDate="{Binding Individual.Passport.IssueDate,UpdateSourceTrigger=PropertyChanged}"/>
+                    <DatePicker Margin="0,5,0,0" Text="" SelectedDate="{Binding Individual.Passport.IssueDate}"/>
+                    <TextBlock Margin="0,5,0,0" Text="Кем выдан"/>
+                    <TextBox Text="{Binding Individual.Passport.IssuePunkt}"/>
                 </StackPanel>
             </GroupBox>
         </StackPanel>

@@ -1,6 +1,5 @@
 ﻿using Castle.Core.Internal;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
 using System.Collections;
 using System.IO;
 using System.Reflection;
@@ -45,7 +44,7 @@ namespace BuildMaterials.Export
                 range.AutoFitColumns();
                 range.Style.Numberformat.Format = "yyyy";
                 range.Style.Numberformat.Format = "### ### ### ##0";
-                range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;                
+                range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
 
                 var headerRange = mainsheet.Cells[1, 1, 1, header.Length];
                 headerRange.AutoFilter = true;
@@ -117,7 +116,7 @@ namespace BuildMaterials.Export
 
                 string value = "";
 
-                if (properties[i].PropertyType==typeof(DateTime))
+                if (properties[i].PropertyType == typeof(DateTime))
                 {
                     value = ((DateTime)properties[i].GetValue(obj)).ToShortDateString();
                 }

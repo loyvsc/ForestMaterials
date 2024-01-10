@@ -19,7 +19,7 @@ namespace BuildMaterials.Views
         public MainWindow(Employee employee)
         {
             InitializeComponent();
-            mainViewModel = new MainWindowViewModel(this,employee);
+            mainViewModel = new MainWindowViewModel(this, employee);
             DataContext = mainViewModel;
         }
 

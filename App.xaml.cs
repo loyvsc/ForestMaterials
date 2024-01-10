@@ -4,7 +4,7 @@ namespace BuildMaterials
 {
     public partial class App
     {
-        public static BD.ApplicationContext DbContext = null!;
+        public static BD.ApplicationContext DbContext { get; private set; } = null!;
 
         protected override void OnStartup(StartupEventArgs e)
         {

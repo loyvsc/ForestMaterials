@@ -4,10 +4,12 @@ using System.Windows.Data;
 
 namespace BuildMaterials.Converters
 {
-    public class BoolToVisibility : IValueConverter
+    public class StringConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            (bool)value ? Visibility.Visible : Visibility.Collapsed;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return $"{value}";
+        }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             => DependencyProperty.UnsetValue;

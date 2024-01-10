@@ -24,9 +24,9 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.5" />
-    <PackageReference Include="FrameworkExtract.System.Deployment" Version="4.0.30319" />
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="OrchardCore.Deployment" Version="1.7.2" />
+    <PackageReference Include="TemplateEngine.Docx" Version="1.1.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,7 +59,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

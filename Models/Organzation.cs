@@ -14,7 +14,7 @@ namespace BuildMaterials.Models
             get => unp;
             set
             {
-                unp = value;
+                unp = value?.Trim();
                 OnPropertyChanged(nameof(UNP));
             }
         }
@@ -66,7 +66,7 @@ namespace BuildMaterials.Models
             get => msnnum;
             set
             {
-                msnnum = value;
+                msnnum = value?.Trim();
                 OnPropertyChanged(nameof(MNSNumber));
             }
         }
@@ -76,7 +76,7 @@ namespace BuildMaterials.Models
             get => msnname;
             set
             {
-                msnname = value;
+                msnname = value?.Trim();
                 OnPropertyChanged(nameof(MNSName));
 
             }
@@ -87,7 +87,7 @@ namespace BuildMaterials.Models
             get => raschScht;
             set
             {
-                raschScht = value;
+                raschScht = value?.Trim();
                 OnPropertyChanged(nameof(RascSchet));
             }
         }
@@ -97,7 +97,7 @@ namespace BuildMaterials.Models
             get => cbu;
             set
             {
-                cbu = value;
+                cbu = value?.Trim();
                 OnPropertyChanged(nameof(CBU));
             }
         }
@@ -111,10 +111,36 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(Contacts));
             }
         }
+        [ExportColumnName("Текущий счет")]
+        public string? CurrentSchet
+        {
+            get => curScht;
+            set
+            {
+                curScht = value?.Trim();
+                OnPropertyChanged();
+            }
+        }
+        [ExportColumnName("БИК")]
+        public string? BIK
+        {
+            get => bik;
+            set
+            {
+                if (value.Length < 11)
+                {
+                    bik = value?.Trim();
+                    OnPropertyChanged();
+                }
+            }
+        }
 
+        #region Private vars
         private List<Contact> contacts;
         private string? cbu;
         private string? raschScht;
+        private string? bik;
+        private string? curScht;
         private string? msnname;
         private string? msnnum;
         private string? shtrcmpname;
@@ -122,6 +148,10 @@ namespace BuildMaterials.Models
         private string? adress;
         private string? unp;
         private DateTime? regdat;
+        #endregion
+
+        public bool IsValid => UNP != string.Empty && BIK != string.Empty && CurrentSchet != string.Empty && RascSchet != string.Empty &&
+            MNSNumber != string.Empty && MNSName != string.Empty;
 
         public Organization()
         {
@@ -129,7 +159,7 @@ namespace BuildMaterials.Models
             Contacts = new List<Contact>();
         }
 
-        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, List<Contact> contacts = null!)
+        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, string? bik, string? currentSchet,List<Contact> contacts = null!)
         {
             ID = iD;
             CompanyName = companyName;
@@ -141,8 +171,9 @@ namespace BuildMaterials.Models
             UNP = uNP;
             RascSchet = rasch;
             CBU = cbu;
-            if (contacts != null) Contacts = contacts;
-            else Contacts = new List<Contact>();
+            Contacts = contacts != null ? contacts : new List<Contact>();
+            CurrentSchet = currentSchet;
+            BIK = bik;
         }
 
         public override string ToString() => CompanyName!;

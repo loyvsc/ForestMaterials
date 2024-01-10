@@ -1,180 +1,126 @@
 ﻿using BuildMaterials.BD;
-using BuildMaterials.Export;
 
 namespace BuildMaterials.Models
 {
     public class Contract : NotifyPropertyChangedBase, ITable
     {
-        [IgnoreProperty]
-        private readonly bool UseBD;
         public int ID { get; set; }
 
-        [ExportColumnName("")]
         public Organization? Seller
-        {
-            get => SellerID != null ? App.DbContext.Organizations.ElementAt((int)SellerID) : null;
-            set
-            {
-                if (value != null)
-                {
-                    SellerID = value.ID;
-                    OnPropertyChanged(nameof(Seller));
-                    OnPropertyChanged(nameof(SellerID));
-                }
-            }
-        }
-
-        public Organization Buyer
-        {
-            get => BuyerID != null ? App.DbContext.Organizations.ElementAt((int)BuyerID) : null;
-            set
-            {
-                if (value != null)
-                {
-                    BuyerID = value.ID;
-                    OnPropertyChanged(nameof(Buyer));
-                    OnPropertyChanged(nameof(BuyerID));
-                }
-            }
-        }
-        public int? SellerID
         {
             get => seller;
             set
             {
                 seller = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET Seller ={value} WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(Seller));
             }
         }
-        public int? BuyerID
+        public Organization? Buyer
         {
             get => buyer;
             set
             {
                 buyer = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET Buyer ={value} WHERE ID={ID};");
-                }
+                OnPropertyChanged(nameof(Buyer));
             }
         }
-        public int MaterialID
+        public Individual? Individual
         {
-            get => matid;
+            get => ind;
             set
             {
-                matid = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contracts SET MaterialID ={value} WHERE ID={ID};");
-                }
-                OnPropertyChanged(nameof(Material));
-                OnPropertyChanged(nameof(MaterialID));
+                ind = value;
+                OnPropertyChanged();
             }
         }
-        public Material? Material
+        public int SellerID
         {
-            get => App.DbContext.Materials.ElementAt(MaterialID);
+            get => sellerid;
             set
             {
-                if (value != null)
-                {
-                    MaterialID = value.ID;
-                    OnPropertyChanged(nameof(Material));
-                }
+                sellerid = value;
+                if (value != 0)
+                    Seller = App.DbContext.Organizations.ElementAt(value);
+                OnPropertyChanged(nameof(Seller));
             }
         }
-        public float Count
+        public int BuyerID
         {
-            get => count;
+            get => buyerid;
             set
             {
-                count = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET Count ='{value}' WHERE ID={ID};");
-                }
-                OnPropertyChanged(nameof(Count));
-                OnPropertyChanged(nameof(Summ));
+                buyerid = value;
+                if (value != 0)
+                    Buyer = App.DbContext.Organizations.ElementAt(value);
+                OnPropertyChanged(nameof(BuyerID));
             }
         }
-        public string? CountUnits
-        {
-            get => countUnits;
-            set
-            {
-                countUnits = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET CountUnits ='{value}' WHERE ID={ID};");
-                }
-            }
-        }
-        public float Price
-        {
-            get => price;
-            set
-            {
-                price = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET Price ='{value}' WHERE ID={ID};");
-                }
-                OnPropertyChanged(nameof(Price));
-                OnPropertyChanged(nameof(Summ));
-            }
-        }
-        public float Summ => Count * Price;
         public DateTime? Date
         {
             get => date;
             set
             {
                 date = value;
-                if (UseBD)
-                {
-                    App.DbContext.Query($"UPDATE Contract SET Date ='{value!.Value.Year}-{value!.Value.Month}-{value!.Value.Day}' WHERE ID={ID};");
-                }
+                OnPropertyChanged();
             }
         }
-        public string? DateInString => Date?.ToShortDateString();
 
+        public List<ContractMaterial> Materials
+        {
+            get => mats;
+            set
+            {
+                mats = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string? LogisiticsType
+        {
+            get => logisticsType;
+            set
+            {
+                logisticsType = value;
+                OnPropertyChanged();
+            }
+        }
+
+        #region Private vars
+        private Individual? ind;
+        private string? logisticsType;
+        private List<ContractMaterial> mats;
         private DateTime? date;
-        private string? countUnits = string.Empty;
-        private int? seller = -1;
-        private int? buyer = -1;
-        private float count = 0;
-        private float price = 0;
-        private int matid = -1;
+        private Organization? seller;
+        private Organization? buyer;
+        private int sellerid;
+        private int buyerid;
+        #endregion
 
+        #region Constructors
         public Contract()
         {
-            UseBD = false;
+            Materials = new List<ContractMaterial>();
+            SellerID = 0;
+            BuyerID = 0;
         }
 
-        public Contract(int iD, int? seller, int? buyer, int matid, float count,
-            string? countUnits, float price, DateTime? date)
+        public Contract(int iD, Organization? seller, Organization? buyer, DateTime? date, List<ContractMaterial> materials,
+            string? logisiticsType, Individual? individual)
         {
-            UseBD = false;
             ID = iD;
-            SellerID = seller;
-            BuyerID = buyer;
-            MaterialID = matid;
-            Count = count;
-            CountUnits = countUnits;
-            Price = price;
+            Materials = materials;
+            Seller = seller;
+            SellerID = seller.ID;
+            Buyer = buyer;
+            BuyerID = buyer.ID;
             Date = date;
-            UseBD = true;
+            LogisiticsType = logisiticsType;
+            Individual = individual;
         }
+        #endregion
 
-        public override string ToString()
-        {
-            return $"Договор купли-продажи #{ID} от {DateInString}\nПокупатель: {BuyerID}\nПродавец: {SellerID}\nТовар \"{Material.Name}\" в количестве {Count} {CountUnits}.\nЦена за единицу ({CountUnits}): {Price}.\nСумма: {Summ}.\n\n               {SellerID}\n\n               {BuyerID}";
-        }
+        public bool IsValid => Date != null && Materials.Count > 0 && SellerID != 0 && (BuyerID != 0 || Individual!=null);
 
-        public bool IsValid => Date != null;
+        public override string ToString() => $"Договор №{ID} от {Date?.ToShortDateString()}";
     }
 }

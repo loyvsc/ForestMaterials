@@ -1,13 +1,12 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Export;
-using System.Numerics;
 
 namespace BuildMaterials.Models
 {
     public class Passport : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
-        [ExportColumnName("Номер пасспорта")]
+        [ExportColumnName("Идентификационный номер")]
         public string? Number
         {
             get => number;
@@ -32,20 +31,33 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Кем выдан")]
+        public string? IssuePunkt
+        {
+            get => ispun;
+            set
+            {
+                ispun = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private DateTime? isdat;
+        private string? number;
+        private string? ispun;
+
         public Passport() { }
 
-        public Passport(int iD, string number, DateTime issueDate)
+        public Passport(int iD, string number, DateTime issueDate, string issuePunkt)
         {
             ID = iD;
             Number = number;
             IssueDate = issueDate;
+            IssuePunkt = issuePunkt;
         }
 
-        public bool IsValid => Number != null && IssueDate != null;
+        public bool IsValid => BuildMaterials.Extensions.PassportExtensions.CheckPassportNumber(Number) && IssueDate != null;
 
         public override string ToString() => Number + " " + IssueDate?.ToShortDateString();
-
-        private DateTime? isdat;
-        private string? number;
     }
 }
