@@ -335,7 +335,7 @@ namespace BuildMaterials.ViewModels
 
             string path = save.FileName;
 
-            DocumentExport export = new DocumentExport();
+            DocumentExport export = new DocumentExport(view);
             switch (selectedTab)
             {
                 case "tnTab":
