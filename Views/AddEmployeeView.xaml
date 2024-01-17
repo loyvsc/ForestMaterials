@@ -1,4 +1,4 @@
-﻿<Window x:Class="BuildMaterials.Views.AddEmployeeView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddEmployeeView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,62 +6,81 @@
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         xmlns:converters="clr-namespace:BuildMaterials.Converters"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новый сотрудник" Width="250" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AddEmployeeViewModel/>
-    </Window.DataContext>
-    <Window.Resources>
-        <converters:BoolConveter x:Key="BoolConverter"/>
-    </Window.Resources>
+        Title="Новый сотрудник" Width="650"  ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+                 WindowBackdropType ="Mica"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowCornerPreference="Default"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 WindowStartupLocation="CenterScreen"                 
+                 d:DataContext="{d:DesignInstance viewmodels:AddEmployeeViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Фамилия</TextBlock>
-            <TextBox Text="{Binding Path=Employee.Surname}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.5*"/>
+        </Grid.ColumnDefinitions>
+        <ui:TitleBar
+            Grid.ColumnSpan="3"
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        
+        <StackPanel Margin="5,5,5,5" Grid.Row="1" Grid.ColumnSpan="2">
+            <ui:TextBox PlaceholderText="Фамилия" Margin="0,5,0,0" Text="{Binding Path=Employee.Surname}"/>
 
-            <TextBlock>Имя</TextBlock>
-            <TextBox Text="{Binding Path=Employee.Name}"/>
+            <ui:TextBox PlaceholderText="Имя" Margin="0,5,0,0" Text="{Binding Path=Employee.Name}"/>
 
-            <TextBlock>Отчество</TextBlock>
-            <TextBox Text="{Binding Path=Employee.Pathnetic}"/>
+            <ui:TextBox PlaceholderText="Отчество" Margin="0,5,0,0" Text="{Binding Path=Employee.Pathnetic}"/>
 
-            <TextBlock>Должность</TextBlock>
-            <TextBox Text="{Binding Path=Employee.Position}"/>
+            <ui:TextBox PlaceholderText="Должность" Margin="0,5,0,0" Text="{Binding Path=Employee.Position}"/>
+        </StackPanel>
 
-            <TextBlock>Номер телефона</TextBlock>
-            <TextBox Text="{Binding Path=Employee.PhoneNumber}"/>
-
-            <TextBlock>Пароль</TextBlock>
-            <TextBox Text="{Binding Path=Employee.Password}"/>
-
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                <TextBlock>Материально ответственный</TextBlock>
-                <CheckBox IsChecked="{Binding Employee.FinResponsible}"/>
-            </StackPanel>
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">
+           
             <GroupBox Header="Паспортные данные">
                 <StackPanel>
-                    <TextBlock Text="Идентификационный номер паспорта"/>
-                    <TextBox Text="{Binding Employee.Passport.Number}"/>
-                    <DatePicker Margin="0,5,0,0" Text="Дата выдачи" SelectedDate="{Binding Employee.Passport.IssueDate}"/>
-                    <TextBlock Margin="0,5,0,0" Text="Кем выдан"/>
-                    <TextBox Text="{Binding Employee.Passport.IssuePunkt}"/>
+                    <ui:TextBox PlaceholderText="Идентификационный номер паспорта" Text="{Binding Employee.Passport.Number}"/>
+                    <Grid Margin="0,5,0,5">
+                        <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Дата выдачи" x:Name="dateText"/>
+                        <DatePicker SelectedDate="{Binding IssueDate}"/>
+                    </Grid>
+                    <ui:TextBox PlaceholderText="Кем выдан" Text="{Binding Employee.Passport.IssuePunkt}"/>
                 </StackPanel>
             </GroupBox>
 
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="5,5,5,5">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                <TextBlock VerticalAlignment="Center" Text="Материально ответственный"/>
+                <CheckBox Margin="10,0,0,0" VerticalAlignment="Center" IsChecked="{Binding Employee.FinResponsible}"/>
+            </StackPanel>
+            <ui:TextBox PlaceholderText="Номер телефона" Text="{Binding Path=Employee.PhoneNumber}"/>
+        </StackPanel>
+
+        <StackPanel Margin="5,-2,5,5" Grid.Column="2" Grid.Row="1">
             <GroupBox Header="Права пользователя">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2.2*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="Является администратором" Grid.Row="0"/>
                     <TextBlock Text="Добавление" Grid.Row="1"/>
@@ -74,11 +93,12 @@
                     <CheckBox IsEnabled="{Binding Employee.IsUserAdmin, Converter={StaticResource BoolConverter},UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Employee.CanUserDelete, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
             </GroupBox>
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Пароль пользователя" Text="{Binding Employee.Password}"/>
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
-            <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
-            <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Grid.ColumnSpan="3">
+            <Button Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
+            <Button Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

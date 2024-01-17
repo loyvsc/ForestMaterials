@@ -1,10 +1,11 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddTNViewModel : NotifyPropertyChangedBase
+    public class AddTNViewModel : ViewModelBase
     {
         #region Public props
         public TN? TN { get; set; }
@@ -12,8 +13,45 @@ namespace BuildMaterials.ViewModels
         public List<Contract> ContractsList => App.DbContext.Contracts.ToList();
         public List<Employee> EmployeesList => App.DbContext.Employees.ToList();
 
-        public ICommand AddCommand => new RelayCommand(Add);
-        public ICommand CloseCommand => new RelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(Add);
+        public ICommand CloseCommand => new AsyncRelayCommand(Close);
+
+        public int? DogovorID
+        {
+            get => TN.Contract.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.dogovorTxt.Visibility = System.Windows.Visibility.Collapsed;
+                    TN.Contract.ID = (int)value;
+                }
+            }
+        }
+        public int? RespID
+        {
+            get => TN.ResponseEmployee.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.respText.Visibility = System.Windows.Visibility.Collapsed;
+                    TN.ResponseEmployee.ID = (int)value;
+                }
+            }
+        }
+        public int? SdalID
+        {
+            get => TN.SdalEmployee.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.sdalText.Visibility = System.Windows.Visibility.Collapsed;
+                    TN.SdalEmployee.ID = (int)value;
+                }
+            }
+        }
         #endregion
 
         #region Private vars
@@ -21,28 +59,25 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region Constructors
-        public AddTNViewModel()
+        public AddTNViewModel(AddTNView view)
         {
             TN = new TN();
-        }
-        public AddTNViewModel(AddTNView view) : this()
-        {
             _window = view;
-            _window.Title = "Добавление ТН";
+            Title = "Добавление ТН";
             _window.addBut.Content = "Добавить";
             _window.clBut.Content = "Отмена";            
         }
         public AddTNViewModel(AddTNView view, TN tn)
         {
             _window = view;
-            _window.Title = "Редактирование ТН";
+            Title = "Изменение ТН";
             _window.addBut.Content = "Сохранить";
             _window.clBut.Content = "Отмена";
             TN = tn;
         }
         #endregion
 
-        private void Add(object? obj)
+        private async Task Add(object? obj)
         {
             if (TN.IsValid)
             {
@@ -58,9 +93,9 @@ namespace BuildMaterials.ViewModels
             }
             else
             {
-                System.Windows.MessageBox.Show("Введите всю требуемую информацию!", _window.Title, System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Exclamation);
+                _window.ShowDialogAsync("Введите всю требуемую информацию!", Title);
             }
         }
-        private void Close(object? obj) => _window.DialogResult = true;
+        private async Task Close(object? obj) => _window.DialogResult = true;
     }
 }

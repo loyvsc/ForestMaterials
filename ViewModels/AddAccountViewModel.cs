@@ -1,30 +1,82 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using BuildMaterials.Views;
 using System.Windows;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddAccountViewModel
+    public class AddAccountViewModel : ViewModelBase
     {
         public Account Account { get; set; } = new Account();
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        private readonly Window _window = null!;
+        private readonly AddAccountView _window = null!;
 
         public List<Organization> Organizations => App.DbContext.Organizations.ToList();
         public List<Contract> Contracts => App.DbContext.Contracts.ToList();
 
-        public AddAccountViewModel() { }
-
-        public AddAccountViewModel(Window window) : this()
+        public AddAccountViewModel(AddAccountView window)
         {
             _window = window;
         }
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        public DateTime? Date
+        {
+            get => Account.Date;
+            set
+            {
+                if (value != null)
+                {
+                    Account.Date = value;
+                    _window.dateText.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
 
-        private void AddMaterial()
+        public int? ContractID
+        {
+            get => Account.Contract.ID;
+            set
+            {
+                if (value != null)
+                {
+                    Account.Contract.ID = (int) value;
+                    _window.contractText.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+        public int? SellerID
+        {
+            get => Account.Seller.ID;
+            set
+            {
+                if (value != null)
+                {
+                    Account.Seller.ID = (int)value;
+                    _window.sellerText.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+        public int? BuyerID
+        {
+            get => Account.Buyer.ID;
+            set
+            {
+                if (value != null)
+                {
+                    Account.Buyer.ID = (int)value;
+                    _window.buyerText.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+        
+
+
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
+
+        private async Task AddMaterial(object? obj)
         {
             if (Account.IsValid)
             {
@@ -36,11 +88,11 @@ namespace BuildMaterials.ViewModels
                 {
                     App.DbContext.Accounts.Add(Account);
                 }
-                Close();
+                await Close();
             }
             else
             {
-                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый счет-фактура", MessageBoxButton.OK, MessageBoxImage.Error);
+                _window.ShowDialogAsync("Не вся информация была введена!", Title);
             }
         }
     }

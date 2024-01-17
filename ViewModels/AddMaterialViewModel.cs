@@ -1,18 +1,20 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using BuildMaterials.Views;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddMaterialViewModel : NotifyPropertyChangedBase
+    public class AddMaterialViewModel : ViewModelBase
     {
         public Models.Material Material { get; set; }
 
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        private readonly Window _window = null!;
+        private readonly AddMaterialView _window = null!;
         private List<string> cul;
 
         public List<string> CountUnits
@@ -25,34 +27,53 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        public AddMaterialViewModel()
+        public string? CountUnit
         {
-            Material = new Models.Material();
+            get => Material.CountUnits;
+            set
+            {
+                if (value != null)
+                {
+                    _window.text.Visibility = Visibility.Collapsed;
+                    Material.CountUnits = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
-        public AddMaterialViewModel(Window window, Models.Material material)
+        //base init
+        private AddMaterialViewModel()
         {
+            CountUnits = new List<string>()
+        {
+            "Кубический метр", "Килограм"
+        };
+        }
+
+        public AddMaterialViewModel(AddMaterialView window, Models.Material material) : this()
+        {
+            Title = "Изменение лесопродукции";
             Material = material;
             _window = window;
-            CountUnits = new List<string>()
-        {
-            "Кубический метр", "Килограм"
-        };
         }
 
-        public AddMaterialViewModel(Window window) : this()
+        public AddMaterialViewModel(AddMaterialView window) : this()
         {
+            Title = "Добавление лесопродукции";
+            Material = new Models.Material();
             _window = window;
-            CountUnits = new List<string>()
-        {
-            "Кубический метр", "Килограм"
-        };
         }
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
 
-        private void AddMaterial(object? obj)
+        private async Task AddMaterial(object? obj)
         {
+            if (Material.IsValid() == false)
+            {
+                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
+                return;
+            }
+
             if (Material.ID != 0)
             {
                 try
@@ -61,24 +82,16 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, "Редактирование материала", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                     return;
                 }
-                Close();
             }
             else
             {
-                if (Material.IsValid())
-                {
-                    Material.EnterDate = DateTime.Now.Date;
-                    App.DbContext.Materials.Add(Material);
-                    Close();
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show("Введена не вся требуемая информация!", "Добавление материала", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                Material.EnterDate = DateTime.Now.Date;
+                App.DbContext.Materials.Add(Material);
             }
+            Close();
         }
     }
 }

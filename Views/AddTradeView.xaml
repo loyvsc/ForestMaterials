@@ -1,40 +1,84 @@
-﻿<Window x:Class="BuildMaterials.Views.AddTradeView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddTradeView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Товарооборот" Width="250" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AddTradeViewModel/>
-    </Window.DataContext>
+        Title="Товарооборот" Width="600" MinHeight="10" ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" Height="192"  
+                 WindowBackdropType ="Mica"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowCornerPreference="Default"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 WindowStartupLocation="CenterScreen"                 
+                 d:DataContext="{d:DesignInstance viewmodels:AddTradeViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Дата совершения</TextBlock>
-            <DatePicker SelectedDate="{Binding Trade.Date}" Text="Дата" IsDropDownOpen="False"/>
-            <TextBlock>ФИО продавца</TextBlock>
-            <ComboBox ItemsSource="{Binding SellersFIO}"  DisplayMemberPath="FIO" SelectedValuePath="ID"
-                      SelectedValue="{Binding Trade.SellerID, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Margin="0,5,0,5">Наименование товара</TextBlock>
-            <ComboBox ItemsSource="{Binding Materials}" SelectedValue="{Binding Trade.MaterialID}"
-                       DisplayMemberPath="Name" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,0">Количество<TextBlock Text="{Binding Path=MaxCountValue}"/></TextBlock>
-            <TextBox Text="{Binding Path=Trade.Count}"/>
-            <TextBlock Margin="0,5,0,5">Стоимость за единицу</TextBlock>
-            <TextBox Text="{Binding Path=Trade.Price}"/>
-            <TextBlock Margin="0,5,0,5">Сумма: <TextBlock Text="{Binding Path=Trade.Summ}"/></TextBlock>
-            <TextBlock>Тип оплаты</TextBlock>
-            <ComboBox Margin="0,0,0,2" DisplayMemberPath="Name" SelectedValuePath="ID"
-                      ItemsSource="{Binding PayTypesList}" SelectedValue="{Binding Trade.PayTypeID}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <ui:TitleBar
+    Grid.ColumnSpan="3"
+    Title="{Binding Title}"
+    CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1">
+            <Grid Margin="0,5,0,5">
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="dateText">Дата совершения</TextBlock>
+                <DatePicker SelectedDate="{Binding Date}" Text="Дата" IsDropDownOpen="False"/>
+            </Grid>
+
+            <Grid>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="selText">ФИО продавца</TextBlock>
+                <ComboBox ItemsSource="{Binding SellersFIO}"  DisplayMemberPath="FIO" SelectedValuePath="ID"
+SelectedValue="{Binding SellerID, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1" Grid.Column="1">
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="matText">
+         Наименование товара</TextBlock>
+                <ComboBox ItemsSource="{Binding Materials}" SelectedValue="{Binding SelectedMaterialID}"
+DisplayMemberPath="Name" SelectedValuePath="ID"/>
+            </Grid>
+
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Количество" Text="{Binding Trade.Count}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Column="2" Grid.Row="1">
+
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Стоимость за единицу" Text="{Binding Path=Trade.Price}"/>
+
+            <Grid Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="29*"/>
+                    <ColumnDefinition Width="161*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="payText" Grid.ColumnSpan="2">Тип оплаты</TextBlock>
+                <ComboBox DisplayMemberPath="Name" SelectedValuePath="ID"
+          ItemsSource="{Binding PayTypesList}" SelectedValue="{Binding PayTypeID}" Grid.ColumnSpan="2"/>
+            </Grid>
+
+            <TextBlock Margin="0,5,0,5">Сумма: <TextBlock Text="{Binding Path=Trade.Summ}"/></TextBlock>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="3" HorizontalAlignment="Right">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

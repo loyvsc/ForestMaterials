@@ -1,46 +1,65 @@
-﻿<Window x:Class="BuildMaterials.Views.AddIndividualView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddIndividualView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новое физ. лицо" Width="250" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AddIndividualViewModel/>
-    </Window.DataContext>
+        Title="Новое физ. лицо" Width="400" ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+                 WindowBackdropType ="Mica"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowCornerPreference="Default"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 WindowStartupLocation="CenterScreen"                 
+                 d:DataContext="{d:DesignInstance viewmodels:AddIndividualViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35px"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Фамилия</TextBlock>
-            <TextBox Text="{Binding Path=Individual.Surname}"/>
 
-            <TextBlock>Имя</TextBlock>
-            <TextBox Text="{Binding Path=Individual.Name}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-            <TextBlock>Отчество</TextBlock>
-            <TextBox Text="{Binding Path=Individual.Pathnetic}"/>
+        <ui:TitleBar
+            Grid.ColumnSpan="3"
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
-            <TextBlock>Номер телефона</TextBlock>
-            <TextBox Text="{Binding Path=Individual.PhoneNumber}"/>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="5,5,5,5" Grid.Column="0">
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Фамилия" Text="{Binding Path=Individual.Surname}"/>
 
-            <GroupBox Header="Паспортные данные">
-                <StackPanel>
-                    <TextBlock Text="Идентификационный номер паспорта"/>
-                    <TextBox Text="{Binding Individual.Passport.Number}"/>
-                    <DatePicker Margin="0,5,0,0" Text="" SelectedDate="{Binding Individual.Passport.IssueDate}"/>
-                    <TextBlock Margin="0,5,0,0" Text="Кем выдан"/>
-                    <TextBox Text="{Binding Individual.Passport.IssuePunkt}"/>
-                </StackPanel>
-            </GroupBox>
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Имя" Text="{Binding Path=Individual.Name}"/>
+
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Отчество" Text="{Binding Path=Individual.Pathnetic}"/>
+
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Номер телефона" Text="{Binding Path=Individual.PhoneNumber}"/>
         </StackPanel>
-        
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
-            <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
-            <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
+
+        <GroupBox Header="Паспортные данные" Grid.Row="1" Grid.Column="1">
+            <StackPanel>
+                <ui:TextBox Margin="0,5,0,0" PlaceholderText="Ид. номер паспорта" Text="{Binding Individual.Passport.Number}"/>
+                <Grid>
+                    <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Дата выдачи" x:Name="dateText"/>
+                    <DatePicker Margin="0,5,0,0" SelectedDate="{Binding IssueDate}"/>
+                </Grid>
+
+                <ui:TextBox Margin="0,5,0,0" PlaceholderText="Кем выдан" Text="{Binding Individual.Passport.IssuePunkt}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Grid.ColumnSpan="2">
+            <Button Margin="5,0,5,5" Command="{Binding AddCommand}">Добавить</Button>
+            <Button Margin="5,0,5,5" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

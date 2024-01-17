@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddTradeView : Window
+    public partial class AddTradeView : FluentWindow
     {
         public AddTradeView()
         {
@@ -13,7 +11,7 @@ namespace BuildMaterials.Views
         public AddTradeView(Models.Trade trade)
         {
             InitializeComponent();
-            DataContext = new ViewModels.AddTradeViewModel(this,trade);
+            DataContext = new ViewModels.AddTradeViewModel(this, trade);
         }
     }
 }

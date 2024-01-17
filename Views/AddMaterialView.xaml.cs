@@ -1,9 +1,7 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddMaterialView : Window
-    {        
+    public partial class AddMaterialView : FluentWindow
+    {
         public AddMaterialView()
         {
             InitializeComponent();

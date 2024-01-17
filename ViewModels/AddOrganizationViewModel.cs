@@ -1,4 +1,5 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.Windows;
 using System.Windows.Input;
@@ -15,7 +16,7 @@ namespace BuildMaterials.ViewModels
         }
     }
 
-    public class AddOrganizationViewModel : NotifyPropertyChangedBase
+    public class AddOrganizationViewModel : ViewModelBase
     {
         public static List<object> Operations { get; set; } = new List<object>(16);
         public Organization Organization { get; set; }
@@ -39,12 +40,12 @@ namespace BuildMaterials.ViewModels
         }
 
         #region Commands
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        public ICommand AddContactCommand => new RelayCommand(AddContact);
-        public ICommand EditContactCommand => new RelayCommand(EditContact);
-        public ICommand DeleteContactCommand => new RelayCommand(DeleteContact);
+        public ICommand AddContactCommand => new AsyncRelayCommand(AddContact);
+        public ICommand EditContactCommand => new AsyncRelayCommand(EditContact);
+        public ICommand DeleteContactCommand => new AsyncRelayCommand(DeleteContact);
         #endregion
 
         private Contact? cntct;
@@ -52,25 +53,27 @@ namespace BuildMaterials.ViewModels
         private readonly Window _window = null!;
 
         #region Constructors
-        public AddOrganizationViewModel()
+        private AddOrganizationViewModel()
         {
-            Organization = new Models.Organization();
             Operations = new List<object>(16);
             Contacts = new List<Contact>();
         }
         public AddOrganizationViewModel(Window window) : this()
         {
+            Title = "Добавление информации об организации";
+            Organization = new Models.Organization();
             _window = window;
         }
-        public AddOrganizationViewModel(Window window, Organization organization)
+        public AddOrganizationViewModel(Window window, Organization organization) : this()
         {
             _window = window;
+            Title = "Изменении информации об организации";
             Organization = organization;
             Organization.Contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + Organization.ID);
         }
         #endregion
 
-        private void AddContact(object? obj)
+        private async Task AddContact(object? obj)
         {
             AddContactView contact = new AddContactView(Organization);
             if (contact.ShowDialog() == true)
@@ -81,7 +84,7 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        private void DeleteContact(object? obj)
+        private async Task DeleteContact(object? obj)
         {
             if (SelectedContact == null) return;
             SelectedContact.ForDelete = true;
@@ -92,7 +95,7 @@ namespace BuildMaterials.ViewModels
             Organization.Contacts = items;
         }
 
-        private void EditContact(object? obj)
+        private async Task EditContact(object? obj)
         {
             if (SelectedContact != null)
             {
@@ -106,9 +109,9 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
 
-        private void CheckOperations()
+        private async Task CheckOperations()
         {
             foreach (var item in Operations)
             {
@@ -153,7 +156,7 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        private void AddMaterial(object? obj)
+        private async Task AddMaterial(object? obj)
         {
             if (Organization.IsValid)
             {
@@ -165,7 +168,7 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (ArgumentException nEx)
                 {
-                    System.Windows.MessageBox.Show(nEx.Message, "Ошибка при получении информации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync(nEx.Message, Title);
                     return;
                 }
                 org.ID = Organization.ID;
@@ -182,7 +185,7 @@ namespace BuildMaterials.ViewModels
                     }
                     catch
                     {
-                        System.Windows.MessageBox.Show("Произошла ошибка при сохранении изменений!", "Ошибка при получении информации", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений!", Title);
                         return;
                     }
                 }
@@ -191,12 +194,12 @@ namespace BuildMaterials.ViewModels
                     App.DbContext.Organizations.Add(org);
                     Organization = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
                 }
-                CheckOperations();
+                await CheckOperations();
                 Close();
             }
             else
             {
-                System.Windows.MessageBox.Show("Введите УНП!", "Добавление поставщика", MessageBoxButton.OK, MessageBoxImage.Error);
+                _window.ShowDialogAsync("Введите УНП!", Title);
             }
         }
     }

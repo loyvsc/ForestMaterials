@@ -1,41 +1,66 @@
-﻿<Window x:Class="BuildMaterials.Views.AddMaterialView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddMaterialView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новый материал" Width="250" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AddMaterialViewModel/>
-    </Window.DataContext>
+        mc:Ignorable="d" x:Name="window" MinHeight="1"
+        Width="600" Height="163" ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+                 WindowBackdropType ="Mica"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowCornerPreference="Default"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 WindowStartupLocation="CenterScreen"                 
+                 d:DataContext="{d:DesignInstance viewmodels:AddMaterialViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35px"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock>Наименование лесопродукции</TextBlock>
-            <TextBox Text="{Binding Path=Material.Name}"/>
-            <TextBlock>Сорт</TextBlock>
-            <TextBox Text="{Binding Path=Material.Sort}"/>
-            <TextBlock>Стоимость за единицу</TextBlock>
-            <TextBox Text="{Binding Path=Material.Price}"/>
-            <TextBlock>Количество</TextBlock>
-            <TextBox Text="{Binding Path=Material.Count}"/>
-            <TextBlock>Ед. измерения</TextBlock>
-            <ComboBox ItemsSource="{Binding CountUnits}" SelectedValue="{Binding Material.CountUnits}"/>
-            <TextBlock>Длина</TextBlock>
-            <TextBox Text="{Binding Path=Material.Dlina}"/>
-            <TextBlock>Ширина</TextBlock>
-            <TextBox Text="{Binding Path=Material.Shirina}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-            <TextBlock>НДС</TextBlock>
-            <TextBox Text="{Binding Path=Material.NDS}"/>
+        <ui:TitleBar
+            Grid.ColumnSpan="3"
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1">
+            <ui:TextBox PlaceholderText="Наименование" Text="{Binding Path=Material.Name}" Margin="0,5,0,0"/>
+
+            <ui:TextBox PlaceholderText="Сорт" Text="{Binding Path=Material.Sort}" Margin="0,5,0,0"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Column="1" Grid.Row="1">
+
+            <ui:TextBox PlaceholderText="Количество" Text="{Binding Path=Material.Count}" Margin="0,5,0,0"/>
+
+            <Grid>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Ед. измерения" x:Name="text"/>
+                <ComboBox ItemsSource="{Binding CountUnits}" SelectedValue="{Binding CountUnit}" Margin="0,5,0,0"/>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Column="2" Grid.Row="1">
+
+            <ui:TextBox PlaceholderText="Стоимость за единицу" Text="{Binding Path=Material.Price}" Margin="0,5,0,0"/>
+            <ui:TextBox PlaceholderText="НДС" Text="{Binding Material.NDS}" Margin="0,5,0,0"/>
+        </StackPanel>
+
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Grid.ColumnSpan="3">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

@@ -1,48 +1,60 @@
-﻿using BuildMaterials.Models;
-using System.Windows;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using BuildMaterials.Views;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddIndividualViewModel
+    public class AddIndividualViewModel : ViewModelBase
     {
         public Individual Individual { get; set; }
 
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        private readonly Window _window = null!;
-
-        public AddIndividualViewModel()
+        public DateTime? IssueDate
         {
+            get => Individual.Passport.IssueDate;
+            set
+            {
+                if (value != null)
+                {
+                    Individual.Passport.IssueDate = value;
+                    _window.dateText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        private readonly AddIndividualView _window;
+
+        public AddIndividualViewModel(AddIndividualView window)
+        {
+            Title = "Добавление физ. лица";
             Individual = new Individual();
-        }
-
-        public AddIndividualViewModel(Window window) : this()
-        {
             _window = window;
         }
 
-        public AddIndividualViewModel(Window window, Individual employee)
+        public AddIndividualViewModel(AddIndividualView window, Individual employee)
         {
             _window = window;
+            Title = "Изменение физ. лица";
             Individual = employee;
         }
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = false;
 
-        private void AddMaterial(object? obj)
+        private async Task AddMaterial(object? obj)
         {
             if (Individual.ID != 0)
             {
                 try
                 {
                     App.DbContext.Individuals.Update(Individual);
-                    Close();
+                    _window.DialogResult = true;
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("При сохранении изменений произошла ошибка...\nСообщение: " + ex.Message, "Новое физ. лицо", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync("При сохранении изменений произошла ошибка...\nСообщение: " + ex.Message, Title);
                 }
             }
             else
@@ -50,10 +62,12 @@ namespace BuildMaterials.ViewModels
                 if (Individual.IsValid)
                 {
                     App.DbContext.Individuals.Add(Individual);
-                    Close();
-                    return;
+                    _window.DialogResult = true;
                 }
-                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новое физ. лицо", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    _window.ShowDialogAsync("Не вся информация была введена!", Title);
+                }
             }
         }
     }

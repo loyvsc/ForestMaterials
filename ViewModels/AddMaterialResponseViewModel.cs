@@ -1,4 +1,6 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System.Windows;
 using System.Windows.Input;
 
@@ -18,13 +20,13 @@ namespace BuildMaterials.ViewModels
                 OnPropertyChanged(nameof(SelectedFinResponEmployee));
             }
         }
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand((sender) => AddMaterial());
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
         public List<Material> Materials => App.DbContext.Materials.ToList();
         public List<Employee> FinResponsibleEmployees => App.DbContext.Employees.Select("SELECT * FROM Employees WHERE FinResponsible = 1");
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
 
         private Employee? finrespempl;
 
@@ -38,11 +40,11 @@ namespace BuildMaterials.ViewModels
             _window = window;
         }
 
-        private void AddMaterial()
+        private async Task AddMaterial(object? obj)
         {
             if (SelectedMaterial == null || SelectedFinResponEmployee == null)
             {
-                System.Windows.MessageBox.Show("Добавление материально-ответственного отчета завершено с ошибкой!\nПопробуйте позже...", "Материально-ответственный отчет", MessageBoxButton.OK, MessageBoxImage.Error);
+                _window.ShowDialogAsync("Введите всю требуемую информацию!", "");
                 return;
             }
             else

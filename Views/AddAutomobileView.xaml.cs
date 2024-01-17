@@ -1,13 +1,12 @@
 ﻿using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
-using System.Windows;
 
 namespace BuildMaterials.Views
 {
     /// <summary>
     /// Логика взаимодействия для AddAutomobileView.xaml
     /// </summary>
-    public partial class AddAutomobileView : Window
+    public partial class AddAutomobileView : FluentWindow
     {
         public AddAutomobileView()
         {

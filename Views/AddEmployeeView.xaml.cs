@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddEmployeeView : Window
+    public partial class AddEmployeeView : FluentWindow
     {
         public AddEmployeeView()
         {

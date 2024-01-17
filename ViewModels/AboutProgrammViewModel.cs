@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AboutProgrammViewModel : NotifyPropertyChangedBase
+    public class AboutProgrammViewModel : ViewModelBase
     {
         public string ApplicationVersion
         {
@@ -16,19 +16,21 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        public ICommand CloseCommand => new RelayCommand((object? obj) => view.Close());
+        public ICommand CloseCommand => new AsyncRelayCommand(AsyncClose);
 
         private string appVersion;
         private readonly AboutProgramView view;
 
-        public AboutProgrammViewModel()
+        private async Task AsyncClose(object? obj)
         {
-            ApplicationVersion = Environment.GetEnvironmentVariable("ClickOnce_CurrentVersion") ?? "0.0.0.0";
+            view.Close();
         }
 
-        public AboutProgrammViewModel(AboutProgramView parent) : this()
+        public AboutProgrammViewModel(AboutProgramView parent)
         {
+            Title = "О программе";
             view = parent;
+            ApplicationVersion = "Версия: " + Environment.GetEnvironmentVariable("ClickOnce_CurrentVersion") ?? "0.0.0.0";
         }
     }
 }

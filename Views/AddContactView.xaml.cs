@@ -4,7 +4,7 @@ using BuildMaterials.ViewModels;
 
 namespace BuildMaterials.Views
 {
-    public partial class AddContactView : Window
+    public partial class AddContactView : FluentWindow
     {
         public AddContactView()
         {

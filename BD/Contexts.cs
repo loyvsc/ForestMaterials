@@ -77,6 +77,7 @@ namespace BuildMaterials.BD
             {
                 InitializeDatabase();
                 Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12), "РУВД ПОЛОЦК"), "", false, true, true, true, true));
+                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12), "РУВД ПОЛОЦК"), "", false, true, true, true, true));
                 PayTypes.Add(new PayType(-1, "Наличный расчет"));
                 PayTypes.Add(new PayType(-1, "Безналичный расчет"));
             }

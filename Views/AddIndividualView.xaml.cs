@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddIndividualView : Window
+    public partial class AddIndividualView : FluentWindow
     {
         public AddIndividualView()
         {

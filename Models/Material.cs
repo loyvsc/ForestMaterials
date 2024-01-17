@@ -28,7 +28,7 @@ namespace BuildMaterials.Models
             }
         }
         [ExportColumnName("Цена")]
-        public float Price
+        public float? Price
         {
             get => price;
             set
@@ -38,7 +38,7 @@ namespace BuildMaterials.Models
             }
         }
         [ExportColumnName("НДС")]
-        public float NDS
+        public float? NDS
         {
             get => nds;
             set
@@ -48,7 +48,7 @@ namespace BuildMaterials.Models
             }
         }
         [ExportColumnName("Количество")]
-        public float Count
+        public float? Count
         {
             get => count;
             set
@@ -102,18 +102,16 @@ namespace BuildMaterials.Models
         private string? shirina;
         private string? dlina;
         private string? name;
-        private float price;
-        private float count;
+        private float? price;
+        private float? count;
         private string? countUnits;
         private DateTime enterDate;
-        private float nds;
+        private float? nds;
 
         public Material()
         {
             Name = string.Empty;
             CountUnits = string.Empty;
-            Price = 0;
-            Count = 0;
             ID = 0;
         }
 
@@ -138,7 +136,7 @@ namespace BuildMaterials.Models
 
         [IgnoreProperty]
         public bool IsValid() => Name != string.Empty &&
-            CountUnits != string.Empty && sort!=string.Empty;
+            CountUnits != string.Empty && sort!=string.Empty && Price!=null && Count!=null && NDS!=null;
 
         public override string ToString() => Name!;
     }

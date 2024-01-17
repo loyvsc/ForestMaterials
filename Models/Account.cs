@@ -49,7 +49,7 @@ namespace BuildMaterials.Models
                 float value = 0;
                 foreach (var item in Contract.Materials)
                 {
-                    value += item.Material.Price;
+                    value += (float)item.Material.Price;
                 }
                 return value+NDS;
             }
@@ -61,7 +61,7 @@ namespace BuildMaterials.Models
                 float value = 0;
                 foreach(var item in Contract.Materials)
                 {
-                    value += item.Material.NDS * item.Material.Price;
+                    value += (float)item.Material.NDS * (float)item.Material.Price;
                 }
                 return value;
             }

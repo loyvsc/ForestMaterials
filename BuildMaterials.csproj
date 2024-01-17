@@ -3,12 +3,12 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TieredCompilation>true</TieredCompilation>
-    <TargetFramework>net8.0-windows10.0.18362.0</TargetFramework>
+    <TargetFramework>net7.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
-    <ApplicationIcon>img\icon.ico</ApplicationIcon>
-    <UseWindowsForms>True</UseWindowsForms>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <UseWindowsForms>False</UseWindowsForms>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -19,7 +19,11 @@
     <None Remove="img\delete.ico" />
     <None Remove="img\plus.ico" />
     <None Remove="img\print.ico" />
-    <None Remove="ViewModels\MainWindowViewModel.cs~RF3284f1f.TMP" />
+    <None Remove="Resources\Icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +31,7 @@
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="OrchardCore.Deployment" Version="1.7.2" />
     <PackageReference Include="TemplateEngine.Docx" Version="1.1.5" />
+    <PackageReference Include="WPF-UI" Version="3.0.0-preview.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +47,7 @@
   <ItemGroup>
     <Resource Include="img\icon.ico" />
     <Resource Include="img\print.ico" />
+    <Resource Include="Resources\Icon.png" />
   </ItemGroup>
 
   <ItemGroup>

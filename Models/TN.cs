@@ -26,7 +26,7 @@ namespace BuildMaterials.Models
                     {
                         if (item.Material != null)
                         {
-                            summ += item.Material.Price * item.Material.Count;
+                            summ += (float)item.Material.Price * (float)item.Material.Count;
                         }
                     }
                 }

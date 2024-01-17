@@ -1,11 +1,11 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.Views;
-using System.Windows;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddContractViewModel : NotifyPropertyChangedBase
+    public class AddContractViewModel : ViewModelBase
     {
         public Contract Contract
         {
@@ -18,12 +18,12 @@ namespace BuildMaterials.ViewModels
         }
 
         #region Commands
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddContract);
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddContract);
 
-        public ICommand AddMaterialCommand => new RelayCommand(AddMaterial);
-        public ICommand EditMaterialCommand => new RelayCommand(EditMaterial);
-        public ICommand DeleteMaterialCommand => new RelayCommand(DeleteMaterial);
+        public ICommand AddMaterialCommand => new AsyncRelayCommand(AddMaterial);
+        public ICommand EditMaterialCommand => new AsyncRelayCommand(EditMaterial);
+        public ICommand DeleteMaterialCommand => new AsyncRelayCommand(DeleteMaterial);
         #endregion
 
         #region Private vars
@@ -31,34 +31,99 @@ namespace BuildMaterials.ViewModels
         private Contract contr;
         #endregion
 
+        #region Lists
         public List<Material> Materials => App.DbContext.Materials.ToList();
         public List<Organization> OrganizationsList => App.DbContext.Organizations.ToList();
         public List<Employee> Employees => App.DbContext.Employees.ToList();
         public List<Individual> Individuals => App.DbContext.Individuals.ToList();
-        public List<string> LogisticsTypes => new List<string>(4)
+        public List<string> LogisticsTypes => new List<string>(3)
         {
             "Франко-верхний лесосклад", "Франко-промежуточный лесосклад",
             "Франко-склад организации-изготовителя "
         };
+        #endregion
 
         #region Constructors
-        public AddContractViewModel()
-        {
-            Contract = new Contract();
-        }
-
-        public AddContractViewModel(AddContractView window) : this()
+        public AddContractViewModel(AddContractView window)
         {
             _window = window;
+            Contract = new Contract();
+            Title = "Добавление счета-фактуры";
         }
         public AddContractViewModel(AddContractView window, Contract contract)
         {
             _window = window;
             Contract = contract;
+            Title = "Изменение счета-фактуры";
         }
         #endregion
 
-        private void AddMaterial(object? obj)
+        public DateTime? Date
+        {
+            get => Contract.Date;
+            set
+            {
+                if (value != null)
+                {
+                    Contract.Date = value;
+                    _window.dateText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        public string? LogisticsType
+        {
+            get => Contract.LogisiticsType;
+            set
+            {
+                if (value != null)
+                {
+                    Contract.LogisiticsType = value;
+                    _window.logText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        public int? Seller
+        {
+            get => Contract.SellerID;
+            set
+            {
+                if (value != null)
+                {
+                    Contract.SellerID = (int) value;
+                    _window.sellerText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        public int? Buyer
+        {
+            get => Contract.BuyerID;
+            set
+            {
+                if (value != null)
+                {
+                    Contract.BuyerID = (int) value;
+                    _window.buyerText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        public Individual? Individual
+        {
+            get => Contract.Individual;
+            set
+            {
+                if (value != null)
+                {
+                    Contract.Individual = value;
+                    _window.buyerText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        private async Task AddMaterial(object? obj)
         {
             AddContractMaterialView view = new AddContractMaterialView(Contract.ID);
             if (view.ShowDialog() == true)
@@ -69,32 +134,30 @@ namespace BuildMaterials.ViewModels
                 OnPropertyChanged(nameof(Contract.Materials));
             }
         }
-        private void EditMaterial(object? obj)
+        private async Task EditMaterial(object? obj)
         {
-            ContractMaterial? selval = _window.materialsDataGrid.SelectedValue as ContractMaterial;
-            if (selval == null) return;
-            AddContractMaterialView view = new AddContractMaterialView(selval);
+            ContractMaterial? Selected = _window.materialsDataGrid.SelectedValue as ContractMaterial;
+            if (Selected == null) return;
+            AddContractMaterialView view = new AddContractMaterialView(Selected);
             if (view.ShowDialog() == true)
             {
-                var i = Contract.Materials.FindIndex((x) => x == selval);
+                var i = Contract.Materials.FindIndex((x) => x == Selected);
                 Contract.Materials[i] = view.viewModel.ContractMaterial;
                 var arr = Contract.Materials.ToArray();
                 Contract.Materials = arr.ToList();
             }
         }
-        private void DeleteMaterial(object? obj)
+        private async Task DeleteMaterial(object? obj)
         {
-            ContractMaterial? selval = _window.materialsDataGrid.SelectedValue as ContractMaterial;
-            if (selval == null) return;
+            ContractMaterial? Selected = _window.materialsDataGrid.SelectedValue as ContractMaterial;
+            if (Selected == null) return;
 
-            Contract.Materials.Remove(selval);
+            Contract.Materials.Remove(Selected);
             var arr = Contract.Materials.ToArray();
-            Contract.Materials = [.. arr];
+            Contract.Materials = arr.ToList();
         }
-
-        private void Close(object? obj = null) => _window.DialogResult = true;
-
-        private void AddContract(object? obj)
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
+        private async Task AddContract(object? obj)
         {
             if (Contract.IsValid)
             {
@@ -110,7 +173,7 @@ namespace BuildMaterials.ViewModels
             }
             else
             {
-                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый счет-фактура", MessageBoxButton.OK, MessageBoxImage.Error);
+                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
             }
         }
     }

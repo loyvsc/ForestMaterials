@@ -1,10 +1,9 @@
 ﻿using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
-using System.Windows;
 
 namespace BuildMaterials.Views
 {
-    public partial class AddContractMaterialView : Window
+    public partial class AddContractMaterialView : FluentWindow
     {
         public readonly AddContractMaterialViewModel viewModel;
         private AddContractMaterialView()

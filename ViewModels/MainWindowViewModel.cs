@@ -1,17 +1,20 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Export;
 using BuildMaterials.Export.Documents;
+using BuildMaterials.Extensions;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
+using Microsoft.Win32;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MessageBoxResult = System.Windows.MessageBoxResult;
 
 namespace BuildMaterials.ViewModels
 {
-    public class MainWindowViewModel : NotifyPropertyChangedBase
+    public class MainWindowViewModel : ViewModelBase
     {
         #region Lists
         public List<Automobile> AutomobilesList
@@ -125,14 +128,14 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region Commands
-        public ICommand AboutProgrammCommand => new RelayCommand(OpenAboutProgram);
-        public ICommand ExitCommand => new RelayCommand((sener) => System.Windows.Application.Current.MainWindow.Close());
-        public ICommand AddRowCommand => new RelayCommand(AddRow);
-        public ICommand EditRowCommand => new RelayCommand(EditRow);
-        public ICommand DeleteRowCommand => new RelayCommand(DeleteRow);
-        public ICommand ExportWithSaveCommand => new RelayCommand(ExportExcelWithSave);
-        public ICommand AddCopyRowCommand => new RelayCommand(AddRowCopy);
-        public ICommand ExportCommand => new RelayCommand(ExportDocument);
+        public ICommand AboutProgrammCommand => new AsyncRelayCommand(OpenAboutProgram);
+        public ICommand ExitCommand => new AsyncRelayCommand(Close);
+        public ICommand AddRowCommand => new AsyncRelayCommand(AddRow);
+        public ICommand EditRowCommand => new AsyncRelayCommand(EditRow);
+        public ICommand DeleteRowCommand => new AsyncRelayCommand(DeleteRow);
+        public ICommand ExportWithSaveCommand => new AsyncRelayCommand(ExportExcelWithSave);
+        public ICommand AddCopyRowCommand => new AsyncRelayCommand(AddRowCopy);
+        public ICommand ExportCommand => new AsyncRelayCommand(ExportDocument);
         #endregion        
 
         public string SearchText
@@ -204,20 +207,11 @@ namespace BuildMaterials.ViewModels
         public MainWindowViewModel()
         {
             CurrentEmployee = new Employee();
-            OrganizationsList = App.DbContext.Organizations.ToList();
             MaterialsList = App.DbContext.Materials.ToList();
-            EmployeesList = App.DbContext.Employees.ToList();
-            TradesList = App.DbContext.Trades.ToList();
-            TTNList = App.DbContext.TTNs.ToList();
-            AccountsList = App.DbContext.Accounts.ToList();
-            ContractsList = App.DbContext.Contracts.ToList();
-            PayTypesList = App.DbContext.PayTypes.ToList();
-            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
-            IndividualsList = App.DbContext.Individuals.ToList();
-            TNsList = App.DbContext.TNs.ToList();
-            AutomobilesList = App.DbContext.Automobiles.ToList();
             IsDocumentSelect = Visibility.Collapsed;
+            Title = "АРМ Менеджера Строительной Фирмы";
         }
+        private readonly FilterDataGrid.FilterDataGrid materialsDataGrid;
 
         public MainWindowViewModel(MainWindow view) : this()
         {
@@ -231,16 +225,16 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region ApplicationFunctions
-        private void OpenAboutProgram(object? obj)
+        private async Task OpenAboutProgram(object? obj)
         {
             AboutProgramView aboutWindow = new AboutProgramView();
             aboutWindow.ShowDialog();
         }
 
-        public void ExitFromProgramm(CancelEventArgs e)
+        public async Task ExitFromProgramm(CancelEventArgs e)
         {
-            MessageBoxResult result = System.Windows.MessageBox.Show("Выйти из программы?", "АРМ Менеджера Строительной Компании", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-            if (result == MessageBoxResult.No)
+            var result = view.ShowDialogAsync("Выйти из программы?", Title, "Да", SymbolRegular.Desktop20);
+            if ((result == Wpf.Ui.Controls.MessageBoxResult.Secondary) || (result == Wpf.Ui.Controls.MessageBoxResult.None))
             {
                 e.Cancel = true;
             }
@@ -319,11 +313,15 @@ namespace BuildMaterials.ViewModels
         }
 
         #region Private methods
-        private void ExportDocument(object? obj)
+        private async Task Close(object? obj)
+        {
+            System.Windows.Application.Current.MainWindow.Close();
+        }
+        private async Task ExportDocument(object? obj)
         {
             if (SelectedTableItem == null)
             {
-                System.Windows.MessageBox.Show("Выбрите документ", "Экспорт документа", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("Выбрите документ!", "Экспорт документа");
                 return;
             }
 
@@ -333,13 +331,13 @@ namespace BuildMaterials.ViewModels
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = false,
             };
-            if (save.ShowDialog() != DialogResult.OK) return;
+            if (save.ShowDialog() != true) return;
 
             string path = save.FileName;
 
             DocumentExport export = new DocumentExport();
             switch (selectedTab)
-            {                
+            {
                 case "tnTab":
                     {
                         export.SaveReport(path, SelectedTableItem as TN);
@@ -366,11 +364,11 @@ namespace BuildMaterials.ViewModels
                     }
             }
         }
-        private void DeleteRow(object? obj)
+        private async Task DeleteRow(object? obj)
         {
             if (CurrentEmployee.CanUserDelete == false)
             {
-                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                 return;
             }
             try
@@ -439,12 +437,12 @@ namespace BuildMaterials.ViewModels
                             Employee buf = (Employee)SelectedTableItem;
                             if (CurrentEmployee == buf)
                             {
-                                System.Windows.MessageBox.Show("Нельзя удалять сотрудника под которым был выполнен вход!", "Удаление сотрудника", MessageBoxButton.OK);
+                                view.ShowDialogAsync("Нельзя удалять сотрудника под которым был выполнен вход!", Title);
                                 return;
                             }
                             if (buf.IsUserAdmin == true && CurrentEmployee.IsUserAdmin == false)
                             {
-                                System.Windows.MessageBox.Show("Удаление администратора запрещено!", "Удаление сотрудника", MessageBoxButton.OK);
+                                view.ShowDialogAsync("Удаление администратора запрещено!", Title);
                                 return;
                             }
                             App.DbContext.Employees.Remove(buf);
@@ -517,11 +515,11 @@ namespace BuildMaterials.ViewModels
                 SelectedTableItem = null;
             }
         }
-        private void AddRow(object? obj)
+        private async Task AddRow(object? obj)
         {
             if (CurrentEmployee.CanUserAdd == false)
             {
-                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                 return;
             }
             switch (selectedTab)
@@ -569,7 +567,7 @@ namespace BuildMaterials.ViewModels
                         {
                             if (CurrentEmployee.IsUserAdmin)
                             {
-                                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                                 return;
                             }
                             EmployeesList = App.DbContext.Employees.ToList();
@@ -632,11 +630,11 @@ namespace BuildMaterials.ViewModels
                     }
             }
         }
-        private void EditRow(object? obj)
+        private async Task EditRow(object? obj)
         {
             if (CurrentEmployee.CanUserEdit == false)
             {
-                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                 return;
             }
             if (SelectedTableItem != null)
@@ -723,7 +721,8 @@ namespace BuildMaterials.ViewModels
                 }
             }
         }
-        private void ExportExcelWithSave(object? obj)
+        public FilterDataGrid.FilterDataGrid CurrentDataGrid { get; set; }
+        private async Task ExportExcelWithSave(object? obj)
         {
             SaveFileDialog savefile = new SaveFileDialog()
             {
@@ -731,54 +730,11 @@ namespace BuildMaterials.ViewModels
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 RestoreDirectory = false,
             };
-            if (savefile.ShowDialog() == DialogResult.OK)
+            if (savefile.ShowDialog() == true)
             {
-                FilterDataGrid.FilterDataGrid fdatagrid = null!;
-                switch (selectedTab)
-                {
-                    case "materialsTab":
-                        {
-                            fdatagrid = view.materialsDataGrid;
-                            break;
-                        }
-                    case "employersTab":
-                        {
-                            fdatagrid = view.employersDataGrid;
-                            break;
-                        }
-                    case "orgTab":
-                        {
-                            fdatagrid = view.organizationsDataGrid;
-                            break;
-                        }
-                    case "uchetTab":
-                        {
-                            //fdatagrid = view.uchetDataGrid;
-                            break;
-                        }
-                    case "ttnTab":
-                        {
-                            fdatagrid = view.ttnsDataGrid;
-                            break;
-                        }
-                    case "accountTab":
-                        {
-                            fdatagrid = view.accountsDataGrid;
-                            break;
-                        }
-                    case "contractTab":
-                        {
-                            fdatagrid = view.contractsDataGrid;
-                            break;
-                        }
-                    case "materialResponsibleTab":
-                        {
-                            fdatagrid = view.materialresponsesDataGrid;
-                            break;
-                        }
-                }
 
-                var myClassType = fdatagrid.ItemsSource.GetType().GetGenericArguments().Single();
+
+                var myClassType = CurrentDataGrid.ItemsSource.GetType().GetGenericArguments().Single();
 
                 var method = typeof(ExportToExcel).GetMethod("ExportFromDataGrid", BindingFlags.Static | BindingFlags.Public);
                 var genericMethod = method.MakeGenericMethod(myClassType);
@@ -786,26 +742,26 @@ namespace BuildMaterials.ViewModels
                 try
                 {
                     // вызов статического метода
-                    genericMethod.Invoke(null, new object[2] { savefile.FileName, fdatagrid });
+                    genericMethod.Invoke(null, new object[3] { savefile.FileName, CurrentDataGrid, view});
                 }
                 catch
                 {
-                    System.Windows.MessageBox.Show("Во время экспорта произошла ошибка...", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Error);
+                    view.ShowDialogAsync("Во время экспорта произошла ошибка...", "Экспорт в Excel");
                     return;
                 }
-                System.Windows.MessageBox.Show("Экспорт успешно завершен", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Information);
+                view.ShowDialogAsync("Экспорт успешно завершен!", Title);
             }
         }
-        private void AddRowCopy(object? obj)
+        private async Task AddRowCopy(object? obj)
         {
             if (CurrentEmployee.CanUserAdd == false)
             {
-                System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("У Вас отсутствуют нужные права", Title);
                 return;
             }
             if (SelectedTableItem == null)
             {
-                System.Windows.MessageBox.Show("Выберите запись", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                view.ShowDialogAsync("Выберите запись!", Title);
                 return;
             }
             switch (selectedTab)
@@ -849,7 +805,7 @@ namespace BuildMaterials.ViewModels
                     {
                         if (CurrentEmployee.IsUserAdmin == false)
                         {
-                            System.Windows.MessageBox.Show("У Вас отсутствуют нужные права", view.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            view.ShowDialogAsync("У Вас отсутствуют нужные права", Title);
                             return;
                         }
                         var copy = SelectedTableItem as Employee;
@@ -905,7 +861,8 @@ namespace BuildMaterials.ViewModels
                         }
                         break;
                     }
-                case "accountTab": {
+                case "accountTab":
+                    {
                         var copy = SelectedTableItem as Account;
                         copy.ID = 0;
                         AddAccountView add = new AddAccountView();
@@ -942,7 +899,7 @@ namespace BuildMaterials.ViewModels
                     }
             }
         }
-        private void Search(string text)
+        private async Task Search(string text)
         {
             if (text.Equals(string.Empty))
             {

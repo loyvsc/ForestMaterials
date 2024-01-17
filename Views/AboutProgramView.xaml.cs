@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AboutProgramView : Window
+    public partial class AboutProgramView : FluentWindow
     {
         public AboutProgramView()
         {

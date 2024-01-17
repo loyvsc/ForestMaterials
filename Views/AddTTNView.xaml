@@ -1,41 +1,72 @@
-﻿<Window x:Class="BuildMaterials.Views.AddTTNView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddTTNView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="ТТН" Width="250" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
-    <Window.DataContext>
-        <viewmodels:AddTTNViewModel/>
-    </Window.DataContext>
+        mc:Ignorable="d" SizeToContent="Height" MinWidth="10" x:Name="window"
+        Title="ТТН" Width="600" ResizeMode="NoResize" Height="215" MinHeight="10"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+         WindowBackdropType ="Mica"
+         ExtendsContentIntoTitleBar="True"
+         WindowCornerPreference="Default" 
+         ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+         ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+         WindowStartupLocation="CenterScreen"       
+         d:DataContext="{d:DesignInstance viewmodels:AddTTNViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock Margin="0,5,0,5">Контракт</TextBlock>
-            <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding TTN.Contract.ID}" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,5">Автомобиль</TextBlock>
-            <ComboBox ItemsSource="{Binding Automobiles}" SelectedValue="{Binding TTN.Automobile.ID}" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,5">Водитель</TextBlock>
-            <TextBox Text="{Binding TTN.Driver}"/>
-            <TextBlock Text="Метод погрузки"/>
-            <TextBox Text="{Binding TTN.PogruzkaMethod}"/>
-            <TextBlock Text="Адрес погрузки"/>
-            <TextBox Text="{Binding TTN.AdresPogruzki}"/>
-            <TextBlock Text="Адрес разгрузки"/>
-            <TextBox Text="{Binding TTN.AdresRazgruzki}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <ui:TitleBar
+            Grid.ColumnSpan="3"
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
-            <TextBlock Margin="0,5,0,5">Отпуск разрешил</TextBlock>
-            <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding TTN.ResponseEmployee}" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,5">Сдал грузоотправитель</TextBlock>
-            <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding TTN.SdalEmployee.ID}" SelectedValuePath="ID"/>
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1">
+            <Grid>
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="contractText">Контракт</TextBlock>
+                <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding ContractID}" SelectedValuePath="ID"/>
+            </Grid>
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="respText">Отпуск разрешил</TextBlock>
+                <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding RespEmpl}" SelectedValuePath="ID"/>
+            </Grid>
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="sdalText">Сдал грузоотправитель</TextBlock>
+                <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding SdalEmpl}" SelectedValuePath="ID"/>
+            </Grid>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1" Grid.Column="1">
+            <Grid Margin="0,0,0,5">
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="autoText">Автомобиль</TextBlock>
+                <ComboBox ItemsSource="{Binding Automobiles}" SelectedValue="{Binding Automobile}" SelectedValuePath="ID"/>
+            </Grid>
+
+            <ui:TextBox PlaceholderText="Водитель" Text="{Binding TTN.Driver}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="2">
+            <ui:TextBox PlaceholderText="Метод погрузки" Text="{Binding TTN.PogruzkaMethod}" Margin="0,5,0,0"/>
+            <ui:TextBox PlaceholderText="Адрес погрузки" Text="{Binding TTN.AdresPogruzki}" Margin="0,5,0,0"/>
+            <ui:TextBox PlaceholderText="Адрес разгрузки" Text="{Binding TTN.AdresRazgruzki}" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="3" HorizontalAlignment="Right">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

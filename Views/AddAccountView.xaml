@@ -1,32 +1,60 @@
-﻿<Window x:Class="BuildMaterials.Views.AddAccountView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AddAccountView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новый счет" Width="250" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AddAccountViewModel/>
-    </Window.DataContext>
+        Title="Новый счет" Width="250" ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+         WindowBackdropType ="Mica"
+         ExtendsContentIntoTitleBar="True"
+         WindowCornerPreference="Default"
+         ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+         ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+         WindowStartupLocation="CenterScreen"                 
+         d:DataContext="{d:DesignInstance viewmodels:AddAccountViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-            <TextBlock Margin="0,5,0,5">Дата</TextBlock>
-            <DatePicker SelectedDate="{Binding Account.Date}"/>
-            <TextBlock Margin="0,5,0,5">Договор</TextBlock>
-            <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding Account.Contract.ID}" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,5">Продавец</TextBlock>
-            <ComboBox ItemsSource="{Binding Organizations}" SelectedValue="{Binding Account.Seller.ID}" SelectedValuePath="ID"/>
-            <TextBlock Margin="0,5,0,5">Покупатель</TextBlock>
-            <ComboBox ItemsSource="{Binding Organizations}" SelectedValue="{Binding Account.Buyer.ID}" SelectedValuePath="ID"/>
+
+
+        <ui:TitleBar
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        
+        <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1">
+            <Grid>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Дата" x:Name="dateText"/>
+                <DatePicker SelectedDate="{Binding Date}"/>
+            </Grid>
+
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Договор" x:Name="contractText"/>
+                <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding ContractID}" SelectedValuePath="ID"/>
+            </Grid>
+
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Продавец" x:Name="sellerText"/>
+                <ComboBox ItemsSource="{Binding Organizations}" SelectedValue="{Binding SellerID}" SelectedValuePath="ID"/>
+            </Grid>
+
+            <Grid Margin="0,5,0,0">
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Покупатель" x:Name="buyerText"/>
+                <ComboBox ItemsSource="{Binding Organizations}" SelectedValue="{Binding BuyerID}" SelectedValuePath="ID"/>
+            </Grid>
+            
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding AddCommand}">Добавить</Button>
             <Button Grid.Row="1" Margin="5,0,5,5" MinWidth="75" Command="{Binding CancelCommand}">Отмена</Button>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

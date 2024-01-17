@@ -1,21 +1,30 @@
-﻿using BuildMaterials.Helpers;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Helpers;
 using BuildMaterials.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
+using System.Windows;
 using TemplateEngine.Docx;
 
 namespace BuildMaterials.Export.Documents
 {
     public class DocumentExport
     {
+        private readonly Window window;
+        public DocumentExport(Window parent)
+        {
+            window = parent;
+        }
+
         public void SaveReport(string path, Account ttn)
         {
             try
             {
                 File.WriteAllBytes(path, Properties.Resources.Account);
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show("Во время экспорта произошла ошибка!" + ex.Message, "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            catch
+            {                
+                window.ShowDialogAsync("Во время экспорта произошла ошибка!", "Экспорт в файл");
                 return;
             }
 
@@ -24,12 +33,12 @@ namespace BuildMaterials.Export.Documents
 
             foreach (var item in ttn.Contract!.Materials)
             {
-                finalCount += item.Material.Count;
-                finalPrice += item.Material.Count * item.Material.Price;
+                finalCount += (float)item.Material.Count;
+                finalPrice += (float)item.Material.Count * (float)item.Material.Price;
 
-                float nds = (item.Material.Count * item.Material.Price) * (item.Material.NDS / 100);
+                float nds = ((float)item.Material.Count * (float)item.Material.Price) * ((float)item.Material.NDS / 100);
                 finalNdsSumm += nds;
-                float summwithnds = (item.Material.Count * item.Material.Price) + finalNdsSumm;
+                float summwithnds = ((float)item.Material.Count * (float) item.Material.Price) + finalNdsSumm;
                 finalSumm += summwithnds;
 
                 mainTable = mainTable.AddRow(
@@ -42,8 +51,7 @@ namespace BuildMaterials.Export.Documents
             }
 
             IContentItem[] items =
-            [
-                new FieldContent("Number", ttn.ID.ToString()),
+            {                new FieldContent("Number", ttn.ID.ToString()),
                 new FieldContent("Date", ttn.Date.Value.ToShortDateString()),
                 new FieldContent("Seller", ttn.Contract.Seller.CompanyName),
                 new FieldContent("SellerUNP", ttn.Contract.Seller.UNP),
@@ -64,14 +72,14 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("ItogoNDS", finalNdsSumm.ToString()),
 
                 mainTable,
-            ];
+            };
 
             using (TemplateProcessor outputDocument = new TemplateProcessor(path).SetRemoveContentControls(true))
             {
                 outputDocument.FillContent(new Content(items)).SaveChanges();
                 items = null!;
             }
-            System.Windows.MessageBox.Show("Экспорт в файл заверешён!", "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            window.ShowDialogAsync("Экспорт в файл заверешён!", "Экспорт в файл");
         }
         public void SaveReport(string path, Contract contact)
         {
@@ -81,7 +89,7 @@ namespace BuildMaterials.Export.Documents
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Во время экспорта произошла ошибка!" + ex.Message, "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                window.ShowDialogAsync("Во время экспорта произошла ошибка!" + ex.Message, "Экспорт в файл");
                 return;
             }
 
@@ -89,7 +97,7 @@ namespace BuildMaterials.Export.Documents
             string itemsDesc = string.Empty;
             contact.Materials.ForEach((item) =>
             {
-                summ += (float)item.Count! * item.Material!.Price;
+                summ += (float)item.Count! * (float)item.Material!.Price;
                 itemsDesc += $"{(itemsDesc != string.Empty ? ", " : "")}{item.Material.Name} {((item.Material.Shirina != string.Empty || item.Material.Dlina != string.Empty) ? $"({GetItemDescription(item.Material)})" : string.Empty)}";
             });
 
@@ -98,7 +106,7 @@ namespace BuildMaterials.Export.Documents
                 $"{contact.Buyer!.ShortCompamyName}\r\n{contact.Buyer.Adress}\r\nт/с {contact.Buyer.CurrentSchet}\r\nр/с {contact.Buyer.RascSchet}\r\nЦБУ {contact.Buyer.CBU}\r\nкод {contact.Buyer.BIK}, УНП {contact.Buyer.UNP}";
 
             IContentItem[] items =
-            [
+            {
                 new FieldContent("DayNumber", contact.Date?.Day.ToString()),
                 new FieldContent("MonthName", GetRussianMonthName(contact.Date!.Value.Month)),
                 new FieldContent("SellerFullName", contact.Seller.CompanyName),
@@ -116,14 +124,14 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("SellerBIK", contact.Seller.BIK),
                 new FieldContent("SellerUNP", contact.Seller.UNP),
                 new FieldContent("FinalBuyerInfo", finalBuyerInfo),
-            ];
+            };
 
             using (TemplateProcessor outputDocument = new TemplateProcessor(path).SetRemoveContentControls(true))
             {
                 outputDocument.FillContent(new Content(items)).SaveChanges();
                 items = null!;
             }
-            System.Windows.MessageBox.Show("Экспорт в файл заверешён!", "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            window.ShowDialogAsync("Экспорт в файл заверешён!", "Экспорт в файл");
 
             string GetRussianMonthName(int number)
             {
@@ -189,7 +197,7 @@ namespace BuildMaterials.Export.Documents
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Во время экспорта произошла ошибка!\r\n" + ex.Message, "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                window.ShowDialogAsync("Во время экспорта произошла ошибка!\r\n" + ex.Message, "Экспорт в файл");
                 return;
             }
 
@@ -204,7 +212,7 @@ namespace BuildMaterials.Export.Documents
                 basicPrice += thisPrice;
                 float thisBasicSumm = thisCount * thisPrice;
                 finalBasicSumm += thisBasicSumm;
-                float thisNdsSumm = thisBasicSumm * item.Material.NDS;
+                float thisNdsSumm = thisBasicSumm * (float)item.Material.NDS;
                 finalNdsSumm += thisNdsSumm;
                 finalMaterialSumm += thisBasicSumm + thisNdsSumm;
                 finalSumm += finalMaterialSumm;
@@ -221,7 +229,7 @@ namespace BuildMaterials.Export.Documents
             }
 
             IContentItem[] items =
-            [
+            {
                 new FieldContent("SellerUNP", contact.Contract.Seller.UNP),
                 new FieldContent("BuyerName", contact.Contract.Buyer != null ? contact.Contract.Buyer.ShortCompamyName : contact.Contract.Individual.FIO),
                 new FieldContent("Date", DateToString(DateTime.Now)),
@@ -240,14 +248,14 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("ResponsibleEmployee", contact.ResponseEmployee!.FIO),
                 new FieldContent("SdalEmployee", contact.SdalEmployee!.FIO),
                 mainTable,
-            ];
+            };
 
             using (TemplateProcessor outputDocument = new TemplateProcessor(path).SetRemoveContentControls(true))
             {
                 outputDocument.FillContent(new Content(items)).SaveChanges();
                 items = null!;
             }
-            System.Windows.MessageBox.Show("Экспорт в файл заверешён!", "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            window.ShowDialogAsync("Экспорт в файл заверешён!", "Экспорт в файл");
 
         }
         public void SaveReport(string path, TTN ttn)
@@ -258,7 +266,7 @@ namespace BuildMaterials.Export.Documents
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Во время экспорта произошла ошибка!\r\n" + ex.Message, "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                window.ShowDialogAsync("Во время экспорта произошла ошибка!\r\n" + ex.Message, "Экспорт в файл");
                 return;
             }
 
@@ -267,12 +275,12 @@ namespace BuildMaterials.Export.Documents
 
             foreach (var item in ttn.Contract!.Materials)
             {
-                count += item.Material.Count;
-                finalBasicSumm += item.Material.Count * item.Material.Price;
+                count += (float)item.Material.Count;
+                finalBasicSumm += (float)item.Material.Count * (float)item.Material.Price;
 
-                float nds = (item.Material.Count * item.Material.Price) * (item.Material.NDS / 100);
+                float nds = ((float)item.Material.Count * (float)item.Material.Price) * ((float)item.Material.NDS / 100);
                 finalNdsSumm += nds;
-                float summwithnds = (item.Material.Count * item.Material.Price) + finalNdsSumm;
+                float summwithnds = ((float)item.Material.Count * (float)item.Material.Price) + finalNdsSumm;
                 finalSumm += summwithnds;
 
                 mainTable = mainTable.AddRow(
@@ -287,7 +295,7 @@ namespace BuildMaterials.Export.Documents
             }
 
             IContentItem[] items =
-            [
+            {
                 new FieldContent("SellerUNP1", ttn.Contract.Seller.UNP),
                 new FieldContent("SellerUNP2", ttn.Contract.Seller.UNP),
                 new FieldContent("BuyerUNP", ttn.Contract.Buyer.UNP),
@@ -311,14 +319,14 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("CompanyPoruzchik", ttn.Contract.Seller.CompanyName),
                 new FieldContent("MethodPogruzka", ttn.PogruzkaMethod),
                 mainTable,
-            ];
+            };
 
             using (TemplateProcessor outputDocument = new TemplateProcessor(path).SetRemoveContentControls(true))
             {
                 outputDocument.FillContent(new Content(items)).SaveChanges();
                 items = null!;
             }
-            System.Windows.MessageBox.Show("Экспорт в файл заверешён!", "Экспорт в файл", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            window.ShowDialogAsync("Экспорт в файл заверешён!", "Экспорт в файл");
         }
 
         private string DateToString(DateTime date)

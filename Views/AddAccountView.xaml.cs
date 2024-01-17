@@ -2,7 +2,7 @@
 
 namespace BuildMaterials.Views
 {
-    public partial class AddAccountView : Window
+    public partial class AddAccountView : FluentWindow
     {
         public AddAccountView()
         {

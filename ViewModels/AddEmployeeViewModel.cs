@@ -1,35 +1,48 @@
-﻿using System.Windows;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using BuildMaterials.Views;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddEmployeeViewModel
+    public class AddEmployeeViewModel : ViewModelBase
     {
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
         public Models.Employee Employee { get; set; }
-
-        private readonly Window _window = null!;
-        public AddEmployeeViewModel()
+        public DateTime? IssueDate
         {
+            get => Employee.Passport.IssueDate;
+            set
+            {
+                if (value != null)
+                {
+                    Employee.Passport.IssueDate = value;
+                    _window.dateText.Visibility = System.Windows.Visibility.Collapsed;
+                }
+            }
+        }
+
+        private readonly AddEmployeeView _window = null!;
+
+        public AddEmployeeViewModel(AddEmployeeView window)
+        {
+            Title = "Добавление сотрудника";
+            _window = window;
             Employee = new Models.Employee();
         }
 
-        public AddEmployeeViewModel(Window window) : this()
+        public AddEmployeeViewModel(AddEmployeeView window, Employee employee)
         {
-            _window = window;
-        }
-
-        public AddEmployeeViewModel(Window window, Models.Employee employee)
-        {
+            Title = "Изменение сотрудника";
             _window = window;
             Employee = employee;
         }
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
 
-        private void AddMaterial(object? obj)
+        private async Task AddMaterial(object? obj)
         {
             if (Employee.ID != 0)
             {
@@ -44,7 +57,7 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("При сохранении изменений произошла ошибка...\nСообщение: " + ex.Message, "Новый сотрудник", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
             }
             else
@@ -53,9 +66,11 @@ namespace BuildMaterials.ViewModels
                 {
                     App.DbContext.Employees.Add(Employee);
                     Close();
-                    return;
                 }
-                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый сотрудник", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
+                }
             }
         }
     }

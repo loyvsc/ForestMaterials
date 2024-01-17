@@ -4,6 +4,21 @@ using System.Runtime.CompilerServices;
 
 namespace BuildMaterials.Models
 {
+    public class ViewModelBase : NotifyPropertyChangedBase
+    {
+        public string Title
+        {
+            get => title;
+            set
+            {
+                title = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string title;
+    }
+
     public class NotifyPropertyChangedBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

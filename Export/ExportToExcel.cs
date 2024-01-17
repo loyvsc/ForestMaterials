@@ -1,4 +1,5 @@
-﻿using Castle.Core.Internal;
+﻿using BuildMaterials.Extensions;
+using Castle.Core.Internal;
 using OfficeOpenXml;
 using System.Collections;
 using System.IO;
@@ -9,12 +10,12 @@ namespace BuildMaterials.Export
 {
     public class ExportToExcel
     {
-        public static void ExportFromDataGrid<T>(string filename, FilterDataGrid.FilterDataGrid datagrid)
+        public static void ExportFromDataGrid<T>(string filename, FilterDataGrid.FilterDataGrid datagrid, Window parent)
         {
-            ExportFromArray<T>(filename, datagrid.CollectionViewSource.Cast<T>().ToArray());
+            ExportFromArray<T>(filename, datagrid.CollectionViewSource.Cast<T>().ToArray(),parent);
         }
 
-        public static void ExportFromArray<T>(string filename, T[] items)
+        public static void ExportFromArray<T>(string filename, T[] items, Window parent)
         {
             ExcelPackage.LicenseContext = LicenseContext.Commercial;
             using (ExcelPackage document = new ExcelPackage())
@@ -49,19 +50,19 @@ namespace BuildMaterials.Export
                 var headerRange = mainsheet.Cells[1, 1, 1, header.Length];
                 headerRange.AutoFilter = true;
 
-                Save(filename, document.GetAsByteArray()); //сохранение файла
+                Save(filename, document.GetAsByteArray(), parent); //сохранение файла
             }
         }
 
-        private static void Save(string path, byte[] bytes)
+        private static void Save(string path, byte[] bytes, Window parent)
         {
             try
             {
                 File.WriteAllBytes(path, bytes);
             }
-            catch (System.IO.IOException)
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Произошла ошибка при сохранении файла", "Экспорт в Excel", MessageBoxButton.OK, MessageBoxImage.Error);
+                parent.ShowDialogAsync("При сохранении файла произошла ошибка: " + ex.Message, "Экспорт в Excel");
             }
         }
 

@@ -1,20 +1,12 @@
 ﻿using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
 using System.ComponentModel;
-using System.Windows;
 
 namespace BuildMaterials.Views
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : FluentWindow
     {
         private readonly MainWindowViewModel mainViewModel;
-
-        public MainWindow()
-        {
-            InitializeComponent();
-            mainViewModel = new MainWindowViewModel(this);
-            DataContext = mainViewModel;
-        }
 
         public MainWindow(Employee employee)
         {
@@ -32,6 +24,11 @@ namespace BuildMaterials.Views
         private void TabControl_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             mainViewModel.OnTabChanged(e);
+        }
+
+        private void NavigationView_SelectionChanged(NavigationView sender, System.Windows.RoutedEventArgs args)
+        {
+
         }
     }
 }

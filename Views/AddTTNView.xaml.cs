@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddTTNView : Window
+    public partial class AddTTNView : FluentWindow
     {
         public AddTTNView()
         {
@@ -12,7 +10,7 @@ namespace BuildMaterials.Views
         public AddTTNView(Models.TTN ttn)
         {
             InitializeComponent();
-            DataContext = new ViewModels.AddTTNViewModel(this,ttn);
+            DataContext = new ViewModels.AddTTNViewModel(this, ttn);
         }
     }
 }

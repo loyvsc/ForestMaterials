@@ -1,4 +1,4 @@
-﻿using BuildMaterials.BD;
+﻿using BuildMaterials.Extensions;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.Windows;
@@ -6,110 +6,126 @@ using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class LoginViewModel : NotifyPropertyChangedBase
+    public class LoginViewModel : ViewModelBase
     {
-        public List<Employee> Employees => GetEmployees();
-        public ICommand AutorizeCommand => new RelayCommand((sender) => Autorize());
-        public int SelectedTypeIndex { get; set; }
+        public List<Employee> Employees { get; }
+        public ICommand AutorizeCommand => new AsyncRelayCommand(Autorize);
         public string? EnteredPassword
         {
             get => _enteredPassword;
             set
             {
+                if (_window.IsLoaded)
+                {
+                    _window.passwordBox.BorderBrush = System.Windows.Media.Brushes.Transparent;
+                    _window.passwordBox.BorderThickness = new Thickness(0);
+                }
                 _enteredPassword = value;
                 OnPropertyChanged();
             }
         }
-
-        private List<Employee> GetEmployees()
+        public Employee? SelectedEmploee
         {
-            List<Employee> employees = new List<Employee>(32);
-            using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
+            get => selEmpl;
+            set
             {
-                using (MySqlCommand _command = new MySqlCommand("SELECT concat(surname,' ', name,' ',pathnetic), Password, canadd, canedit, candel, isadmin FROM Employees;", _connection))
+                if (value != null)
                 {
-                    _connection.OpenAsync().Wait();
-                    using (MySqlDataReader reader = _command.ExecuteMySqlReaderAsync())
-                        while (reader.Read())
-                        {
-                            employees.Add(new Employee(reader.GetString(0), reader.GetString(1), (reader.GetInt32(2) == 1 ? true : false), (reader.GetInt32(3) == 1 ? true : false), (reader.GetInt32(4) == 1 ? true : false), (reader.GetInt32(5) == 1 ? true : false)));
-                        }
-                    _connection.CloseAsync().Wait();
+                    if (_window.IsLoaded)
+                    {
+                        _window.emplCombobox.BorderBrush = System.Windows.Media.Brushes.Transparent;
+                        _window.emplCombobox.BorderThickness = new Thickness(0,0,0,0);
+                    }
+                    _window.emplTextBlock.Visibility = Visibility.Collapsed;
+                    selEmpl = value;
+                    OnPropertyChanged();
                 }
             }
-            return employees;
         }
 
-        public LoginViewModel()
-        {
-            EnteredPassword = "";
-        }
-
-        public LoginViewModel(Window parentWindow) : this()
+        public LoginViewModel(LoginView parentWindow)
         {
             _window = parentWindow;
+            EnteredPassword = "";
+            Title = "Авторизация";
+            Employees = App.DbContext.Employees.ToList();
         }
 
-        private readonly Window? _window;
+        private readonly LoginView _window;
         private string? _enteredPassword;
+        private Employee? selEmpl;
 
-        private bool IsSelectedTypeValid => SelectedTypeIndex.Equals(-1);
-
-        public void Autorize()
+        public async Task Autorize(object? obj)
         {
             try
             {
-                if (IsSelectedTypeValid)
+                if (SelectedEmploee == null)
                 {
+                    _window.emplCombobox.BorderBrush = System.Windows.Media.Brushes.DarkRed;
+                    _window.emplCombobox.BorderThickness = new Thickness(0,0,0,2);
                     throw new AutorizeException("Выберите пользователя!");
+
                 }
 
-                Employee findedEmployee = Employees[SelectedTypeIndex];
-
-                if (EnteredPassword == findedEmployee.Password)
+                if (EnteredPassword == SelectedEmploee.Password)
                 {
-                    MainWindow mainWindow = new MainWindow(findedEmployee);
+                    MainWindow mainWindow = new MainWindow(SelectedEmploee);
                     mainWindow.Show();
                     System.Windows.Application.Current.MainWindow = mainWindow;
                     _window?.Close();
                 }
                 else
                 {
+                    _window.passwordBox.BorderBrush = System.Windows.Media.Brushes.DarkRed;
+                    _window.passwordBox.BorderThickness = new Thickness(0, 0, 0, 2);
                     throw new AutorizeException("Неверный пароль!");
                 }
             }
             catch (AutorizeException aEx)
             {
-                System.Windows.MessageBox.Show(aEx.Message, "Авторизация", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                _window.ShowDialogAsync(aEx.Message, Title);
             }
         }
     }
 
-    public class RelayCommand : ICommand
+    public class AsyncRelayCommand : ICommand
     {
-        private readonly Action<object?> execute;
-        private readonly Func<object?, bool>? canExecute;
-
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
-
-        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+        private readonly Func<object, Task> execute;
+        private readonly Func<object, bool> canExecute;
+        private long isExecuting;
+        public AsyncRelayCommand(Func<object, Task> execute, Func<object, bool> canExecute = null)
         {
             this.execute = execute;
-            this.canExecute = canExecute;
+            this.canExecute = canExecute ?? (o => true);
         }
-
-        public bool CanExecute(object? parameter)
+        public event EventHandler CanExecuteChanged
         {
-            return canExecute == null || canExecute(parameter);
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
-
-        public void Execute(object? parameter)
+        public void RaiseCanExecuteChanged()
         {
-            execute(parameter);
+            CommandManager.InvalidateRequerySuggested();
+        }
+        public bool CanExecute(object parameter)
+        {
+            if (Interlocked.Read(ref isExecuting) != 0)
+                return false;
+            return canExecute(parameter);
+        }
+        public async void Execute(object parameter)
+        {
+            Interlocked.Exchange(ref isExecuting, 1);
+            RaiseCanExecuteChanged();
+            try
+            {
+                await execute(parameter);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref isExecuting, 0);
+                RaiseCanExecuteChanged();
+            }
         }
     }
 

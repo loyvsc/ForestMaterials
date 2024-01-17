@@ -1,11 +1,12 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.Windows;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddAutomobileViewModel : NotifyPropertyChangedBase
+    public class AddAutomobileViewModel : ViewModelBase
     {
         public Automobile Automobile { get; set; }
         public ICommand CancelCommand { get; }
@@ -15,15 +16,15 @@ namespace BuildMaterials.ViewModels
 
         public AddAutomobileViewModel()
         {
-            AddCommand = new RelayCommand(Add);
-            CancelCommand = new RelayCommand(Close);
+            AddCommand = new AsyncRelayCommand(Add);
+            CancelCommand = new AsyncRelayCommand(Close);
         }
 
         public AddAutomobileViewModel(AddAutomobileView view) : this()
         {
             _window = view;
             _window.addComm.Content = "Добавить";
-            _window.Title = "Добавление автомобиля";
+            Title = "Добавление автомобиля";
             Automobile = new Automobile();
         }
 
@@ -31,12 +32,12 @@ namespace BuildMaterials.ViewModels
         {
             Automobile = automobile;
             _window = window;
-            _window.Title = "Редактирование автомобиля";
+            Title = "Изменение автомобиля";
             _window.addComm.Content = "Сохранить";
         }
 
-        private void Close(object? obj) => _window.DialogResult = true;
-        private void Add(object? obj)
+        private async Task Close(object? obj) => _window.DialogResult = true;
+        private async Task Add(object? obj)
         {
             if (Automobile.IsValid)
             {
@@ -52,14 +53,14 @@ namespace BuildMaterials.ViewModels
                     }
                     Close(null);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Попробуйте позже.", _window.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
             }
             else
             {
-                System.Windows.MessageBox.Show("Введите всю требуемую информацию!", _window.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
             }
         }
     }

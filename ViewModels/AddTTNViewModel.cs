@@ -1,5 +1,6 @@
-﻿using BuildMaterials.Models;
-using System.Windows;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
+using BuildMaterials.Views;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
@@ -9,12 +10,12 @@ namespace BuildMaterials.ViewModels
         public static MySqlDataReader ExecuteMySqlReaderAsync(this MySqlCommand command) => command.ExecuteReader();
     }
 
-    public class AddTTNViewModel : NotifyPropertyChangedBase
+    public class AddTTNViewModel : ViewModelBase
     {
-        private readonly Window _window = null!;
+        private readonly AddTTNView _window = null!;
         public TTN TTN
         {
-            get=> ttn;
+            get => ttn;
             set
             {
                 ttn = value;
@@ -22,8 +23,64 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        public ICommand CancelCommand => new RelayCommand(Close);
-        public ICommand AddCommand => new RelayCommand(AddMaterial);
+        public int ContractID
+        {
+            get => TTN.Contract.ID;
+            set
+            {
+                if (value != 0)
+                {
+                    _window.contractText.Visibility = System.Windows.Visibility.Collapsed;
+                    TTN.Contract.ID = value;
+                    OnPropertyChanged(nameof(TTN.Contract.ID));
+                }
+            }
+        }
+
+        public int RespEmpl
+        {
+            get => TTN.ResponseEmployee.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.respText.Visibility = System.Windows.Visibility.Collapsed;
+                    TTN.ResponseEmployee.ID = value;
+                    OnPropertyChanged(nameof(TTN.ResponseEmployee.ID));
+                }
+            }
+        }
+
+        public int SdalEmpl
+        {
+            get => TTN.SdalEmployee.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.sdalText.Visibility = System.Windows.Visibility.Collapsed;
+                    TTN.ResponseEmployee.ID = value;
+                    OnPropertyChanged(nameof(TTN.SdalEmployee.ID));
+                }
+            }
+        }
+
+        public int Automobile
+        {
+            get => TTN.Automobile.ID;
+            set
+            {
+                if (value != null)
+                {
+                    _window.autoText.Visibility = System.Windows.Visibility.Collapsed;
+                    TTN.Automobile.ID = value;
+                    OnPropertyChanged(nameof(TTN.Automobile.ID));                    
+                }
+            }
+        }
+
+        public ICommand CancelCommand => new AsyncRelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
         public List<Contract> Contracts { get; } = App.DbContext.Contracts.ToList();
         public List<Automobile> Automobiles { get; } = App.DbContext.Automobiles.ToList();
@@ -32,23 +89,23 @@ namespace BuildMaterials.ViewModels
 
         private TTN ttn;
 
-        private void Close(object? obj = null) => _window.DialogResult = true;
+        private async Task Close(object? obj = null) => _window.DialogResult = true;
 
-        public AddTTNViewModel()
+        public AddTTNViewModel(AddTTNView window)
         {
             TTN = new TTN();
+            _window = window;
+            Title = "Добавление ТТН";
         }
 
-        public AddTTNViewModel(Window window) : this()
+        public AddTTNViewModel(AddTTNView window, Models.TTN ttn)
         {
             _window = window;
-        }
-        public AddTTNViewModel(Window window, Models.TTN ttn) : this(window)
-        {
             TTN = ttn;
+            Title = "Изменение ТТН";
         }
 
-        private void AddMaterial(object? obj)
+        private async Task AddMaterial(object? obj)
         {
             if (TTN.IsValid)
             {
@@ -65,16 +122,16 @@ namespace BuildMaterials.ViewModels
                     }
                     Close();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Произошла ошибка. Попробуйте позже", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _window.ShowDialogAsync(Title, "Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message);
                 }
             }
             else
             {
-                System.Windows.MessageBox.Show("Не вся информация была введена!", "Новый ТТН", MessageBoxButton.OK, MessageBoxImage.Error);
+                _window.ShowDialogAsync(Title,"Введена не вся требуемая информация!");
             }
-            
+
         }
     }
 }

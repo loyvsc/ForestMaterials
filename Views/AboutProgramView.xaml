@@ -1,46 +1,47 @@
-﻿<Window x:Class="BuildMaterials.Views.AboutProgramView"
+﻿<ui:FluentWindow x:Class="BuildMaterials.Views.AboutProgramView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" ResizeMode="CanMinimize"
-        Title="О программе" Width="350" Height="300" WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodels:AboutProgrammViewModel/>
-    </Window.DataContext>
+        mc:Ignorable="d" 
+        Title="О программе" Width="400" Height="280" ResizeMode="NoResize"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+                 WindowBackdropType ="Mica"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowCornerPreference="Default"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 WindowStartupLocation="CenterScreen"                 
+                 d:DataContext="{d:DesignInstance viewmodels:AboutProgrammViewModel}">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="35px"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="25px"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40px"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical" Grid.Column="1">
-            <StackPanel Orientation="Horizontal">
-                <Image Source="/img/icon.ico" Width="32" Margin="0,5,5,5" VerticalAlignment="Center"/>
-                <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,7.4">АРМ Менеджера Строительной Фирмы</TextBlock>
-            </StackPanel>
-            <TextBlock Margin="0,0,5,0" TextWrapping="Wrap">
-                Приложение разработано для сотрудников строительной фирмы.
+        <ui:TitleBar
+            Title="{Binding Title}"
+            CloseWindowByDoubleClickOnIcon="True" ShowMaximize="False" ShowMinimize="False">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/Icon.png"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <TextBlock Margin="5,5,5,5" TextWrapping="Wrap">
+                Приложение разработано для сотрудников ГЛХУ Молодечненский лесхоз
                 <LineBreak></LineBreak>
-                Для разработки использованы:<LineBreak></LineBreak>
+                Для разработки было использованы:<LineBreak/>
                 • .NET 7<LineBreak></LineBreak>
                 • Windows Presentation Foundation (WPF)<LineBreak></LineBreak>
                 • СУБД MySQL<LineBreak></LineBreak>
                 • Библиотека MySQL.Data (подключение к СУБД)
                 <LineBreak/><LineBreak/>
-                Курсовая работа по предмету Базы данных и СУБД
-                <LineBreak/>Автор: Варакса Валерий Витальевич, группа 0К9392
+                Автор: Варакса Валерий Витальевич, группа 0К9392
             </TextBlock>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                <TextBlock Text="Версия: "></TextBlock>
-                <TextBlock Text="{Binding ApplicationVersion}"/>
-            </StackPanel>
+            <TextBlock Text="{Binding ApplicationVersion}" HorizontalAlignment="Center"/>
         </StackPanel>
-        <Button Grid.Row="1" Grid.Column="1" Margin="5,0,5,5" HorizontalAlignment="Right" MaxWidth="75" MinWidth="75"
-                Command="{Binding CloseCommand}">Закрыть</Button>
+        <Button Grid.Row="2" Margin="5,0,5,5" HorizontalAlignment="Right" Command="{Binding CloseCommand}">Закрыть</Button>
     </Grid>
-</Window>
+</ui:FluentWindow>

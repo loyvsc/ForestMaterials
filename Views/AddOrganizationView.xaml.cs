@@ -1,9 +1,7 @@
-﻿using System.Windows;
-
-namespace BuildMaterials.Views
+﻿namespace BuildMaterials.Views
 {
-    public partial class AddOrganizationView : Window
-    {        
+    public partial class AddOrganizationView : FluentWindow
+    {
         public AddOrganizationView()
         {
             InitializeComponent();

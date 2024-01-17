@@ -1,25 +1,31 @@
-﻿using BuildMaterials.Models;
+﻿using BuildMaterials.Extensions;
+using BuildMaterials.Models;
 using BuildMaterials.Views;
+using System.Windows;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels
 {
-    public class AddContractMaterialViewModel : NotifyPropertyChangedBase
+    public class AddContractMaterialViewModel : ViewModelBase
     {
-        public ICommand AddCommand => new RelayCommand(Add);
-        public ICommand CloseCommand => new RelayCommand(Close);
+        public ICommand AddCommand => new AsyncRelayCommand(Add);
+        public ICommand CloseCommand => new AsyncRelayCommand(Close);
 
         #region Public proprs
-        public int MaterialID
+        public int? MaterialID
         {
             get => matid;
             set
             {
-                matid = value;
-                OnPropertyChanged();
+                if (value != null)
+                {
+                    _view.text.Visibility = System.Windows.Visibility.Collapsed;
+                    matid = value;
+                    OnPropertyChanged();
+                }
             }
         }
-        private int matid;
+        private int? matid;
         public List<Material> Materials => App.DbContext.Materials.ToList();
         public ContractMaterial ContractMaterial
         {
@@ -64,7 +70,7 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region Private methods
-        private void Add(object? obj)
+        private async Task Add(object? obj)
         {
             if (ContractMaterial.Material!=null) ContractMaterial.Material.ID = 0;
             if (ContractMaterial.IsValid)
@@ -74,10 +80,10 @@ namespace BuildMaterials.ViewModels
             }
             else
             {
-                System.Windows.MessageBox.Show("Введите всю требуемую информацию!", "Добавление товара", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); 
+                _view.ShowDialogAsync("Не вся информация была введена!", Title);
             }
         }
-        private void Close(object? obj)
+        private async Task Close(object? obj)
         {
             _view.DialogResult = true;
         }
