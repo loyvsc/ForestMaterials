@@ -27,6 +27,7 @@
         </Grid.ColumnDefinitions>
 
         <ui:TitleBar
+            ShowMaximize="False" ShowMinimize="False"
             Grid.ColumnSpan="2"
             Title="{Binding Title}"
             CloseWindowByDoubleClickOnIcon="True">

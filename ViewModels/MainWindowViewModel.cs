@@ -563,14 +563,17 @@ namespace BuildMaterials.ViewModels
                 case "employersTab":
                     {
                         AddEmployeeView add = new AddEmployeeView();
-                        if (add.ShowDialog() == true)
+                        if (CurrentEmployee.IsUserAdmin)
                         {
-                            if (CurrentEmployee.IsUserAdmin)
+                            if (add.ShowDialog() == true)
                             {
-                                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
-                                return;
+                                EmployeesList = App.DbContext.Employees.ToList();
                             }
-                            EmployeesList = App.DbContext.Employees.ToList();
+                        }
+                        else
+                        {
+                            view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
+                            return;
                         }
                         break;
                     }

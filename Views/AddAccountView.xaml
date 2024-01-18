@@ -23,6 +23,7 @@
 
 
         <ui:TitleBar
+            ShowMaximize="False" ShowMinimize="False"
             Title="{Binding Title}"
             CloseWindowByDoubleClickOnIcon="True">
             <ui:TitleBar.Icon>

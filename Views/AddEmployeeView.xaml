@@ -28,6 +28,7 @@
             <ColumnDefinition Width="1.5*"/>
         </Grid.ColumnDefinitions>
         <ui:TitleBar
+            ShowMaximize="False" ShowMinimize="False"
             Grid.ColumnSpan="3"
             Title="{Binding Title}"
             CloseWindowByDoubleClickOnIcon="True">
