@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" 
-        Title="О программе" Width="400" Height="280" ResizeMode="NoResize"
+        mc:Ignorable="d" Height="245" MaxHeight="245" MinHeight="240"
+        Title="О программе" Width="400" ResizeMode="NoResize"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
                  WindowBackdropType ="Mica"
                  ExtendsContentIntoTitleBar="True"
@@ -16,9 +16,9 @@
                  d:DataContext="{d:DesignInstance viewmodels:AboutProgrammViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35px"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="AUto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="35px"/>
         </Grid.RowDefinitions>
         <ui:TitleBar
             Title="{Binding Title}"
@@ -28,20 +28,9 @@
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
-        <StackPanel Orientation="Vertical" Grid.Row="1">
-            <TextBlock Margin="5,5,5,5" TextWrapping="Wrap">
-                Приложение разработано для сотрудников ГЛХУ Молодечненский лесхоз
-                <LineBreak></LineBreak>
-                Для разработки было использованы:<LineBreak/>
-                • .NET 7<LineBreak></LineBreak>
-                • Windows Presentation Foundation (WPF)<LineBreak></LineBreak>
-                • СУБД MySQL<LineBreak></LineBreak>
-                • Библиотека MySQL.Data (подключение к СУБД)
-                <LineBreak/><LineBreak/>
-                Автор: Варакса Валерий Витальевич, группа 0К9392
-            </TextBlock>
-            <TextBlock Text="{Binding ApplicationVersion}" HorizontalAlignment="Center"/>
-        </StackPanel>
-        <Button Grid.Row="2" Margin="5,0,5,5" HorizontalAlignment="Right" Command="{Binding CloseCommand}">Закрыть</Button>
+        <TextBlock Margin="5,5,5,5" TextWrapping="WrapWithOverflow" Grid.Row="1"
+                   Text="{Binding Text}"/>
+        <Button Grid.Row="2" Margin="5,0,5,5" HorizontalAlignment="Right"
+                Command="{Binding CloseCommand}" Content="Закрыть"/>
     </Grid>
 </ui:FluentWindow>

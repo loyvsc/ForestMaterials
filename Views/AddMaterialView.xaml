@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" x:Name="window" MinHeight="1"
-        Width="600" Height="163" ResizeMode="NoResize"
+        Width="600" ResizeMode="NoResize" SizeToContent="Height"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
                  WindowBackdropType ="Mica"
                  ExtendsContentIntoTitleBar="True"
@@ -16,7 +16,7 @@
                  d:DataContext="{d:DesignInstance viewmodels:AddMaterialViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35px"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>

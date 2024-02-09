@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="10" x:Name="window"
-        Title="ТТН" Width="600" ResizeMode="NoResize" Height="215" MinHeight="10"
+        Title="ТТН" Width="600" ResizeMode="NoResize" MinHeight="10"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
          WindowBackdropType ="Mica"
          ExtendsContentIntoTitleBar="True"
@@ -37,16 +37,22 @@
 
         <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Row="1">
             <Grid>
-                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="contractText">Контракт</TextBlock>
-                <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding ContractID}" SelectedValuePath="ID"/>
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5"
+                           x:Name="contractText">Договор</TextBlock>
+                <ComboBox ItemsSource="{Binding Contracts}" SelectedValue="{Binding ContractID}"
+                          SelectedValuePath="ID" SelectedItem="{Binding TTN.Contract}"/>
             </Grid>
             <Grid Margin="0,5,0,0">
                 <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="respText">Отпуск разрешил</TextBlock>
-                <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding RespEmpl}" SelectedValuePath="ID"/>
+                <ComboBox ItemsSource="{Binding Employees}" SelectedItem="{Binding TTN.ResponseEmployee}"
+                          SelectedValue="{Binding RespEmpl}" SelectedValuePath="ID"/>
             </Grid>
             <Grid Margin="0,5,0,0">
-                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5" x:Name="sdalText">Сдал грузоотправитель</TextBlock>
-                <ComboBox ItemsSource="{Binding Employees}" SelectedValue="{Binding SdalEmpl}" SelectedValuePath="ID"/>
+                <TextBlock VerticalAlignment="Center" Foreground="LightGray" Margin="9,5,0,5"
+                           x:Name="sdalText"
+                           Visibility="{Binding TTN.SdalEmployee, Converter={StaticResource ZeroIDToVisibilityConverter}}">Сдал грузоотправитель</TextBlock>
+                <ComboBox ItemsSource="{Binding Employees}"
+                          SelectedItem="{Binding TTN.SdalEmployee}"/>
             </Grid>
         </StackPanel>
 
@@ -61,7 +67,7 @@
 
         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="2">
             <ui:TextBox PlaceholderText="Метод погрузки" Text="{Binding TTN.PogruzkaMethod}" Margin="0,5,0,0"/>
-            <ui:TextBox PlaceholderText="Адрес погрузки" Text="{Binding TTN.AdresPogruzki}" Margin="0,5,0,0"/>
+            <ui:TextBox PlaceholderText="Адрес погрузки" Text="{Binding TTN.AdresPogruzki}" Margin="0,5,0,0" TextChanged="TextBox_TextChanged"/>
             <ui:TextBox PlaceholderText="Адрес разгрузки" Text="{Binding TTN.AdresRazgruzki}" Margin="0,5,0,0"/>
         </StackPanel>
 

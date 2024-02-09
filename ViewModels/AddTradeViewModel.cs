@@ -86,7 +86,7 @@ namespace BuildMaterials.ViewModels
 
         public AddTradeViewModel(AddTradeView window)
         {
-            Trade = new Trade();
+            Trade = new Trade();            
             _window = window;
             Title = "Добавление информации о товарообороте";
         }
@@ -104,12 +104,12 @@ namespace BuildMaterials.ViewModels
         {
             if (Trade.Count > Trade.Material.Count)
             {
-                _window.ShowDialogAsync(Title, "Продано больше, чем в наличии!");
+                _window.ShowDialogAsync("Продано больше, чем в наличии!", Title);
                 return;
             }
             if (Trade.Seller == null || Trade.Material == null)
             {
-                _window.ShowDialogAsync(Title, "Введите всю требуемую информацию!");
+                _window.ShowDialogAsync("Введите всю требуемую информацию!", Title);
                 return;
             }
 
@@ -131,7 +131,6 @@ namespace BuildMaterials.ViewModels
                 else
                 {
                     App.DbContext.Trades.Add(Trade);
-                    App.DbContext.Query($"UPDATE Materials SET COUNT = COUNT-{Trade.Count} WHERE id = {Trade.Material.ID};");
                     Close();
                 }
             }

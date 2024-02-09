@@ -176,6 +176,6 @@ namespace BuildMaterials.Models
             BIK = bik;
         }
 
-        public override string ToString() => CompanyName!;
+        public override string ToString() => CompanyName;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BuildMaterials.Extensions;
+using BuildMaterials.Helpers;
 using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
 
@@ -10,17 +11,25 @@ namespace BuildMaterials.BD
         public const string ConnectionString = $"server=localhost;user=root;database={DatabaseName};password=546909023Var;";
         public const string CreateDatabaseConnectionString = "server=localhost;user=root;password=546909023Var;";
     }
-    public interface IDBSetBase<T> where T : class
+    internal interface IDBSetBase<T> where T : class
     {
         void Add(T obj);
         void Remove(T obj);
         void Remove(int id);
-        public List<T> Select(string query);
-        public void Update(T obj);
+        List<T> Select(string query);
+        void AddRange(IEnumerable<T> entities)
+        {
+            foreach(var item in entities)
+            {
+                Add(item);
+            }
+        }
+        void Update(T obj);
     }
 
     public class ApplicationContext
     {
+        #region Tables
         public ContactTable Contacts { get; }
         public MaterialsTable Materials { get; }
         public EmployeesTable Employees { get; }
@@ -36,6 +45,7 @@ namespace BuildMaterials.BD
         public ContractMaterialsTable ContractMaterials { get; }
         public TNTable TNs { get; }
         public AutomobilesTable Automobiles { get; }
+        #endregion
 
         private bool CheckBDCreated()
         {
@@ -76,8 +86,8 @@ namespace BuildMaterials.BD
             if (CheckBDCreated() == false)
             {
                 InitializeDatabase();
-                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12), "РУВД ПОЛОЦК"), "", false, true, true, true, true));
-                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12), "РУВД ПОЛОЦК"), "", false, true, true, true, true));
+                Employees.Add(new Employee(-1, "Имя", "Фамилия", "Отчество", "Администратор", "+375259991234", new Passport(0, "BM1234567", new DateTime(2016, 3, 12), "РУВД ПОЛОЦК"), "", false, true, true, true, true));                                
+                
                 PayTypes.Add(new PayType(-1, "Наличный расчет"));
                 PayTypes.Add(new PayType(-1, "Безналичный расчет"));
             }
@@ -156,7 +166,7 @@ namespace BuildMaterials.BD
         private readonly MySqlConnection _connection;
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS contacts " +
                 "(ID int NOT NULL AUTO_INCREMENT, organizationid int not null, contacttypeid int not null, text varchar(200) null," +
-                "PRIMARY KEY (ID));";
+                "PRIMARY KEY (ID));";        
 
         public ContactTable()
         {
@@ -578,9 +588,9 @@ namespace BuildMaterials.BD
         private readonly MySqlConnection _connection;
 
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS employees " +
-                "(ID int NOT NULL AUTO_INCREMENT, Name varchar(50), Surname varchar(50)," +
-                "Pathnetic varchar(70), Position varchar(100), PhoneNumber varchar(14)," +
-                "Password varchar(100), FinResponsible boolean, passportid int, canadd boolean, canedit boolean, candel boolean, isadmin boolean, PRIMARY KEY (ID));";
+                "(ID int NOT NULL AUTO_INCREMENT, Name varchar, Surname varchar," +
+                "Pathnetic varchar, Position varchar, PhoneNumber varchar," +
+                "Password varchar, FinResponsible boolean, passportid int, canadd boolean, canedit boolean, candel boolean, isadmin boolean, PRIMARY KEY (ID));";
 
         public EmployeesTable()
         {
@@ -606,11 +616,11 @@ namespace BuildMaterials.BD
         private Employee GetEmployee(MySqlDataReader reader)
         {
             int id = (int)reader[0];
-            string name = (string)reader[1];
-            string surname = (string)reader[2];
-            string pathnetic = (string)reader[3];
+            string name = ((string)reader[1]).DecryptText();
+            string surname = ((string)reader[2]).DecryptText();
+            string pathnetic = ((string)reader[3]).DecryptText();
             string position = (string)reader[4];
-            string phonenumber = (string)reader[5];
+            string phonenumber = ((string)reader[5]).DecryptText();
             string password = (string)reader[6];
             bool finresp = (bool)reader[7];
             int pasid = (int)reader[8];
@@ -618,6 +628,7 @@ namespace BuildMaterials.BD
             bool canedit = (bool)reader[10];
             bool candel = (bool)reader[11];
             bool isadmin = (bool)reader[12];
+
             Passport passport = App.DbContext.Passports.ElementAt(pasid);
             return new Employee(id, name, surname, pathnetic, position, phonenumber, passport, password, finresp,
                 canadd, canedit, candel, isadmin);
@@ -678,8 +689,8 @@ namespace BuildMaterials.BD
             using (MySqlCommand command = new MySqlCommand(
                 "INSERT INTO employees " +
                 $"(Name, Surname, pathnetic, position, phonenumber, password, FinResponsible,passportid, canadd, canedit, candel, isadmin) VALUES" +
-                $"('{obj.Name}','{obj.Surname}'," +
-                $"'{obj.Pathnetic}','{obj.Position}','{obj.PhoneNumber}','{obj.Password}',{(obj.FinResponsible ? 1 : 0)}," +
+                $"('{obj.Name.EncryptText()}','{obj.Surname.EncryptText()}'," +
+                $"'{obj.Pathnetic.EncryptText()}','{obj.Position}','{obj.PhoneNumber.EncryptText()}','{obj.Password}',{(obj.FinResponsible ? 1 : 0)}," +
                 $"{id},{obj.CanUserAdd},{obj.CanUserEdit},{obj.CanUserDelete},{obj.IsUserAdmin});", _connection))
             {
                 _connection.OpenAsync().Wait();
@@ -942,13 +953,14 @@ namespace BuildMaterials.BD
             string sellerValue = obj.SellerID != null ? obj.SellerID + "," : "";
             using (MySqlCommand command = new MySqlCommand("INSERT INTO trades " +
                 $"(Date, {sellerParam} MaterialID, Count, Price,paytypeid) VALUES" +
-                $"('{obj.Date.ToMySQLDate()}',{sellerValue}" +
+                $"('{obj.Date?.ToMySQLDate()}',{sellerValue}" +
                 $"{obj.MaterialID},{obj.Count},{obj.Price},{obj.PayTypeID});", _connection))
             {
                 _connection.OpenAsync().Wait();
                 command.ExecuteNonQueryAsync().Wait();
                 _connection.CloseAsync().Wait();
             }
+            App.DbContext?.Query($"UPDATE Materials SET COUNT = COUNT-{obj.Count} WHERE id = {obj.Material.ID};");
         }
 
         public void Remove(Trade obj)
@@ -966,7 +978,7 @@ namespace BuildMaterials.BD
             _connection.CloseAsync().Wait();
         }
 
-        public void Update(Trade obj) => App.DbContext.Query($"UPDATE Trades SET Count = {obj.Count}, Date = '{obj.Date.ToMySQLDate()}'," +
+        public void Update(Trade obj) => App.DbContext.Query($"UPDATE Trades SET Count = {obj.Count}, Date = '{obj.Date?.ToMySQLDate()}'," +
             $"MaterialID = {obj.MaterialID},PayTypeID = {obj.PayTypeID},Price = {obj.Price},SellerID = {obj.SellerID} " +
             $"WHERE ID = {obj.ID};");
 
@@ -1092,7 +1104,8 @@ namespace BuildMaterials.BD
 
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS ttns " +
                 "(ID int NOT NULL AUTO_INCREMENT, automobileid int not null, driver varchar(300) not null, " +
-            "contractid int not null, pogruzka varchar(100) not null, dat date null, sdalEmployee int not null, responseEmployee int not null," +
+            "contractid int not null, pogruzka varchar(100) not null, dat date null, sdalEmployee int not null, " +
+            "responseEmployee int not null," +
             "adrpogruzka varchar(300) not null, adrrazgruzka varchar(300) not null, PRIMARY KEY (ID));";
 
         public TTNSTable()
@@ -1121,11 +1134,11 @@ namespace BuildMaterials.BD
             string empl = reader.GetString(2);
             Contract contract = App.DbContext.Contracts.ElementAt(reader.GetInt32(3));
             string pogruzka = reader.GetString(4);
-            DateTime date = reader.IsDBNull(5) ? new DateTime(0, 0, 0) : reader.GetDateTime(6);
-            Employee sdal = App.DbContext.Employees.ElementAt(reader.GetInt32(7));
-            Employee response = App.DbContext.Employees.ElementAt(reader.GetInt32(8));
-            string pogr = reader.GetString(9);
-            string razgr = reader.GetString(10);
+            DateTime date = reader.IsDBNull(5) ? new DateTime(0, 0, 0) : reader.GetDateTime(5);
+            Employee sdal = App.DbContext.Employees.ElementAt(reader.GetInt32(6));
+            Employee response = App.DbContext.Employees.ElementAt(reader.GetInt32(7));
+            string pogr = reader.GetString(8);
+            string razgr = reader.GetString(9);
 
             return new TTN(id, contract, empl, auto, date, pogruzka, sdal, response, pogr, razgr);
         }
@@ -1170,7 +1183,8 @@ namespace BuildMaterials.BD
         public void Add(TTN obj)
         {
             using (MySqlCommand command = new MySqlCommand("INSERT INTO ttns " +
-                "(automobileid,driver,contractid,pogruzka,dat,sdalEmployee, responseEmploye) VALUES (@a,@d,@c,@p,@dt,@sd,@re, @raz, @pog);", _connection))
+                "(automobileid,driver,contractid,pogruzka,dat,sdalEmployee, responseEmployee, adrpogruzka, adrrazgruzka) VALUES " +
+                "(@a,@d,@c,@p,@dt,@sd, @rs, @raz, @pog);", _connection))
             {
                 command.Parameters.AddWithValue("@a", obj.Automobile!.ID);
                 command.Parameters.AddWithValue("@d", obj.Driver);
@@ -1245,9 +1259,10 @@ namespace BuildMaterials.BD
 
         private Account GetAccount(MySqlDataReader reader)
         {
-            var sel = App.DbContext.Organizations.ElementAt(reader.GetInt32(2));
-            var buy = App.DbContext.Organizations.ElementAt(reader.GetInt32(3));
-            return new Account(reader.GetInt32(0),reader.GetDateTime(1),sel,buy);
+            var sel = App.DbContext.Organizations.ElementAt(reader.GetInt32(1));
+            var buy = App.DbContext.Organizations.ElementAt(reader.GetInt32(2));
+            var contract = App.DbContext.Contracts.ElementAt(reader.GetInt32(3));
+            return new Account(reader.GetInt32(0),reader.GetDateTime(4),sel,buy,contract);
         }
 
         public Account ElementAt(int id)
@@ -1447,7 +1462,7 @@ namespace BuildMaterials.BD
             var indiv = reader.IsDBNull(5) ? new Individual() : App.DbContext.Individuals.ElementAt(reader.GetInt32(5));
             return new Contract(reader.GetInt32(0), seller, buyer, reader.GetDateTime(3), mats, log, indiv);
         }
-
+        
         public Contract ElementAt(int id)
         {
             Contract obj = null!;
@@ -1559,7 +1574,7 @@ namespace BuildMaterials.BD
         }
     }
 
-    public class PayTypesTable
+    public class PayTypesTable : IDBSetBase<PayType>
     {
         public const string CreateQuery = "CREATE TABLE PAYTYPES (ID INT NOT NULL auto_increment, NAME VARCHAR(100) NOT NULL, PRIMARY KEY(ID));";
 
@@ -1636,6 +1651,11 @@ namespace BuildMaterials.BD
             string name = (string)reader[1];
 
             return new PayType(id, name);
+        }
+
+        public void Remove(int id)
+        {
+            throw new NotImplementedException();
         }
     }
     public class IndividualsTable : IDBSetBase<Individual>
@@ -1785,14 +1805,16 @@ namespace BuildMaterials.BD
     public class PassportsTable : IDBSetBase<Passport>
     {
         public const string CreateQuery = "CREATE TABLE passports " +
-            "(ID INT NOT NULL auto_increment, number VARCHAR(14) NOT NULL, issuedate date, issuepunkt varchar(100), PRIMARY KEY(ID));";
+            "(ID INT NOT NULL auto_increment, number VARCHAR NOT NULL, " +
+            "issuedate varchar, issuepunkt varchar, PRIMARY KEY(ID));";
 
         public void Add(Passport item)
         {
             using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
             {
                 _connection.OpenAsync().Wait();
-                using (MySqlCommand command = new MySqlCommand($"INSERT INTO passports (number,issuedate,issuepunkt) VALUES ('{item.Number}','{item.IssueDate?.ToMySQLDate()}','{item.IssuePunkt}');", _connection))
+                using (MySqlCommand command = new MySqlCommand($"INSERT INTO passports " +
+                    $"(number,issuedate,issuepunkt) VALUES ('{item.Number.EncryptText()}','{item.IssueDate?.ToShortDateString().EncryptText()}','{item.IssuePunkt.EncryptText()}');", _connection))
                 {
                     command.ExecuteNonQueryAsync().Wait();
                 }
@@ -1814,7 +1836,6 @@ namespace BuildMaterials.BD
         }
 
         public void Remove(Passport item) => Remove(item.ID);
-
 
         public List<Passport> ToList() => Select("SELECT * FROM passports;");
 
@@ -1840,9 +1861,9 @@ namespace BuildMaterials.BD
         private Passport GetPassport(MySqlDataReader reader)
         {
             int id = (int)reader[0];
-            string num = (string)reader[1];
-            DateTime isdat = (DateTime)reader[2];
-            string punkt = (string)reader[3];
+            string num = ((string)reader[1]).DecryptText();
+            DateTime isdat = Convert.ToDateTime(((string)reader[2]).DecryptText());
+            string punkt = ((string)reader[3]).DecryptText();
 
             return new Passport(id, num, isdat, punkt);
         }

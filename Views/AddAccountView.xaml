@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новый счет" Width="250" ResizeMode="NoResize"
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
-         WindowBackdropType ="Mica"
+        mc:Ignorable="d" SizeToContent="Height" x:Name="window"
+        Title="Новый счет" MinWidth="10" ResizeMode="NoResize" MinHeight="10"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+         WindowBackdropType ="Mica" Width="200"
          ExtendsContentIntoTitleBar="True"
          WindowCornerPreference="Default"
          ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -16,7 +16,7 @@
          d:DataContext="{d:DesignInstance viewmodels:AddAccountViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>

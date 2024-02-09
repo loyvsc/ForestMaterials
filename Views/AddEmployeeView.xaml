@@ -6,7 +6,7 @@
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         xmlns:converters="clr-namespace:BuildMaterials.Converters"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
-        Title="Новый сотрудник" Width="650"  ResizeMode="NoResize"
+        Title="Новый сотрудник" Width="650"  ResizeMode="NoResize" 
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
                  WindowBackdropType ="Mica"
                  ExtendsContentIntoTitleBar="True"
@@ -17,7 +17,7 @@
                  d:DataContext="{d:DesignInstance viewmodels:AddEmployeeViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>

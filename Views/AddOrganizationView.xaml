@@ -6,7 +6,7 @@
         xmlns:controls="http://filterdatagrid.control.com/2021"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         xmlns:converters="clr-namespace:BuildMaterials.Converters"
-        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window" Height="450"
+        mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window" MinHeight="450"
         Title="Добавление организации" Width="500" WindowStartupLocation="CenterScreen"
          xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
           WindowBackdropType ="Mica"
@@ -17,7 +17,7 @@
           d:DataContext="{d:DesignInstance viewmodels:AddOrganizationViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35px"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -65,7 +65,8 @@
                     <Button Margin="0,0,0,5" Content="Удалить" Command="{Binding DeleteContactCommand}"/>
                 </StackPanel>
                 <controls:FilterDataGrid ItemsSource="{Binding Organization.Contacts, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource FilterDataGridStyle}" SelectedValue="{Binding SelectedContact, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1">
+                     Style="{StaticResource FilterDataGridStyle}"
+                                         SelectedValue="{Binding SelectedContact, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1">
                     <controls:FilterDataGrid.Columns>
                         <controls:DataGridTemplateColumn
 FieldName="ContactType" Header="Тип контакта" IsColumnFiltered="True" SortMemberPath="ContactType">

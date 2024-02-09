@@ -6,7 +6,7 @@
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
         mc:Ignorable="d" SizeToContent="Height" MinWidth="250" x:Name="window"
         Title="Товарооборот" Width="600" MinHeight="10" ResizeMode="NoResize"
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" Height="192"  
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
                  WindowBackdropType ="Mica"
                  ExtendsContentIntoTitleBar="True"
                  WindowCornerPreference="Default"
@@ -16,7 +16,7 @@
                  d:DataContext="{d:DesignInstance viewmodels:AddTradeViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -44,7 +44,7 @@
             <Grid>
                 <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="selText">ФИО продавца</TextBlock>
                 <ComboBox ItemsSource="{Binding SellersFIO}"  DisplayMemberPath="FIO" SelectedValuePath="ID"
-SelectedValue="{Binding SellerID, UpdateSourceTrigger=PropertyChanged}"/>
+SelectedValue="{Binding SellerID, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Trade.Seller}"/>
             </Grid>
 
         </StackPanel>
@@ -53,16 +53,17 @@ SelectedValue="{Binding SellerID, UpdateSourceTrigger=PropertyChanged}"/>
             <Grid Margin="0,5,0,0">
                 <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" x:Name="matText">
          Наименование товара</TextBlock>
-                <ComboBox ItemsSource="{Binding Materials}" SelectedValue="{Binding SelectedMaterialID}"
+                <ComboBox ItemsSource="{Binding Materials}" SelectedItem="{Binding Trade.Material}"
+                          SelectedValue="{Binding SelectedMaterialID}"
 DisplayMemberPath="Name" SelectedValuePath="ID"/>
             </Grid>
 
-            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Количество" Text="{Binding Trade.Count}"/>
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Количество" Text="{Binding Trade.Count, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
 
         <StackPanel Orientation="Vertical" Margin="5,5,5,5" Grid.Column="2" Grid.Row="1">
 
-            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Стоимость за единицу" Text="{Binding Path=Trade.Price}"/>
+            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Стоимость за единицу" Text="{Binding Trade.Price, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Grid Margin="0,5,0,0">
                 <Grid.ColumnDefinitions>

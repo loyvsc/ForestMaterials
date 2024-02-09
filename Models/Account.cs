@@ -80,12 +80,13 @@ namespace BuildMaterials.Models
             Contract = new Contract();
         }
 
-        public Account(int iD, DateTime date, Organization? sel, Organization? buy)
+        public Account(int iD, DateTime date, Organization? sel, Organization? buy, Contract contract)
         {
             ID = iD;
             Date = date;
             Seller = sel;
             Buyer = buy;
+            Contract = contract;
         }
 
         public bool IsValid => Date != null

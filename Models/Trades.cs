@@ -31,7 +31,7 @@ namespace BuildMaterials.Models
     public class Trade : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
-        public DateTime Date
+        public DateTime? Date
         {
             get => date;
             set
@@ -40,7 +40,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
-        public string? DateInString => Date.ToShortDateString();
+        public string? DateInString => Date?.ToShortDateString();
 
         public int? SellerID
         {
@@ -137,19 +137,14 @@ namespace BuildMaterials.Models
         private PayType? payType;
         private Material? mat;
         private int? sellerId = 0;
-        private float? count = 0;
-        private float? price = 0;
-        private DateTime date;
+        private float? count;
+        private float? price;
+        private DateTime? date;
         private int? matId = 0;
         private int? pattypeid = 0;
         private Employee? seller;
-
-        public Trade()
-        {
-            Date = DateTime.Now;
-        }
-
-        public Trade(int iD, DateTime date, int? sellerid, int? materialId, float? count, float? price, int paytypeid, Employee? empl = null)
+        public Trade() { }
+        public Trade(int iD, DateTime? date, int? sellerid, int? materialId, float? count, float? price, int paytypeid, Employee? empl = null)
         {
             ID = iD;
             Date = date;
@@ -164,7 +159,7 @@ namespace BuildMaterials.Models
         public bool IsValid => SellerID != 0
             && MaterialID != 0
             && PayTypeID != 0
-            && Count != 0
-            && Price != 0;
+            && Count != null
+            && Price != null;
     }
 }

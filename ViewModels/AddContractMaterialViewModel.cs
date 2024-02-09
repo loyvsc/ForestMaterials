@@ -11,7 +11,18 @@ namespace BuildMaterials.ViewModels
         public ICommand AddCommand => new AsyncRelayCommand(Add);
         public ICommand CloseCommand => new AsyncRelayCommand(Close);
 
+        private Visibility _textVis;
+
         #region Public proprs
+        public Visibility TextVisibility
+        {
+            get => _textVis;
+            set
+            {
+                _textVis = value;
+                OnPropertyChanged();
+            }
+        }
         public int? MaterialID
         {
             get => matid;
@@ -19,7 +30,7 @@ namespace BuildMaterials.ViewModels
             {
                 if (value != null)
                 {
-                    _view.text.Visibility = System.Windows.Visibility.Collapsed;
+                    TextVisibility = System.Windows.Visibility.Collapsed;
                     matid = value;
                     OnPropertyChanged();
                 }
@@ -56,6 +67,7 @@ namespace BuildMaterials.ViewModels
         }
         public AddContractMaterialViewModel(AddContractMaterialView view, int contractId) : this(view)
         {
+            Title = "Добавление лесопродукта";
             ContractMaterial = new ContractMaterial()
             {
                 ContactID = contractId
@@ -63,6 +75,7 @@ namespace BuildMaterials.ViewModels
         }
         public AddContractMaterialViewModel(AddContractMaterialView view, ContractMaterial contractMaterial) : this()
         {
+            Title = "Изменение лесопродукта";
             ContractMaterial = contractMaterial;
             MaterialID = contractMaterial.Material.ID;
             _view = view;

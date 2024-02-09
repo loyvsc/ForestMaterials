@@ -6,6 +6,8 @@ namespace BuildMaterials.Models
     {
         public int ID { get; set; }
 
+        public string BuyerText { get; set; }
+
         public Organization? Seller
         {
             get => seller;
@@ -116,6 +118,7 @@ namespace BuildMaterials.Models
             Date = date;
             LogisiticsType = logisiticsType;
             Individual = individual;
+            BuyerText = Buyer.ID != 0 ? Buyer.ToString() : Individual.FIO;
         }
         #endregion
 

@@ -111,7 +111,6 @@ namespace BuildMaterials.ViewModels
             {
                 try
                 {
-
                     if (TTN.ID != 0)
                     {
                         App.DbContext.TTNs.Update(TTN);
@@ -124,12 +123,12 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    _window.ShowDialogAsync(Title, "Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message,Title);
                 }
             }
             else
             {
-                _window.ShowDialogAsync(Title,"Введена не вся требуемая информация!");
+                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
             }
 
         }

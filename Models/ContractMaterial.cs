@@ -21,7 +21,7 @@ namespace BuildMaterials.Models
         {
             get => count;
             set
-            {
+            {                
                 count = value;
                 OnPropertyChanged();
             }

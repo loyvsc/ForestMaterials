@@ -17,7 +17,7 @@ namespace BuildMaterials.Export.Documents
         }
 
         public void SaveReport(string path, Account ttn)
-        {
+        {            
             try
             {
                 File.WriteAllBytes(path, Properties.Resources.Account);
@@ -59,7 +59,7 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("SellerBank", $"{ttn.Contract.Seller.RascSchet}, {ttn.Contract.Seller.CBU}, {ttn.Contract.Seller.BIK}"),
                 new FieldContent("Buyer", ttn.Contract.Buyer.CompanyName),
                 new FieldContent("BuyerUNP", ttn.Contract.Buyer.UNP),
-                new FieldContent("BuyerAdress", ttn.Contract.Buyer.Adress),
+                new FieldContent("BuyerAdress", ttn.Buyer.Adress),
                 new FieldContent("BuyerBank", ttn.Contract.Buyer.Adress),
                 new FieldContent("BuyerAdress", $"{ttn.Contract.Seller.RascSchet}, {ttn.Contract.Seller.CBU}, {ttn.Contract.Seller.BIK}"),
                 new FieldContent("Dogovor", ttn.Contract.ToString()),

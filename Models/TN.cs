@@ -63,6 +63,9 @@ namespace BuildMaterials.Models
         public TN()
         {
             ID = 0;
+            ResponseEmployee = new();
+            SdalEmployee = new();
+            Contract = new();
         }
 
         public TN(int iD, Contract contract, Employee responseEmployee, Employee sdalEmployee)
@@ -74,6 +77,6 @@ namespace BuildMaterials.Models
         }
         #endregion
 
-        public bool IsValid =>  Contract != null && ResponseEmployee != null && SdalEmployee != null;
+        public bool IsValid =>  Contract.ID != 0 && ResponseEmployee.ID != 0 && SdalEmployee.ID != 0;
     }
 }

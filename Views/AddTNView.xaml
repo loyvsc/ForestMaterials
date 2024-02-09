@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" Height="160" Width="400"
+        mc:Ignorable="d" Width="400" MinHeight="10" 
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
-                 WindowBackdropType ="Mica"
+                 WindowBackdropType ="Mica" SizeToContent="Height"
                  ExtendsContentIntoTitleBar="True"
                  WindowCornerPreference="Default"
                  ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -19,7 +19,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -55,9 +55,9 @@
 
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2">
-            <Button Command="{Binding AddCommand}" Width="120px" Height="25" x:Name="addBut"/>
-            <Button Command="{Binding CloseCommand}" Margin="5,0,0,0" Width="120px" Height="25" x:Name="clBut"/>
+        <StackPanel Orientation="Horizontal" Margin="5,5,5,5" HorizontalAlignment="Right" Grid.Row="2" Grid.ColumnSpan="2">
+            <Button Command="{Binding AddCommand}" x:Name="addBut"/>
+            <Button Command="{Binding CloseCommand}" Margin="5,0,0,0" x:Name="clBut"/>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>

@@ -15,7 +15,7 @@
                  ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                  WindowStartupLocation="CenterScreen"                 
                  d:DataContext="{d:DesignInstance viewmodels:MainWindowViewModel}"
-                 MinHeight="450" MinWidth="760" Height="450" Width="760">
+                 MinHeight="480" MinWidth="760" Height="450" Width="760">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -60,6 +60,7 @@
                         <control:DataGridTextColumn MinWidth="155" IsColumnFiltered="True" Header="Стоимость за единицу" Binding="{Binding Price,UpdateSourceTrigger=PropertyChanged}"/>
                         <control:DataGridTextColumn MinWidth="100" IsColumnFiltered="True" Header="Количество" Binding="{Binding Count,UpdateSourceTrigger=PropertyChanged}"/>
                         <control:DataGridTextColumn MinWidth="115" IsColumnFiltered="True" Header="Ед. измерения" Binding="{Binding CountUnits,UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn MinWidth="115" IsColumnFiltered="True" Header="НДС" Binding="{Binding NDS,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NDSConverter}}"/>
                         <control:DataGridTextColumn MinWidth="145" IsColumnFiltered="True" Header="Дата поступления" Binding="{Binding EnterDate, UpdateSourceTrigger=PropertyChanged}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
@@ -146,16 +147,15 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                                                 Style="{StaticResource FilterDataGridStyle}" x:Name="ttnsDataGrid">
                     <control:FilterDataGrid.Columns>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Грузоотправитель" Binding="{Binding Shipper, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Грузополучатель" Binding="{Binding Consignee, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Плательщик" Binding="{Binding Payer, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Количество" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Цена" Binding="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn MinWidth="195" IsColumnFiltered="True" Header="Наименование материала" Binding="{Binding Material.Name, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Ед. измерения" Binding="{Binding CountUnits, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Масса" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Сумма" Binding="{Binding Summ, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date,UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DateConverter}}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Договор" Binding="{Binding Contract.ID, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Отпуск разрешил" Binding="{Binding ResponseEmployee, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Сдал" Binding="{Binding SdalEmployee, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Автомобиль" Binding="{Binding Automobile, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Водитель" Binding="{Binding Driver, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Метод погрузки" Binding="{Binding PogruzkaMethod, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Адрес погрузки" Binding="{Binding AdresPogruzki, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Адрес разгрузки" Binding="{Binding AdresRazgruzki, UpdateSourceTrigger=PropertyChanged}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
             </TabItem>
@@ -167,22 +167,22 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Договор" Binding="{Binding Contract}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата заключения договора" Binding="{Binding Contract.Date, Converter={StaticResource DateConverter}}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="НДС" Binding="{Binding NDSSumm}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Сумма" Binding="{Binding Summ}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Отпуск разрешил" Binding="{Binding ResponseEmployee}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Сдал грузоотправитель" Binding="{Binding SdalEmployee}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
             </TabItem>
-            <TabItem x:Name="accountTab" Header="Счет-фактура" >
+            <TabItem x:Name="acountTab" Header="Счет-фактура" >
                 <control:FilterDataGrid Grid.Column="1" ItemsSource="{Binding AccountsList,UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedItem="{Binding SelectedTableItem}" x:Name="accountsDataGrid"
                                                 Style="{StaticResource FilterDataGridStyle}">
                     <control:FilterDataGrid.Columns>
-                        <control:DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
-                        <control:DataGridTextColumn Header="Дата" Binding="{Binding DateInString, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn Header="Продавец" Binding="{Binding Seller, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn Header="Сумма НДС" Binding="{Binding NDS, UpdateSourceTrigger=PropertyChanged}"/>
-                        <control:DataGridTextColumn Header="Сумма работ всего" Binding="{Binding Summ, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DateConverter}}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Продавец" Binding="{Binding Seller, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Сумма НДС" Binding="{Binding NDS, UpdateSourceTrigger=PropertyChanged}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Сумма работ всего" Binding="{Binding Summ, UpdateSourceTrigger=PropertyChanged}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
             </TabItem>
@@ -193,18 +193,17 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                     <control:FilterDataGrid.Columns>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Продавец" Binding="{Binding Seller}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Покупатель" Binding="{Binding Buyer}"/>
+                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Покупатель" Binding="{Binding BuyerText}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date,Converter={StaticResource DateConverter}}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Текущий счет" Binding="{Binding Seller.CurrentSchet}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Расчетный счет" Binding="{Binding Seller.RascSchet}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="УНП" Binding="{Binding Seller.UNP}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="БИК" Binding="{Binding Seller.BIK}"/>
-                        <control:DataGridTextColumn IsColumnFiltered="True" Header="Ответственное лицо" Binding="{Binding Employee.FIO}"/>
                         <control:DataGridTextColumn IsColumnFiltered="True" Header="Условия доставки" Binding="{Binding LogisiticsType}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
             </TabItem>
-            <TabItem x:Name="materialResponsibleTab" Header="Материально-ответственный отчет">
+            <!--<TabItem x:Name="materialResponsibleTab" Header="Материально-ответственный отчет">
                 <control:FilterDataGrid Grid.Column="1" ItemsSource="{Binding MaterialResponsesList,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectionUnit="FullRow" SelectedItem="{Binding SelectedTableItem}" 
                                       CanUserAddRows="False" AutoGenerateColumns="False" x:Name="materialresponsesDataGrid">
                     <control:FilterDataGrid.Columns>
@@ -218,11 +217,11 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                         <control:DataGridTextColumn Header="Материально-ответственное лицо" Binding="{Binding FinReponseEmployee.FIO}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
-            </TabItem>
-            <!--<TabItem Header="Учет" x:Name="uchetTab">
-                <control:FilterDataGrid ItemsSource="{Binding TradesList,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FilterDataGridStyle}"
+            </TabItem>-->
+            <TabItem Header="Учет" x:Name="uchetTab">
+                <control:FilterDataGrid ItemsSource="{Binding TradesList,UpdateSourceTrigger=PropertyChanged}"
                                             SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
-                                        x:Name="uchetDataGrid">
+                                        x:Name="uchetDataGrid"  Style="{StaticResource FilterDataGridStyle}">
                     <control:FilterDataGrid.Columns>
                         <control:DataGridTextColumn MinWidth="30" IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                         <control:DataGridTextColumn MinWidth="30" IsColumnFiltered="True" Header="Дата" Binding="{Binding Date}"/>
@@ -233,7 +232,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                         <control:DataGridTextColumn MinWidth="195" IsColumnFiltered="True" Header="Тип оплаты" Binding="{Binding PayType.Name,UpdateSourceTrigger=PropertyChanged}"/>
                     </control:FilterDataGrid.Columns>
                 </control:FilterDataGrid>
-            </TabItem>-->
+            </TabItem>
         </TabControl>
     </Grid>
 </ui:FluentWindow>

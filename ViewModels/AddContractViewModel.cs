@@ -48,13 +48,13 @@ namespace BuildMaterials.ViewModels
         {
             _window = window;
             Contract = new Contract();
-            Title = "Добавление счета-фактуры";
+            Title = "Добавление договора купли-продажи";
         }
         public AddContractViewModel(AddContractView window, Contract contract)
         {
             _window = window;
             Contract = contract;
-            Title = "Изменение счета-фактуры";
+            Title = "Изменение договора купли-продажи";
         }
         #endregion
 
@@ -136,7 +136,7 @@ namespace BuildMaterials.ViewModels
         }
         private async Task EditMaterial(object? obj)
         {
-            ContractMaterial? Selected = _window.materialsDataGrid.SelectedValue as ContractMaterial;
+            ContractMaterial? Selected = _window.materialsDataGrid.SelectedItem as ContractMaterial;
             if (Selected == null) return;
             AddContractMaterialView view = new AddContractMaterialView(Selected);
             if (view.ShowDialog() == true)

@@ -15,11 +15,12 @@ namespace BuildMaterials.ViewModels
         private readonly AddAccountView _window = null!;
 
         public List<Organization> Organizations => App.DbContext.Organizations.ToList();
-        public List<Contract> Contracts => App.DbContext.Contracts.ToList();
+        public List<Contract> Contracts => App.DbContext.Contracts.ToList().Where(x => x.Buyer.ID != 0).ToList();
 
         public AddAccountViewModel(AddAccountView window)
         {
             _window = window;
+            Title = "Добавление счёта-фактуры";
         }
 
         public DateTime? Date
@@ -72,10 +73,7 @@ namespace BuildMaterials.ViewModels
             }
         }
         
-
-
         private async Task Close(object? obj = null) => _window.DialogResult = true;
-
         private async Task AddMaterial(object? obj)
         {
             if (Account.IsValid)

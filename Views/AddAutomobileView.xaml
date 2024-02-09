@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:BuildMaterials.ViewModels"
-        mc:Ignorable="d" Height="160" Width="300"
+        mc:Ignorable="d" Width="300" MinHeight="10" SizeToContent="Height"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  WindowBackdropType ="Mica"
          ExtendsContentIntoTitleBar="True"
@@ -15,7 +15,7 @@
          d:DataContext="{d:DesignInstance viewmodels:AddAutomobileViewModel}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35px"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>

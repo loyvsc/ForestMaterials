@@ -14,6 +14,8 @@
     <converters:EmptyStringConveter x:Key="EmptyStringConveter"/>
     <converters:ContractTypeStringConverter x:Key="ContractTypeStringConverter"/>
     <converters:ContactTypeConverter x:Key="ContactTypeConverter"/>
+    <converters:NDSConverter x:Key="NDSConverter"/>
+    <converters:ZeroIDToVisibilityConverter x:Key="ZeroIDToVisibilityConverter"/>
 
     <SolidColorBrush Color="#0c3b4f" x:Key="WindowBackground"/>
     <SolidColorBrush Color="#0c3b4f" x:Key="TabHeaderBackground"/>
@@ -35,7 +37,7 @@
     <Style TargetType="{x:Type Window}">
         <Setter Property="WindowStyle" Value="None"/>
     </Style>
-    
+
     <Style TargetType="control:FilterDataGrid" x:Key="FilterDataGridStyle">
         <Setter Property="FilterLanguage" Value="Russian"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
@@ -44,60 +46,44 @@
         <Setter Property="ColumnWidth" Value="*"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="Background" Value="{StaticResource WindowBackground}"/>
-        <Setter Property="RowStyle">
-            <Setter.Value>
-                <Style TargetType="{x:Type DataGridRow}">
-                    <Style.Triggers>
-                        <Trigger Property="AlternationIndex" Value="0">
-                            <Setter Property="Background" Value="{StaticResource SecondDataGridRowColor}" />
-                        </Trigger>
-                        <Trigger Property="AlternationIndex" Value="1">
-                            <Setter Property="Background" Value="{StaticResource FirstDataGridRowColor}" />
-                        </Trigger>
-                        <DataTrigger Binding="{Binding Path=Selectable}" Value="False">
-                            <DataTrigger.Setters>
-                                <Setter Property="Background" Value="{StaticResource FirstDataGridRowColor}" />
-                            </DataTrigger.Setters>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style TargetType="{x:Type DataGridCell}">
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{StaticResource WindowBackground}"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="Foreground" Value="{StaticResource WindowBackground}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <ControlTemplate TargetType="{x:Type TabItem}" x:Key="TabItemTemplate">
         <Border x:Name="TabHeaderBackgroundBorder"
-                    RenderTransformOrigin="0.5,0.5"
-                    BorderBrush="{StaticResource TabHeaderBackground}"
-                    BorderThickness="0,0,0,1"
-                    Background="{StaticResource TabHeaderBackground}">
+                BorderBrush="{StaticResource TabHeaderBackground}"
+                Background="{StaticResource TabHeaderBackground}">
             <Grid>
-                <Border x:Name="TabHeaderHighlightBackgroundBorder" Opacity="0" Background="{StaticResource TabHeaderHighlightBackground}" />
-                <Border x:Name="TabHeaderSelectedBackgroundBorder" Opacity="0" Background="{StaticResource TabHeaderSelectedBackground}" />
-                <ContentControl Content="{TemplateBinding Header}"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalContentAlignment="Center"
-                                    Margin="16,10,16,10"
-                                    FontSize="12"
-                                    Foreground="White"
-                                    FontWeight="Light"                                
-                                    Cursor="Hand"
-                                    x:Name="ContControl"/>
+                <Border x:Name="TabHeaderHighlightBackgroundBorder" Opacity="0"
+                        Background="{StaticResource TabHeaderHighlightBackground}" />
+                <Border x:Name="TabHeaderSelectedBackgroundBorder" Opacity="0"
+                        Background="{StaticResource TabHeaderSelectedBackground}"/>
+                <ContentControl Content="{TemplateBinding Header}" RenderTransformOrigin="0.5,0.5"
+                                BorderThickness="0,0,0,1"
+                                HorizontalContentAlignment="Center" Margin="16,10,16,10" FontSize="12"
+                                Foreground="White" FontWeight="Light" Cursor="Hand" x:Name="ContControl"/>
             </Grid>
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal"/>
                     <VisualState x:Name="MouseOver">
                         <Storyboard>
-                            <DoubleAnimation Storyboard.TargetName="TabHeaderHighlightBackgroundBorder"
-                                                 Storyboard.TargetProperty="Opacity"
-                                                 To="1"
-                                                 Duration="0:0:0.25" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="TabHeaderHighlightBackgroundBorder"
+                                                 Storyboard.TargetProperty="Opacity" To="1"
+                                Duration="0:0:0.25" />
                         </Storyboard>
                     </VisualState>
                 </VisualStateGroup>
@@ -109,18 +95,15 @@
         <Setter Property="Template" Value="{StaticResource TabItemTemplate}"/>
     </Style>
 
-    <ControlTemplate x:Key="TabControlTemplate"
-                         TargetType="{x:Type TabControl}">
+    <ControlTemplate x:Key="TabControlTemplate" TargetType="{x:Type TabControl}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180px" />
+                <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <ItemsPresenter/>
-            
-            <Border Grid.Column="1" x:Name="TabContent">
-                <ContentPresenter ContentSource="SelectedContent"/>
-            </Border>
+
+            <ContentPresenter Grid.Column="1" x:Name="TabContent" ContentSource="SelectedContent"/>
         </Grid>
     </ControlTemplate>
         
@@ -183,7 +166,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Thumb}">
-                            <Border CornerRadius="1" Background="{TemplateBinding Background}" Width="8" Margin="8,0,0,8"/>
+                            <Border CornerRadius="1" Background="{TemplateBinding Background}" Width="8"/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -218,7 +201,7 @@
                             <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageUpCommand" />
                         </Track.DecreaseRepeatButton>
                         <Track.Thumb>
-                            <Thumb Style="{StaticResource ScrollBarThumb}" Margin="1,0,1,0" Background="{StaticResource HorizontalNormalBrush}" BorderBrush="{StaticResource HorizontalNormalBorderBrush}" />
+                            <Thumb Style="{StaticResource ScrollBarThumb}" Background="{StaticResource HorizontalNormalBrush}" BorderBrush="{StaticResource HorizontalNormalBorderBrush}" />
                         </Track.Thumb>
                         <Track.IncreaseRepeatButton>
                             <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageDownCommand" />

@@ -21,9 +21,18 @@ namespace BuildMaterials.Views
 
         private void isBuyerIdv_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            viewModel.Individual = null;
-            viewModel.Buyer = 0;
-            buyerText.Visibility = System.Windows.Visibility.Visible;
+            if (buyerText.Visibility != System.Windows.Visibility.Visible)
+            {
+                viewModel.Individual = null;
+                viewModel.Buyer = 0;
+                buyerText.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                viewModel.Individual = null;
+                viewModel.Buyer = 0;
+                buyerText.Visibility = System.Windows.Visibility.Collapsed;
+            }
         }
     }
 }

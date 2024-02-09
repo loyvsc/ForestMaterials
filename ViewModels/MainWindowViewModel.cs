@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using MessageBoxResult = System.Windows.MessageBoxResult;
 
 namespace BuildMaterials.ViewModels
 {
@@ -209,7 +208,7 @@ namespace BuildMaterials.ViewModels
             CurrentEmployee = new Employee();
             MaterialsList = App.DbContext.Materials.ToList();
             IsDocumentSelect = Visibility.Collapsed;
-            Title = "АРМ Менеджера Строительной Фирмы";
+            Title = "ПС \"Учет товарооборота лесхоза\"";
         }
         private readonly FilterDataGrid.FilterDataGrid materialsDataGrid;
 
@@ -256,56 +255,72 @@ namespace BuildMaterials.ViewModels
                     case "automobilesTab":
                         {
                             AutomobilesList = App.DbContext.Automobiles.ToList();
+                            CurrentDataGrid = view.automobilesDataGrid;
                             break;
                         }
                     case "materialsTab":
                         {
                             MaterialsList = App.DbContext.Materials.ToList();
+                            CurrentDataGrid = view.materialsDataGrid;
                             break;
                         }
                     case "employersTab":
                         {
                             EmployeesList = App.DbContext.Employees.ToList();
+                            CurrentDataGrid = view.employersDataGrid;
                             break;
                         }
                     case "orgTab":
                         {
                             OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers");
+                            CurrentDataGrid = view.organizationsDataGrid;
                             break;
                         }
                     case "uchetTab":
                         {
                             TradesList = App.DbContext.Trades.ToList();
+                            CurrentDataGrid = view.uchetDataGrid;
                             break;
                         }
                     case "ttnTab":
                         {
                             IsDocumentSelect = Visibility.Visible;
+                            CurrentDataGrid = view.ttnsDataGrid;
                             TTNList = App.DbContext.TTNs.ToList();
                             break;
                         }
-                    case "accountTab":
+                    case "acountTab":
                         {
                             IsDocumentSelect = Visibility.Visible;
                             AccountsList = App.DbContext.Accounts.ToList();
+                            CurrentDataGrid = view.accountsDataGrid;
                             break;
                         }
                     case "contractTab":
                         {
                             IsDocumentSelect = Visibility.Visible;
                             ContractsList = App.DbContext.Contracts.ToList();
+                            CurrentDataGrid = view.contractsDataGrid;
                             break;
                         }
                     case "materialResponsibleTab":
                         {
                             IsDocumentSelect = Visibility.Visible;
                             MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            CurrentDataGrid = view.materialsDataGrid;
                             break;
                         }
                     case "tnTab":
                         {
                             IsDocumentSelect = Visibility.Visible;
                             TNsList = App.DbContext.TNs.ToList();
+                            CurrentDataGrid = view.tnsDataGrid;
+                            break;
+                        }
+                    case "individualsTab":
+                        {
+                            IndividualsList = App.DbContext.Individuals.ToList();
+                            CurrentDataGrid = view.individualsDataGrid;
                             break;
                         }
                 }
@@ -348,9 +363,13 @@ namespace BuildMaterials.ViewModels
                         export.SaveReport(path, SelectedTableItem as TTN);
                         break;
                     }
-                case "accountTab":
+                case "acountTab":
                     {
-
+                        if ((SelectedTableItem as Account).Buyer.ID == 0)
+                        {
+                            view.ShowDialogAsync("Выбрите документ!", "Экспорт документа");
+                        }
+                        export.SaveReport(path, SelectedTableItem as Account);
                         break;
                     }
                 case "contractTab":
@@ -613,7 +632,7 @@ namespace BuildMaterials.ViewModels
                         }
                         break;
                     }
-                case "accountTab":
+                case "acountTab":
                     {
                         AddAccountView add = new AddAccountView();
                         if (add.ShowDialog() == true)
@@ -737,15 +756,15 @@ namespace BuildMaterials.ViewModels
             {
 
 
-                var myClassType = CurrentDataGrid.ItemsSource.GetType().GetGenericArguments().Single();
+                try
+                {
+                    var myClassType = CurrentDataGrid.ItemsSource.GetType().GetGenericArguments().Single();
 
                 var method = typeof(ExportToExcel).GetMethod("ExportFromDataGrid", BindingFlags.Static | BindingFlags.Public);
                 var genericMethod = method.MakeGenericMethod(myClassType);
 
-                try
-                {
                     // вызов статического метода
-                    genericMethod.Invoke(null, new object[3] { savefile.FileName, CurrentDataGrid, view});
+                    genericMethod.Invoke(null, new object[3] { savefile.FileName, CurrentDataGrid, view });
                 }
                 catch
                 {
