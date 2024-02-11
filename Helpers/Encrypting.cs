@@ -12,6 +12,7 @@ namespace BuildMaterials.Helpers
         private static string EncryptionKey = "qjdiashdfi1293812jsadjkashd";
         public static string Encrypt(string clearText)
         {
+            if (clearText== null || clearText.Trim().Length == 0) return "";
             byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
             using (Aes encryptor = Aes.Create())
             {
@@ -33,6 +34,7 @@ namespace BuildMaterials.Helpers
 
         public static string Decrypt(string cipherText)
         {
+            if (cipherText.Trim().Length == 0) return "";
             cipherText = cipherText.Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(cipherText);
             using (Aes encryptor = Aes.Create())

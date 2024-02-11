@@ -137,6 +137,15 @@ namespace BuildMaterials.ViewModels
         public ICommand ExportCommand => new AsyncRelayCommand(ExportDocument);
         #endregion        
 
+        public bool IsUpdating
+        {
+            get => isUpdating;
+            set
+            {
+                isUpdating = value;
+                OnPropertyChanged();
+            }
+        }
         public string SearchText
         {
             get => _searchtext;
@@ -182,6 +191,7 @@ namespace BuildMaterials.ViewModels
         }
 
         #region Private vars
+        private bool isUpdating;
         private List<Automobile> automobs;
         private List<TN> tns;
         private Visibility isdocsel;
@@ -240,11 +250,12 @@ namespace BuildMaterials.ViewModels
         }
         #endregion
 
-        public void OnTabChanged(SelectionChangedEventArgs e)
+        public async Task OnTabChanged(SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count == 0) return;
             if (e.AddedItems[0] is TabItem)
             {
+                IsUpdating = true;
                 SelectedTableItem = null;
                 string tabName = (e.AddedItems[0] as TabItem)!.Name;
                 selectedTab = tabName;
@@ -254,73 +265,117 @@ namespace BuildMaterials.ViewModels
                 {
                     case "automobilesTab":
                         {
-                            AutomobilesList = App.DbContext.Automobiles.ToList();
-                            CurrentDataGrid = view.automobilesDataGrid;
+                            new Task(() =>
+                            {
+                                AutomobilesList = App.DbContext.Automobiles.ToList();
+                                CurrentDataGrid = view.automobilesDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "materialsTab":
                         {
-                            MaterialsList = App.DbContext.Materials.ToList();
-                            CurrentDataGrid = view.materialsDataGrid;
+                            new Task(() =>
+                            {
+                                MaterialsList = App.DbContext.Materials.ToList();
+                                CurrentDataGrid = view.materialsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "employersTab":
                         {
-                            EmployeesList = App.DbContext.Employees.ToList();
-                            CurrentDataGrid = view.employersDataGrid;
+                            new Task(() =>
+                            {
+                                EmployeesList = App.DbContext.Employees.ToList();
+                                CurrentDataGrid = view.employersDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "orgTab":
                         {
-                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers");
-                            CurrentDataGrid = view.organizationsDataGrid;
+                            new Task(() =>
+                            {
+                                OrganizationsList = App.DbContext.Organizations.ToList();
+                                CurrentDataGrid = view.organizationsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "uchetTab":
                         {
-                            TradesList = App.DbContext.Trades.ToList();
-                            CurrentDataGrid = view.uchetDataGrid;
+                            new Task(() =>
+                            {
+                                TradesList = App.DbContext.Trades.ToList();
+                                CurrentDataGrid = view.uchetDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "ttnTab":
                         {
-                            IsDocumentSelect = Visibility.Visible;
-                            CurrentDataGrid = view.ttnsDataGrid;
-                            TTNList = App.DbContext.TTNs.ToList();
+                            new Task(() =>
+                            {
+                                IsDocumentSelect = Visibility.Visible;
+                                CurrentDataGrid = view.ttnsDataGrid;
+                                TTNList = App.DbContext.TTNs.ToList();
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "acountTab":
                         {
-                            IsDocumentSelect = Visibility.Visible;
-                            AccountsList = App.DbContext.Accounts.ToList();
-                            CurrentDataGrid = view.accountsDataGrid;
+                            new Task(() =>
+                            {
+                                IsDocumentSelect = Visibility.Visible;
+                                AccountsList = App.DbContext.Accounts.ToList();
+                                CurrentDataGrid = view.accountsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "contractTab":
                         {
-                            IsDocumentSelect = Visibility.Visible;
-                            ContractsList = App.DbContext.Contracts.ToList();
-                            CurrentDataGrid = view.contractsDataGrid;
+                            new Task(() =>
+                            {
+                                IsDocumentSelect = Visibility.Visible;
+                                ContractsList = App.DbContext.Contracts.ToList();
+                                CurrentDataGrid = view.contractsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "materialResponsibleTab":
                         {
-                            IsDocumentSelect = Visibility.Visible;
-                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
-                            CurrentDataGrid = view.materialsDataGrid;
+                            new Task(() =>
+                            {
+                                IsDocumentSelect = Visibility.Visible;
+                                MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                                CurrentDataGrid = view.materialsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "tnTab":
                         {
-                            IsDocumentSelect = Visibility.Visible;
-                            TNsList = App.DbContext.TNs.ToList();
-                            CurrentDataGrid = view.tnsDataGrid;
+                            new Task(() =>
+                            {
+                                IsDocumentSelect = Visibility.Visible;
+                                TNsList = App.DbContext.TNs.ToList();
+                                CurrentDataGrid = view.tnsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                     case "individualsTab":
                         {
-                            IndividualsList = App.DbContext.Individuals.ToList();
-                            CurrentDataGrid = view.individualsDataGrid;
+                            new Task(() =>
+                            {
+                                IndividualsList = App.DbContext.Individuals.ToList();
+                                CurrentDataGrid = view.individualsDataGrid;
+                                IsUpdating = false;
+                            }).Start();
                             break;
                         }
                 }

@@ -13,8 +13,12 @@
          ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
          ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
          WindowStartupLocation="CenterScreen"                 
-         d:DataContext="{d:DesignInstance viewmodels:AddContactViewModel}">
+         d:DataContext="{d:DesignInstance viewmodels:AddContactViewModel}"
+                 xmlns:extensions="clr-namespace:BuildMaterials.Extensions">
     <Grid>
+        <Grid.Resources>
+            
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="AUto"/>
             <RowDefinition Height="*"/>
@@ -33,12 +37,21 @@
             <Grid>
                 <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Тип контакта" x:Name="contactText"/>
                 <ComboBox SelectedIndex="{Binding ContactTypeIndex, UpdateSourceTrigger=PropertyChanged,Converter={StaticResource ContactTypeConverter}}">
-                    <ComboBoxItem Height="20"/>
+                    <ComboBoxItem Height="35"/>
                     <ComboBoxItem Content="Эл. почта"/>
                     <ComboBoxItem Content="Контактный номер телефона"/>
                 </ComboBox>
             </Grid>
-            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Описание" Text="{Binding Contact.Text}"/>
+
+            <Grid>
+                <ui:TextBox Margin="0,5,0,0" MaxLength="{Binding PhoneNumberInput.MaxLength}"
+             x:Name="emailTextbox"
+Text="{Binding Contact.Text,UpdateSourceTrigger=PropertyChanged}"/>
+
+                <ui:TextBox Margin="0,5,0,0" MaxLength="{Binding PhoneNumberInput.MaxLength}" Visibility="Collapsed"
+             x:Name="phoneTextbox" PlaceholderText="+375 (XX) XXX-XX-XX" PreviewTextInput="phoneTextbox_PreviewTextInput"
+            Text="{Binding PhoneNumberInput.Phone,UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">

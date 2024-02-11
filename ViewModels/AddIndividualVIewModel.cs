@@ -1,4 +1,5 @@
 ﻿using BuildMaterials.Extensions;
+using BuildMaterials.Helpers;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
 using System.Windows.Input;
@@ -7,6 +8,7 @@ namespace BuildMaterials.ViewModels
 {
     public class AddIndividualViewModel : ViewModelBase
     {
+        public PhoneNumberInputHelper PhoneNumberInput { get; } = new PhoneNumberInputHelper();
         public Individual Individual { get; set; }
 
         public ICommand CancelCommand => new AsyncRelayCommand(Close);
@@ -38,6 +40,7 @@ namespace BuildMaterials.ViewModels
         {
             _window = window;
             Title = "Изменение физ. лица";
+            PhoneNumberInput.Phone = employee.PhoneNumber;
             Individual = employee;
         }
 
@@ -45,6 +48,7 @@ namespace BuildMaterials.ViewModels
 
         private async Task AddMaterial(object? obj)
         {
+            Individual.PhoneNumber = PhoneNumberInput.Phone;
             if (Individual.ID != 0)
             {
                 try

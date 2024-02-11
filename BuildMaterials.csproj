@@ -52,6 +52,7 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.5" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.30" />
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="OrchardCore.Deployment" Version="1.7.2" />
     <PackageReference Include="TemplateEngine.Docx" Version="1.1.5" />

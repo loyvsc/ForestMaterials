@@ -9,6 +9,7 @@
     <converters:DateStringConverter x:Key="DateConverter"/>
     <converters:MaterialResponseStringConverter x:Key="MaterialResponseStringConverter"/>
     <converters:BoolToVisibility x:Key="BoolToVisibility"/>
+    <converters:InversedBoolToVisibility x:Key="InversedBoolToVisibility"/>
     <converters:BoolConveter x:Key="BoolConverter"/>
     <converters:VisibilityConverter x:Key="VisibilityConverter"/>
     <converters:EmptyStringConveter x:Key="EmptyStringConveter"/>
@@ -16,6 +17,8 @@
     <converters:ContactTypeConverter x:Key="ContactTypeConverter"/>
     <converters:NDSConverter x:Key="NDSConverter"/>
     <converters:ZeroIDToVisibilityConverter x:Key="ZeroIDToVisibilityConverter"/>
+    <converters:IsPhoneContactTypeSelectedConverter x:Key="IsPhoneContactTypeSelectedConverter"/>
+    <converters:IsEmalContactTypeSelectedConverter x:Key="IsEmalContactTypeSelectedConverter"/>
 
     <SolidColorBrush Color="#0c3b4f" x:Key="WindowBackground"/>
     <SolidColorBrush Color="#0c3b4f" x:Key="TabHeaderBackground"/>

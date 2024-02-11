@@ -43,7 +43,11 @@
 
             <ui:TextBox Margin="0,5,0,0" PlaceholderText="Отчество" Text="{Binding Path=Individual.Pathnetic}"/>
 
-            <ui:TextBox Margin="0,5,0,0" PlaceholderText="Номер телефона" Text="{Binding Path=Individual.PhoneNumber}"/>
+            <ui:TextBox Margin="0,5,0,0"
+                        PlaceholderText="Номер телефона"
+                        PreviewTextInput="TextBox_PreviewTextInput"
+                        MaxLength="{Binding PhoneNumberInput.MaxLength}"
+                        Text="{Binding PhoneNumberInput.Phone,UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
 
         <GroupBox Header="Паспортные данные" Grid.Row="1" Grid.Column="1">
@@ -54,7 +58,9 @@
                     <DatePicker Margin="0,5,0,0" SelectedDate="{Binding IssueDate}"/>
                 </Grid>
 
-                <ui:TextBox Margin="0,5,0,0" PlaceholderText="Кем выдан" Text="{Binding Individual.Passport.IssuePunkt}"/>
+                <ui:TextBox Margin="0,5,0,0" 
+                            PlaceholderText="Кем выдан" 
+                            Text="{Binding Individual.Passport.IssuePunkt}"/>
             </StackPanel>
         </GroupBox>
 
