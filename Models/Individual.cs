@@ -43,9 +43,7 @@ namespace BuildMaterials.Models
             get => phoneNumber;
             set
             {
-                if (value == null) return;
-                value = value!.Trim();
-                if (value.CheckPhoneNumber())
+                if (value != null)
                 {
                     phoneNumber = value;
                     OnPropertyChanged();

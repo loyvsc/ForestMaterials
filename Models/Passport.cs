@@ -12,6 +12,7 @@ namespace BuildMaterials.Models
             get => number;
             set
             {
+                if (value == null) return;
                 if (BuildMaterials.Extensions.PassportExtensions.CheckPassportNumber(value))
                 {
                     number = value;
@@ -56,7 +57,7 @@ namespace BuildMaterials.Models
             IssuePunkt = issuePunkt;
         }
 
-        public bool IsValid => BuildMaterials.Extensions.PassportExtensions.CheckPassportNumber(Number) && IssueDate != null;
+        public bool IsValid => Number!=null && BuildMaterials.Extensions.PassportExtensions.CheckPassportNumber(Number) && IssueDate != null;
 
         public override string ToString() => Number + " " + IssueDate?.ToShortDateString();
     }

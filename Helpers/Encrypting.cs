@@ -31,7 +31,6 @@ namespace BuildMaterials.Helpers
             }
             return clearText;
         }
-
         public static string Decrypt(string cipherText)
         {
             if (cipherText.Trim().Length == 0) return "";

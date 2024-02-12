@@ -1664,7 +1664,7 @@ namespace BuildMaterials.BD
 
         public const string CreateQuery = "CREATE TABLE IF NOT EXISTS individuals" +
                 "(ID int NOT NULL AUTO_INCREMENT, Name varchar(50), Surname varchar(50)," +
-                "Pathnetic varchar(70), PhoneNumber varchar(14), passportid int not null, PRIMARY KEY (ID));";
+                "Pathnetic varchar(70), PhoneNumber varchar(17), passportid int not null, PRIMARY KEY (ID));";
 
         public IndividualsTable()
         {
@@ -1733,15 +1733,15 @@ namespace BuildMaterials.BD
             App.DbContext.Passports.Add(obj.Passport);
             int id = 0;
             using (MySqlCommand command = new MySqlCommand(
-                $"SELECT ID FROM PASSPORTS WHERE NUMBER = '{obj.Passport.Number}'", _connection))
+                $"SELECT ID FROM PASSPORTS WHERE NUMBER = '{obj.Passport.Number.EncryptText()}'", _connection))
             {
-                _connection.OpenAsync().Wait();
+                _connection.Open();
                 var reader = command.ExecuteMySqlReaderAsync();
                 while (reader.Read())
                 {
                     id = (int)reader[0];
                 }
-                _connection.CloseAsync().Wait();
+                _connection.Close();
             }
             using (MySqlCommand command = new MySqlCommand("INSERT INTO individuals " +
                 "(Name, Surname, pathnetic, phonenumber, passportid) VALUES" +
@@ -1749,9 +1749,9 @@ namespace BuildMaterials.BD
                 $"'{obj.Pathnetic}','{obj.PhoneNumber}'," +
                 $"{id});", _connection))
             {
-                _connection.OpenAsync().Wait();
+                _connection.Open();
                 command.ExecuteNonQueryAsync().Wait();
-                _connection.CloseAsync().Wait();
+                _connection.Close();
             }
         }
 
@@ -1805,20 +1805,19 @@ namespace BuildMaterials.BD
     public class PassportsTable : IDBSetBase<Passport>
     {
         public const string CreateQuery = "CREATE TABLE passports " +
-            "(ID INT NOT NULL auto_increment, number VARCHAR(300) NOT NULL, " +
+            "(ID INT NOT NULL auto_increment, number VARCHAR(200) NOT NULL, " +
             "issuedate varchar(300), issuepunkt varchar(300), PRIMARY KEY(ID));";
 
         public void Add(Passport item)
         {
             using (MySqlConnection _connection = new MySqlConnection(StaticValues.ConnectionString))
             {
-                _connection.OpenAsync().Wait();
-                using (MySqlCommand command = new MySqlCommand($"INSERT INTO passports " +
-                    $"(number,issuedate,issuepunkt) VALUES ('{item.Number.EncryptText()}','{item.IssueDate?.ToShortDateString().EncryptText()}','{item.IssuePunkt.EncryptText()}');", _connection))
+                _connection.Open();
+                using (MySqlCommand command = new MySqlCommand($"INSERT INTO passports (number,issuedate,issuepunkt) VALUES ('{item.Number.EncryptText()}','{item.IssueDate?.ToShortDateString().EncryptText()}','{item.IssuePunkt.EncryptText()}');", _connection))
                 {
                     command.ExecuteNonQueryAsync().Wait();
                 }
-                _connection.CloseAsync().Wait();
+                _connection.Close();
             }
         }
 
@@ -1862,8 +1861,8 @@ namespace BuildMaterials.BD
         {
             int id = (int)reader[0];
             string num = ((string)reader[1]).DecryptText();
-            string dec = ((string)reader[2]).DecryptText();
-            DateTime isdat = Convert.ToDateTime(dec);
+            string decryptedShortDatestring = ((string)reader[2]).DecryptText();
+            DateTime isdat = Convert.ToDateTime(decryptedShortDatestring);
             string punkt = ((string)reader[3]).DecryptText();
 
             return new Passport(id, num, isdat, punkt);

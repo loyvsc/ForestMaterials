@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using System.Windows.Controls;
 
 namespace BuildMaterials.Views
 {
@@ -17,8 +18,20 @@ namespace BuildMaterials.Views
 
         private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
+            Regex regex = ContainsLettersRegex();
             e.Handled = regex.IsMatch(e.Text);
         }
+
+        private void DatePicker_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            var textbox = sender as DatePicker;
+
+            dateText.Visibility = textbox!.Text.Length == 0 ?
+                System.Windows.Visibility.Visible :
+                System.Windows.Visibility.Collapsed;
+        }
+
+        [GeneratedRegex("[^0-9]+")]
+        private static partial Regex ContainsLettersRegex();
     }
 }

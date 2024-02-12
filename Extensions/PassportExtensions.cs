@@ -1,16 +1,7 @@
-﻿using System.Text.RegularExpressions;
-
-namespace BuildMaterials.Extensions
+﻿namespace BuildMaterials.Extensions
 {
     public static class PassportExtensions
     {
-        private readonly static Regex regex = new Regex("[+375][1-9]{9}");
-
-        public static bool CheckPhoneNumber(this string phoneNumber)
-        {
-            return regex.IsMatch(phoneNumber) && phoneNumber.Length==13;
-        }
-
         public static bool CheckPassportNumber(string passportNumber)
         {
             if (passportNumber.Length != 14) return false;
