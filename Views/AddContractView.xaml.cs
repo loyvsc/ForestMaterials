@@ -1,5 +1,7 @@
 ﻿using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
+using System.Text.RegularExpressions;
+using System.Windows.Controls;
 
 namespace BuildMaterials.Views
 {
@@ -21,18 +23,15 @@ namespace BuildMaterials.Views
 
         private void isBuyerIdv_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (buyerText.Visibility != System.Windows.Visibility.Visible)
-            {
-                viewModel.Individual = null;
-                viewModel.Buyer = 0;
-                buyerText.Visibility = System.Windows.Visibility.Visible;
-            }
-            else
-            {
-                viewModel.Individual = null;
-                viewModel.Buyer = 0;
-                buyerText.Visibility = System.Windows.Visibility.Collapsed;
-            }
+            viewModel.Individual = null;
+            viewModel.Buyer = null;
+            buyerText.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void DatePicker_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            var textbox = sender as DatePicker;
+            dateText.Visibility = textbox.Text.Length != 0 ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
         }
     }
 }

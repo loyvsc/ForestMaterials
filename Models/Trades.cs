@@ -1,4 +1,6 @@
 ﻿using BuildMaterials.BD;
+using BuildMaterials.Export;
+using FilterDataGrid.Attributes;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -31,6 +33,7 @@ namespace BuildMaterials.Models
     public class Trade : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
+        [IgnoreProperty]
         public DateTime? Date
         {
             get => date;
@@ -40,8 +43,10 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ExportColumnName("Дата совершения")]
         public string? DateInString => Date?.ToShortDateString();
 
+        [IgnoreProperty]
         public int? SellerID
         {
             get => sellerId;
@@ -53,6 +58,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("ФИО продавца")]
         public Employee? Seller
         {
             get => seller;
@@ -63,7 +69,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(Seller));
             }
         }
-
+        [IgnoreProperty]
         public int? MaterialID
         {
             get => matId;
@@ -75,6 +81,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Лесопродукт")]
         public Material? Material
         {
             get => mat;
@@ -86,6 +93,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Количество")]
         public float? Count
         {
             get => count;
@@ -96,6 +104,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(Summ));
             }
         }
+        [ExportColumnName("Цена за единицу")]
         public float? Price
         {
             get => price;
@@ -107,6 +116,9 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Сумма")]
+        public float? Summ => Count * Price;
+        [IgnoreProperty]
         public int? PayTypeID
         {
             get => pattypeid;
@@ -118,6 +130,7 @@ namespace BuildMaterials.Models
             }
         }
 
+        [ExportColumnName("Тип оплаты")]
         public PayType? PayType
         {
             get => payType;
@@ -131,8 +144,6 @@ namespace BuildMaterials.Models
                 }
             }
         }
-
-        public float? Summ => Count * Price;
 
         private PayType? payType;
         private Material? mat;
@@ -156,6 +167,7 @@ namespace BuildMaterials.Models
             Seller = empl;
         }
 
+        [IgnoreProperty]
         public bool IsValid => SellerID != 0
             && MaterialID != 0
             && PayTypeID != 0

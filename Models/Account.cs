@@ -1,11 +1,13 @@
 ﻿using BuildMaterials.BD;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using FilterDataGrid.Attributes;
 
 namespace BuildMaterials.Models
 {
     public class Account : NotifyPropertyChangedBase, ITable
     {
         public int ID { get; set; }
+        [ColumnName("Дата")]
         public DateTime? Date
         {
             get => date;
@@ -15,6 +17,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ColumnName("Исполнитель")]
         public Organization? Seller
         {
             get => sel;
@@ -24,6 +27,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ColumnName("Заказчик")]
         public Organization? Buyer
         {
             get => buy;
@@ -33,6 +37,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ColumnName("Договор купли-продажи")]
         public Contract? Contract
         {
             get => con;
@@ -42,6 +47,7 @@ namespace BuildMaterials.Models
                 OnPropertyChanged();
             }
         }
+        [ColumnName("Сумма")]
         public float Summ
         {
             get
@@ -54,6 +60,7 @@ namespace BuildMaterials.Models
                 return value+NDS;
             }
         }
+        [ColumnName("НДС")]
         public float NDS
         {
             get

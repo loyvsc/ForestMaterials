@@ -241,7 +241,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Продавец" Binding="{Binding Seller}"/>
-                            <control:DataGridTextColumn IsColumnFiltered="True" Header="Покупатель" Binding="{Binding BuyerText}"/>
+                            <control:DataGridTextColumn IsColumnFiltered="True" Header="Покупатель" Binding="{Binding Buyer}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date,Converter={StaticResource DateConverter}}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Текущий счет" Binding="{Binding Seller.CurrentSchet}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Расчетный счет" Binding="{Binding Seller.RascSchet}"/>

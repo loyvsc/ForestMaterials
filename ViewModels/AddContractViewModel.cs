@@ -97,16 +97,17 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        public int? Buyer
+        public Organization? Buyer
         {
-            get => Contract.BuyerID;
+            get => Contract.Buyer;
             set
-            {
+            {                
+                Contract.Buyer = value;
                 if (value != null)
                 {
-                    Contract.BuyerID = (int) value;
                     _window.buyerText.Visibility = System.Windows.Visibility.Collapsed;
                 }
+                OnPropertyChanged();
             }
         }
 
@@ -115,11 +116,9 @@ namespace BuildMaterials.ViewModels
             get => Contract.Individual;
             set
             {
-                if (value != null)
-                {
-                    Contract.Individual = value;
-                    _window.buyerText.Visibility = System.Windows.Visibility.Collapsed;
-                }
+                Contract.Individual = value;
+                if (value != null) _window.buyerText.Visibility = System.Windows.Visibility.Collapsed;
+                OnPropertyChanged();
             }
         }
 

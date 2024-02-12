@@ -43,7 +43,7 @@ namespace BuildMaterials.Export.Documents
 
                 mainTable = mainTable.AddRow(
             new FieldContent("MaterialName", item.Material.Name),
-            new FieldContent("MaterialCount", item.Material.CountUnits),
+            new FieldContent("MaterialCount", item.Material.Count.ToString()),
             new FieldContent("Price", item.Material.Count.ToString()),
             new FieldContent("NDS", item.Material.Price.ToString()),
             new FieldContent("NDSSumm", (item.Material.Count * item.Material.Price).ToString()),
@@ -60,8 +60,8 @@ namespace BuildMaterials.Export.Documents
                 new FieldContent("Buyer", ttn.Contract.Buyer.CompanyName),
                 new FieldContent("BuyerUNP", ttn.Contract.Buyer.UNP),
                 new FieldContent("BuyerAdress", ttn.Buyer.Adress),
-                new FieldContent("BuyerBank", ttn.Contract.Buyer.Adress),
-                new FieldContent("BuyerAdress", $"{ttn.Contract.Seller.RascSchet}, {ttn.Contract.Seller.CBU}, {ttn.Contract.Seller.BIK}"),
+                new FieldContent("BuyerBank", $"{ttn.Contract.Seller.RascSchet}, {ttn.Contract.Seller.CBU}, {ttn.Contract.Seller.BIK}"),
+                new FieldContent("BuyerAdress", ttn.Contract.Buyer.Adress),
                 new FieldContent("Dogovor", ttn.Contract.ToString()),
 
                 new FieldContent("FinalCount", finalCount.ToString()),
@@ -231,12 +231,12 @@ namespace BuildMaterials.Export.Documents
             IContentItem[] items =
             {
                 new FieldContent("SellerUNP", contact.Contract.Seller.UNP),
-                new FieldContent("BuyerName", contact.Contract.Buyer != null ? contact.Contract.Buyer.ShortCompamyName : contact.Contract.Individual.FIO),
+                new FieldContent("BuyerName", contact.Contract.Buyer.ID != 0 ? contact.Contract.Buyer.ShortCompamyName : contact.Contract.Individual.FIO),
                 new FieldContent("Date", DateToString(DateTime.Now)),
                 new FieldContent("SellerInfo", contact.Contract.Seller.ShortCompamyName),
                 new FieldContent("SellerAdress", contact.Contract.Seller.Adress),
-                new FieldContent("BuyerInfo", contact.Contract.Buyer != null ? contact.Contract.Buyer.ShortCompamyName : contact.Contract.Individual.FIO),
-                new FieldContent("BuyerAdress", contact.Contract.Buyer != null ? contact.Contract.Buyer.Adress : ""),
+                new FieldContent("BuyerInfo", contact.Contract.Buyer.ID != 0 ? contact.Contract.Buyer.ShortCompamyName : contact.Contract.Individual.FIO),
+                new FieldContent("BuyerAdress", contact.Contract.Buyer.ID != 0 ? contact.Contract.Buyer.Adress : ""),
                 new FieldContent("DogovorNumber", contact.Contract.ToString()),
                 new FieldContent("FinalCount", count.ToString()),
                 new FieldContent("FinalBasicSumm", finalBasicSumm.ToString()),
@@ -252,9 +252,9 @@ namespace BuildMaterials.Export.Documents
 
             using (TemplateProcessor outputDocument = new TemplateProcessor(path).SetRemoveContentControls(true))
             {
-                outputDocument.FillContent(new Content(items)).SaveChanges();
-                items = null!;
+                outputDocument.FillContent(new Content(items)).SaveChanges();                
             }
+            items = null!;
             window.ShowDialogAsync("Экспорт в файл заверешён!", "Экспорт в файл");
 
         }

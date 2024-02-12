@@ -16,12 +16,6 @@ namespace BuildMaterials.Views
             DataContext = new ViewModels.AddIndividualViewModel(this, employee);
         }
 
-        private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            Regex regex = ContainsLettersRegex();
-            e.Handled = regex.IsMatch(e.Text);
-        }
-
         private void DatePicker_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             var textbox = sender as DatePicker;
@@ -33,5 +27,11 @@ namespace BuildMaterials.Views
 
         [GeneratedRegex("[^0-9]+")]
         private static partial Regex ContainsLettersRegex();
+
+        private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            Regex regex = ContainsLettersRegex();
+            e.Handled = regex.IsMatch(e.Text);
+        }
     }
 }

@@ -39,8 +39,9 @@
 
         <StackPanel Grid.Row="1">
             <Grid>
-                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Дата" x:Name="dateText"/>
-                <DatePicker SelectedDate="{Binding Date}"/>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray"
+                           Margin="12,0,0,7" Text="Дата" x:Name="dateText"/>
+                <DatePicker SelectedDate="{Binding Date}" TextBoxBase.TextChanged="DatePicker_TextChanged"/>
             </Grid>
 
             <Grid>
@@ -56,13 +57,12 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="2">
             <TextBlock VerticalAlignment="Center" Text="Покупатель является организацией"/>
-            <CheckBox VerticalAlignment="Center" Margin="10,0,0,0" x:Name="isBuyerIdv" Checked="isBuyerIdv_Checked"/>
+            <CheckBox VerticalAlignment="Center" Margin="10,0,0,0" x:Name="isBuyerIdv" Click="isBuyerIdv_Checked"/>
         </StackPanel>
         <Grid Grid.Row="2" Grid.Column="1">
             <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Покупатель" x:Name="buyerText"/>
             <ComboBox ItemsSource="{Binding OrganizationsList}"
-SelectedValuePath="ID" x:Name="orgCombo"
-SelectedValue="{Binding Buyer}" 
+x:Name="orgCombo" SelectedItem="{Binding Buyer, UpdateSourceTrigger=PropertyChanged}"
 DisplayMemberPath="CompanyName" Visibility="{Binding IsChecked, ElementName=isBuyerIdv, Converter={StaticResource BoolToVisibility}}"/>
 
             <ComboBox ItemsSource="{Binding Individuals}"
@@ -80,7 +80,8 @@ DisplayMemberPath="FIO" Visibility="{Binding Visibility, ElementName=orgCombo, C
                 <Button Content="Изменить" Margin="5,0,0,0" Command="{Binding EditMaterialCommand}"/>
                 <Button Content="Удалить" Margin="5,0,0,0" Command="{Binding DeleteMaterialCommand}"/>
             </StackPanel>
-            <DataGrid VerticalAlignment="Stretch" ItemsSource="{Binding Contract.Materials,UpdateSourceTrigger=PropertyChanged}"
+            <DataGrid VerticalAlignment="Stretch" 
+                      ItemsSource="{Binding Contract.Materials,UpdateSourceTrigger=PropertyChanged}"
                           IsReadOnly="False"
                           AutoGenerateColumns="False" x:Name="materialsDataGrid" Grid.Row="1">
                 <DataGrid.Columns>

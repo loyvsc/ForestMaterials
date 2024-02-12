@@ -6,8 +6,6 @@ namespace BuildMaterials.Models
     {
         public int ID { get; set; }
 
-        public string BuyerText { get; set; }
-
         public Organization? Seller
         {
             get => seller;
@@ -46,17 +44,6 @@ namespace BuildMaterials.Models
                 OnPropertyChanged(nameof(Seller));
             }
         }
-        public int BuyerID
-        {
-            get => buyerid;
-            set
-            {
-                buyerid = value;
-                if (value != 0)
-                    Buyer = App.DbContext.Organizations.ElementAt(value);
-                OnPropertyChanged(nameof(BuyerID));
-            }
-        }
         public DateTime? Date
         {
             get => date;
@@ -67,7 +54,7 @@ namespace BuildMaterials.Models
             }
         }
 
-        public List<ContractMaterial> Materials
+        public List<ContractMaterial>? Materials
         {
             get => mats;
             set
@@ -90,7 +77,7 @@ namespace BuildMaterials.Models
         #region Private vars
         private Individual? ind;
         private string? logisticsType;
-        private List<ContractMaterial> mats;
+        private List<ContractMaterial>? mats;
         private DateTime? date;
         private Organization? seller;
         private Organization? buyer;
@@ -102,8 +89,7 @@ namespace BuildMaterials.Models
         public Contract()
         {
             Materials = new List<ContractMaterial>();
-            SellerID = 0;
-            BuyerID = 0;
+            SellerID = 0;            
         }
 
         public Contract(int iD, Organization? seller, Organization? buyer, DateTime? date, List<ContractMaterial> materials,
@@ -114,15 +100,13 @@ namespace BuildMaterials.Models
             Seller = seller;
             SellerID = seller.ID;
             Buyer = buyer;
-            BuyerID = buyer.ID;
             Date = date;
             LogisiticsType = logisiticsType;
             Individual = individual;
-            BuyerText = Buyer.ID != 0 ? Buyer.ToString() : Individual.FIO;
         }
         #endregion
 
-        public bool IsValid => Date != null && Materials.Count > 0 && SellerID != 0 && (BuyerID != 0 || Individual!=null);
+        public bool IsValid => Date != null && Materials.Count > 0 && SellerID != 0 && (Buyer.ID != 0 || Individual.ID!=0);
 
         public override string ToString() => $"Договор №{ID} от {Date?.ToShortDateString()}";
     }

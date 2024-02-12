@@ -20,6 +20,8 @@ namespace BuildMaterials.Models
             Name = name;
         }
 
+        public override string ToString() => Name;
+
         public bool IsValid => Name != string.Empty;
     }
 }

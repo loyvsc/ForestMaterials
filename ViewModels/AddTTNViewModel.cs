@@ -79,7 +79,7 @@ namespace BuildMaterials.ViewModels
         public ICommand CancelCommand => new AsyncRelayCommand(Close);
         public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        public List<Contract> Contracts => App.DbContext.Contracts.ToList();
+        public List<Contract> Contracts => App.DbContext.Contracts.ToList().Where(x=>x.Buyer.ID!=0).ToList();
         public List<Automobile> Automobiles => App.DbContext.Automobiles.ToList();
         public List<Employee> Employees => App.DbContext.Employees.ToList();
         public List<Organization>? CustomersList => App.DbContext.Organizations.ToList();
