@@ -125,51 +125,79 @@ namespace BuildMaterials.ViewModels
 
         private async Task AddMaterial(object? obj)
         {
-            AddContractMaterialView view = new AddContractMaterialView(Contract.ID);
-            if (view.ShowDialog() == true)
+            try
             {
-                Contract.Materials.Add(view.viewModel.ContractMaterial);
-                var arr = Contract.Materials.ToArray();
-                Contract.Materials = arr.ToList();
-                OnPropertyChanged(nameof(Contract.Materials));
+                AddContractMaterialView view = new AddContractMaterialView(Contract.ID);
+                if (view.ShowDialog() == true)
+                {
+                    Contract.Materials.Add(view.viewModel.ContractMaterial);
+                    var arr = Contract.Materials.ToArray();
+                    Contract.Materials = arr.ToList();
+                    OnPropertyChanged(nameof(Contract.Materials));
+                }
+            }
+            catch(Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
             }
         }
         private async Task EditMaterial(object? obj)
         {
-            ContractMaterial? Selected = _window.materialsDataGrid.SelectedItem as ContractMaterial;
-            if (Selected == null) return;
-            AddContractMaterialView view = new AddContractMaterialView(Selected);
-            if (view.ShowDialog() == true)
+            try
             {
-                var i = Contract.Materials.FindIndex((x) => x == Selected);
-                Contract.Materials[i] = view.viewModel.ContractMaterial;
-                var arr = Contract.Materials.ToArray();
-                Contract.Materials = arr.ToList();
+                ContractMaterial? Selected = _window.materialsDataGrid.SelectedItem as ContractMaterial;
+                if (Selected == null) return;
+                AddContractMaterialView view = new AddContractMaterialView(Selected);
+                if (view.ShowDialog() == true)
+                {
+                    var i = Contract.Materials.FindIndex((x) => x == Selected);
+                    Contract.Materials[i] = view.viewModel.ContractMaterial;
+                    var arr = Contract.Materials.ToArray();
+                    Contract.Materials = arr.ToList();
+                }
+            }
+            catch(Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
             }
         }
         private async Task DeleteMaterial(object? obj)
         {
-            ContractMaterial? Selected = _window.materialsDataGrid.SelectedValue as ContractMaterial;
-            if (Selected == null) return;
+            try
+            {
+                ContractMaterial? Selected = _window.materialsDataGrid.SelectedValue as ContractMaterial;
+                if (Selected == null) return;
 
-            Contract.Materials.Remove(Selected);
-            var arr = Contract.Materials.ToArray();
-            Contract.Materials = arr.ToList();
+                Contract.Materials.Remove(Selected);
+                var arr = Contract.Materials.ToArray();
+                Contract.Materials = arr.ToList();
+            }
+            catch (Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+            }
         }
         private async Task Close(object? obj = null) => _window.DialogResult = true;
         private async Task AddContract(object? obj)
         {
             if (Contract.IsValid)
             {
-                if (Contract.ID != 0)
+                try
                 {
-                    App.DbContext.Contracts.Update(Contract);
+                    if (Contract.ID != 0)
+                    {
+                        App.DbContext.Contracts.Update(Contract);
+                    }
+                    else
+                    {
+                        App.DbContext.Contracts.Add(Contract);
+                    }
+                    Close();
                 }
-                else
+                catch (Exception ex)
                 {
-                    App.DbContext.Contracts.Add(Contract);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
-                Close();
             }
             else
             {

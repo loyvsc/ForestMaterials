@@ -81,15 +81,22 @@ namespace BuildMaterials.ViewModels
         {
             if (TN.IsValid)
             {
-                if (TN.ID != 0)
+                try
                 {
-                    App.DbContext.TNs.Update(TN);
+                    if (TN.ID != 0)
+                    {
+                        App.DbContext.TNs.Update(TN);
+                    }
+                    else
+                    {
+                        App.DbContext.TNs.Add(TN);
+                    }
+                    Close(null);
                 }
-                else
+                catch (Exception ex)
                 {
-                    App.DbContext.TNs.Add(TN);
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
-                Close(null);
             }
             else
             {

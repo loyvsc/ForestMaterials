@@ -78,13 +78,20 @@ namespace BuildMaterials.ViewModels
         {
             if (Account.IsValid)
             {
-                if (Account.ID != 0)
+                try
                 {
-                    App.DbContext.Accounts.Update(Account);
+                    if (Account.ID != 0)
+                    {
+                        App.DbContext.Accounts.Update(Account);
+                    }
+                    else
+                    {
+                        App.DbContext.Accounts.Add(Account);
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    App.DbContext.Accounts.Add(Account);
+                    _window.ShowDialogAsync("При выполнении операции произошла ошибка:\n"+ex.Message, Title);
                 }
                 await Close();
             }

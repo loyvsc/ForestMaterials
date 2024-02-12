@@ -82,10 +82,10 @@ namespace BuildMaterials.ViewModels
         public ICommand CancelCommand => new AsyncRelayCommand(Close);
         public ICommand AddCommand => new AsyncRelayCommand(AddMaterial);
 
-        public List<Contract> Contracts { get; } = App.DbContext.Contracts.ToList();
-        public List<Automobile> Automobiles { get; } = App.DbContext.Automobiles.ToList();
-        public List<Employee> Employees { get; } = App.DbContext.Employees.ToList();
-        public List<Organization>? CustomersList { get; } = App.DbContext.Organizations.ToList();
+        public List<Contract> Contracts => App.DbContext.Contracts.ToList();
+        public List<Automobile> Automobiles => App.DbContext.Automobiles.ToList();
+        public List<Employee> Employees => App.DbContext.Employees.ToList();
+        public List<Organization>? CustomersList => App.DbContext.Organizations.ToList();
 
         private TTN ttn;
 

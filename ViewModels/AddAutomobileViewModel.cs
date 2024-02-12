@@ -1,7 +1,6 @@
 ﻿using BuildMaterials.Extensions;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
-using System.Windows;
 using System.Windows.Input;
 
 namespace BuildMaterials.ViewModels

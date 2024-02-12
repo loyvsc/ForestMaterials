@@ -64,7 +64,6 @@ namespace BuildMaterials.ViewModels
                     _window.emplCombobox.BorderBrush = System.Windows.Media.Brushes.DarkRed;
                     _window.emplCombobox.BorderThickness = new Thickness(0,0,0,2);
                     throw new AutorizeException("Выберите пользователя!");
-
                 }
 
                 if (EnteredPassword == SelectedEmploee.Password)
@@ -109,9 +108,7 @@ namespace BuildMaterials.ViewModels
         }
         public bool CanExecute(object parameter)
         {
-            if (Interlocked.Read(ref isExecuting) != 0)
-                return false;
-            return canExecute(parameter);
+            return Interlocked.Read(ref isExecuting) != 0 ? false : canExecute(parameter);
         }
         public async void Execute(object parameter)
         {

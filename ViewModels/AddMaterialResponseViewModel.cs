@@ -54,14 +54,20 @@ namespace BuildMaterials.ViewModels
             }
             if (MaterialResponse.IsValid)
             {
-                App.DbContext.MaterialResponse.Add(MaterialResponse);
-                System.Windows.MessageBox.Show("Материально-ответственный отчет успешно добавлен!", "Материально-ответственный отчет", MessageBoxButton.OK, MessageBoxImage.Information);
-                Close();
+                try
+                {
+                    App.DbContext.MaterialResponse.Add(MaterialResponse);
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, "title");
+                }
             }
             else
             {
-                System.Windows.MessageBox.Show("Добавление материально-ответственного отчета завершено с ошибкой!\nПопробуйте позже...", "Материально-ответственный отчет", MessageBoxButton.OK, MessageBoxImage.Error);
-            }            
+                _window.ShowDialogAsync("Не вся информация была введена!", "title");
+            }
         }
     }
 }

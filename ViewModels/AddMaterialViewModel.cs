@@ -41,13 +41,9 @@ namespace BuildMaterials.ViewModels
             }
         }
 
-        //base init
         private AddMaterialViewModel()
         {
-            CountUnits = new List<string>()
-        {
-            "Кубический метр", "Килограм"
-        };
+            CountUnits = new List<string>() { "Кубический метр", "Килограм" };
         }
 
         public AddMaterialViewModel(AddMaterialView window, Models.Material material) : this()
@@ -70,28 +66,36 @@ namespace BuildMaterials.ViewModels
         {
             if (Material.IsValid() == false)
             {
-                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
-                return;
-            }
-
-            if (Material.ID != 0)
-            {
-                try
-                {
-                    App.DbContext.Materials.Update(Material);
-                }
-                catch (Exception ex)
-                {
-                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
-                    return;
-                }
+                _window.ShowDialogAsync("Не вся информация была введена!", Title);
             }
             else
             {
-                Material.EnterDate = DateTime.Now.Date;
-                App.DbContext.Materials.Add(Material);
-            }
-            Close();
+                if (Material.ID != 0)
+                {
+                    try
+                    {
+                        App.DbContext.Materials.Update(Material);
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Material.EnterDate = DateTime.Now.Date;
+                        App.DbContext.Materials.Add(Material);
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                    }
+                }
+            }            
         }
     }
 }

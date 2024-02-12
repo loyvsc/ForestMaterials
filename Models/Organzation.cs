@@ -1,5 +1,6 @@
 ﻿using BuildMaterials.BD;
 using BuildMaterials.Export;
+using System.Collections.ObjectModel;
 
 namespace BuildMaterials.Models
 {
@@ -102,7 +103,7 @@ namespace BuildMaterials.Models
             }
         }
         [ExportColumnName("Контакты")]
-        public List<Contact> Contacts
+        public ObservableCollection<Contact> Contacts
         {
             get => contacts;
             set
@@ -136,7 +137,7 @@ namespace BuildMaterials.Models
         }
 
         #region Private vars
-        private List<Contact> contacts;
+        private ObservableCollection<Contact> contacts;
         private string? cbu;
         private string? raschScht;
         private string? bik;
@@ -156,10 +157,10 @@ namespace BuildMaterials.Models
         public Organization()
         {
             UNP = "";
-            Contacts = new List<Contact>();
+            Contacts = new ObservableCollection<Contact>();
         }
 
-        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, string? bik, string? currentSchet,List<Contact> contacts = null!)
+        public Organization(int iD, string? companyName, string? shortCompanyName, string? adress, DateTime? regDate, string? mnsNum, string? mnsName, string? uNP, string? rasch, string? cbu, string? bik, string? currentSchet,ObservableCollection<Contact> contacts = null!)
         {
             ID = iD;
             CompanyName = companyName;
@@ -171,7 +172,7 @@ namespace BuildMaterials.Models
             UNP = uNP;
             RascSchet = rasch;
             CBU = cbu;
-            Contacts = contacts != null ? contacts : new List<Contact>();
+            Contacts = contacts != null ? contacts : new ObservableCollection<Contact>();
             CurrentSchet = currentSchet;
             BIK = bik;
         }

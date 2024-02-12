@@ -1,7 +1,7 @@
-﻿using BuildMaterials.Extensions;
+﻿using BuildMaterials.BD;
+using BuildMaterials.Extensions;
 using BuildMaterials.Models;
 using BuildMaterials.Views;
-using System.Windows;
 using System.Windows.Input;
 using UNPRead;
 
@@ -18,7 +18,7 @@ namespace BuildMaterials.ViewModels
 
     public class AddOrganizationViewModel : ViewModelBase
     {
-        public static List<object> Operations { get; set; } = new List<object>(16);
+        public List<ITable> Operations { get; set; } = new List<ITable>(16);
         public Organization Organization { get; set; }
         public List<Contact> Contacts
         {
@@ -50,38 +50,43 @@ namespace BuildMaterials.ViewModels
 
         private Contact? cntct;
         private List<Contact> organizationContacts;
-        private readonly Window _window = null!;
+        private readonly AddOrganizationView _window = null!;
 
         #region Constructors
         private AddOrganizationViewModel()
         {
-            Operations = new List<object>(16);
             Contacts = new List<Contact>();
         }
-        public AddOrganizationViewModel(Window window) : this()
+        public AddOrganizationViewModel(AddOrganizationView window) : this()
         {
             Title = "Добавление информации об организации";
             Organization = new Models.Organization();
             _window = window;
         }
-        public AddOrganizationViewModel(Window window, Organization organization) : this()
+        public AddOrganizationViewModel(AddOrganizationView window, Organization organization) : this()
         {
             _window = window;
             Title = "Изменении информации об организации";
             Organization = organization;
-            Organization.Contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + Organization.ID);
+            Organization.Contacts = new System.Collections.ObjectModel.ObservableCollection<Contact>(App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + Organization.ID));
         }
         #endregion
 
         private async Task AddContact(object? obj)
         {
-            AddContactView contact = new AddContactView(Organization);
-            if (contact.ShowDialog() == true)
+            AddContactView contact = new AddContactView(Organization,this);
+            try
             {
-                Contact last = (Contact)Operations.Last();
-                Organization.Contacts.Add(last);
-                Organization.Contacts = Organization.Contacts.ToList();
+                if (contact.ShowDialog() == true)
+                {
+                    Contact last = (Contact)Operations.Last();
+                    Organization.Contacts.Add(last);
+                }
             }
+            catch (Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+            }            
         }
 
         private async Task DeleteContact(object? obj)
@@ -90,21 +95,17 @@ namespace BuildMaterials.ViewModels
             SelectedContact.ForDelete = true;
             Organization.Contacts.Remove(SelectedContact);
             Operations.Add(SelectedContact);
-
-            var items = Organization.Contacts.ToList();
-            Organization.Contacts = items;
         }
 
         private async Task EditContact(object? obj)
         {
             if (SelectedContact != null)
             {
-                AddContactView contact = new AddContactView(SelectedContact);
+                AddContactView contact = new AddContactView(SelectedContact, this);
                 if (contact.ShowDialog() == true)
                 {
                     Contact last = (Contact)Operations.Last();
-                    Organization.Contacts[Organization.Contacts.FindIndex(x => x.ID == last.ID)] = last;
-                    Organization.Contacts = Organization.Contacts.ToList();
+                    Organization.Contacts[Organization.Contacts.IndexOf(last)] = last;
                 }
             }
         }

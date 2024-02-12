@@ -2,6 +2,7 @@
 using BuildMaterials.Helpers;
 using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
+using System.Collections.ObjectModel;
 
 namespace BuildMaterials.BD
 {
@@ -800,7 +801,7 @@ namespace BuildMaterials.BD
             string bik = reader.IsDBNull(10) ? string.Empty : (string)reader[10];
             string curScht = reader.IsDBNull(11) ? string.Empty : (string)reader[11];
 
-            List<Contact> contacts = App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + id);
+            ObservableCollection<Contact> contacts = new ObservableCollection<Contact>(App.DbContext.Contacts.Select("SELECT * FROM CONTACTS WHERE ORGANIZATIONID = " + id));
 
             return new Organization(id, compName, shortcmpname, address, regdate, mnsnum, mnsname, unp, rasch, cbu, bik, curScht, contacts);
         }

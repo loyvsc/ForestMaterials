@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using System.Windows;
 using BuildMaterials.Models;
 using BuildMaterials.ViewModels;
 
@@ -7,28 +6,24 @@ namespace BuildMaterials.Views
 {
     public partial class AddContactView : FluentWindow
     {
-        public AddContactView()
+        public AddContactView(Organization organization,AddOrganizationViewModel organizationViewModel)
         {
             InitializeComponent();
-            DataContext = new AddContactViewModel();
+            DataContext = new AddContactViewModel(this,organization, organizationViewModel);
         }
 
-        public AddContactView(Organization organization)
+        public AddContactView(Contact contact, AddOrganizationViewModel organizationViewModel)
         {
             InitializeComponent();
-            DataContext = new AddContactViewModel(this,organization);
-        }
-
-        public AddContactView(Contact contact)
-        {
-            InitializeComponent();
-            DataContext = new AddContactViewModel(this, contact);
+            DataContext = new AddContactViewModel(this, contact, organizationViewModel);
         }
 
         private void phoneTextbox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = PreviewTextInputregex().IsMatch(e.Text);
         }
+
+        [GeneratedRegex("[^0-9]+")]
+        private static partial Regex PreviewTextInputregex();
     }
 }

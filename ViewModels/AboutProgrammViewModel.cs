@@ -22,10 +22,7 @@ namespace BuildMaterials.ViewModels
 
         public string Text { get; }
 
-        private async Task AsyncClose(object? obj)
-        {
-            view.Close();
-        }
+        private async Task AsyncClose(object? obj) => view.Close();
 
         public AboutProgrammViewModel(AboutProgramView parent)
         {

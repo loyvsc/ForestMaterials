@@ -44,34 +44,41 @@ namespace BuildMaterials.ViewModels
 
         private async Task AddMaterial(object? obj)
         {
-            if (Employee.ID != 0)
+            if (Employee.IsValid)
             {
-                try
+                if (Employee.ID != 0)
                 {
-                    App.DbContext.Employees.Update(Employee);
-                    if ((App.Current.MainWindow.DataContext as MainWindowViewModel)?.CurrentEmployee?.ID == Employee.ID)
+                    try
                     {
-                        (App.Current.MainWindow.DataContext as MainWindowViewModel).CurrentEmployee = Employee;
+                        App.DbContext.Employees.Update(Employee);
+                        if ((App.Current.MainWindow.DataContext as MainWindowViewModel)?.CurrentEmployee?.ID == Employee.ID)
+                        {
+                            (App.Current.MainWindow.DataContext as MainWindowViewModel).CurrentEmployee = Employee;
+                        }
+                        Close();
                     }
-                    Close();
+                    catch (Exception ex)
+                    {
+                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                    try
+                    {
+                        App.DbContext.Employees.Add(Employee);
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                    }
                 }
             }
             else
             {
-                if (Employee.IsValid)
-                {
-                    App.DbContext.Employees.Add(Employee);
-                    Close();
-                }
-                else
-                {
-                    _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
-                }
-            }
+                _window.ShowDialogAsync("Введена не вся требуемая информация!", Title);
+            }            
         }
     }
 }

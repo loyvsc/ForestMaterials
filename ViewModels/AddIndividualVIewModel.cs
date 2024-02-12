@@ -49,30 +49,30 @@ namespace BuildMaterials.ViewModels
         private async Task AddMaterial(object? obj)
         {
             Individual.PhoneNumber = PhoneNumberInput.Phone;
-            if (Individual.ID != 0)
+
+            if (Individual.IsValid)
             {
                 try
                 {
-                    App.DbContext.Individuals.Update(Individual);
+                    if (Individual.ID != 0)
+                    {
+                        App.DbContext.Individuals.Update(Individual);
+                    }
+                    else
+                    {
+                        App.DbContext.Individuals.Add(Individual);
+                    }
                     _window.DialogResult = true;
                 }
                 catch (Exception ex)
                 {
-                    _window.ShowDialogAsync("При сохранении изменений произошла ошибка...\nСообщение: " + ex.Message, Title);
+                    _window.ShowDialogAsync("Произошла ошибка...\nСообщение: " + ex.Message, Title);
                 }
             }
             else
             {
-                if (Individual.IsValid)
-                {
-                    App.DbContext.Individuals.Add(Individual);
-                    _window.DialogResult = true;
-                }
-                else
-                {
-                    _window.ShowDialogAsync("Не вся информация была введена!", Title);
-                }
-            }
+                _window.ShowDialogAsync("Не вся информация была введена!", Title);
+            }            
         }
     }
 }

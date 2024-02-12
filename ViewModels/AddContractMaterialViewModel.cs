@@ -88,8 +88,15 @@ namespace BuildMaterials.ViewModels
             if (ContractMaterial.Material!=null) ContractMaterial.Material.ID = 0;
             if (ContractMaterial.IsValid)
             {
-                ContractMaterial.Material = Materials.Find((x) => x.ID == MaterialID);
-                Close(null);
+                try
+                {
+                    ContractMaterial.Material = Materials.Find((x) => x.ID == MaterialID);
+                    Close(null);
+                }
+                catch(Exception ex)
+                {
+                    _view.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                }
             }
             else
             {

@@ -9,7 +9,7 @@ namespace BuildMaterials.ViewModels
 {
     public class AddContactViewModel : ViewModelBase
     {
-        public PhoneNumberInputHelper PhoneNumberInput { get; set; } = new PhoneNumberInputHelper();
+        public PhoneNumberInputHelper PhoneNumberInput => new PhoneNumberInputHelper();
         #region Public propertys
         public Contact? Contact
         {
@@ -63,13 +63,19 @@ namespace BuildMaterials.ViewModels
         #endregion
 
         #region Constructors
-        public AddContactViewModel()
+        private AddContactViewModel()
         {
             Contracts = App.DbContext.Contracts.ToList();
             Title = "Добавление контакта";
         }
 
-        public AddContactViewModel(AddContactView view, Organization organization)
+        private AddContactViewModel(AddOrganizationViewModel organizationViewModel)
+        {
+            this.organizationViewModel = organizationViewModel;
+        }
+
+        public AddContactViewModel(AddContactView view, Organization organization, AddOrganizationViewModel organizationViewModel)
+            :this(organizationViewModel)
         {
             Contracts = App.DbContext.Contracts.ToList();
             OrganizationID = organization.ID;
@@ -78,7 +84,8 @@ namespace BuildMaterials.ViewModels
             Title = "Добавление контакта";            
         }
 
-        public AddContactViewModel(AddContactView view, Contact contact)
+        public AddContactViewModel(AddContactView view, Contact contact, AddOrganizationViewModel organizationViewModel)
+            : this(organizationViewModel)
         {
             Contracts = App.DbContext.Contracts.ToList();
             this.view = view;
@@ -96,18 +103,26 @@ namespace BuildMaterials.ViewModels
         private List<Contract> _contracts;
         private bool isPhoneNumber;
         private readonly AddContactView view;
+        private readonly AddOrganizationViewModel organizationViewModel;
 
         private async Task Close(object? obj = null) => view.DialogResult = false;
         private async Task AddContact(object? obj)
         {
             if (Contact.IsValid)
-            {                
+            {
                 if (Contact.ContactType == ContactType.Phonenumber)
                 {
                     Contact.Text = PhoneNumberInput.Phone;
-                }                
-                AddOrganizationViewModel.Operations.Add(Contact);
-                view.DialogResult = true;
+                }
+                try
+                {
+                    organizationViewModel.Operations.Add(Contact);                    
+                    view.DialogResult = true;
+                }
+                catch(Exception ex)
+                {
+                    view.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
+                }
             }
             else
             {

@@ -120,18 +120,24 @@ namespace BuildMaterials.ViewModels
                     try
                     {
                         App.DbContext.Trades.Update(Trade);
+                        Close();
                     }
                     catch (Exception ex)
                     {
                         _window.ShowDialogAsync(Title, "При сохранении изменений произошла ошибка: " + ex.Message);
-                        return;
                     }
-                    Close();
                 }
                 else
                 {
-                    App.DbContext.Trades.Add(Trade);
-                    Close();
+                    try
+                    {
+                        App.DbContext.Trades.Add(Trade);
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _window.ShowDialogAsync(Title, "Произошла ошибка: " + ex.Message);
+                    }
                 }
             }
             else
