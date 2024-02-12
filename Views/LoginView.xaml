@@ -40,7 +40,8 @@
                    VerticalAlignment="Center" Margin="20,0,0,0" Foreground="White"/>
         <ComboBox ItemsSource="{Binding Employees}" x:Name="emplCombobox" Margin="10,0,10,0" SelectedItem="{Binding SelectedEmploee}" DisplayMemberPath="FIO"
                   Grid.ColumnSpan="2" Grid.Row="1"/>
-        <ui:PasswordBox Text="{Binding EnteredPassword}" x:Name="passwordBox" Margin="10,0,10,0" PlaceholderText="Пароль" Grid.Row="2" Grid.ColumnSpan="2"/>
+        <ui:PasswordBox Text="{Binding EnteredPassword}"
+                        x:Name="passwordBox" Margin="10,0,10,0" PlaceholderText="Пароль" Grid.Row="2" Grid.ColumnSpan="2"/>
         <Button Command="{Binding AutorizeCommand}" Content="Войти" Grid.Row="3" Grid.Column="1" Width="76"/>
         <ui:SnackbarPresenter x:Name="snackBarPresenter" Grid.Row="3" Grid.ColumnSpan="2" Height="50px"/>
     </Grid>

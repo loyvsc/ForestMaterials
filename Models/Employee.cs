@@ -79,7 +79,7 @@ namespace BuildMaterials.Models
             }
         }
 
-        [ExportColumnName("Пасспортные данные")]
+        [ExportColumnName("Паспортные данные")]
         public Passport Passport
         {
             get => passport;

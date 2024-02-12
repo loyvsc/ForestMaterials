@@ -52,11 +52,10 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.5" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.30" />
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="OrchardCore.Deployment" Version="1.7.2" />
     <PackageReference Include="TemplateEngine.Docx" Version="1.1.5" />
-    <PackageReference Include="WPF-UI" Version="3.0.0-preview.13" />
+    <PackageReference Include="WPF-UI" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

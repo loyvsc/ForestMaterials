@@ -9,7 +9,7 @@ namespace BuildMaterials.ViewModels
 {
     public class AddContactViewModel : ViewModelBase
     {
-        public PhoneNumberInputHelper PhoneNumberInput => new PhoneNumberInputHelper();
+        public PhoneNumberInputHelper PhoneNumberInput { get; set; }= new PhoneNumberInputHelper();
         #region Public propertys
         public Contact? Contact
         {

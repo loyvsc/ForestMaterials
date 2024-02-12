@@ -51,6 +51,7 @@ namespace BuildMaterials.ViewModels
             Title = "Изменение лесопродукции";
             Material = material;
             _window = window;
+            _window.text.Visibility = Visibility.Collapsed;
         }
 
         public AddMaterialViewModel(AddMaterialView window) : this()

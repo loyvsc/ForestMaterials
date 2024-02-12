@@ -47,8 +47,10 @@
             <ui:TextBox PlaceholderText="Количество" Text="{Binding Path=Material.Count}" Margin="0,5,0,0"/>
 
             <Grid>
-                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" Text="Ед. измерения" x:Name="text"/>
-                <ComboBox ItemsSource="{Binding CountUnits}" SelectedValue="{Binding CountUnit}" Margin="0,5,0,0"/>
+                <TextBlock VerticalAlignment="Bottom" Foreground="LightGray" Margin="12,0,0,7" 
+                           Text="Ед. измерения" x:Name="text"/>
+                <ComboBox ItemsSource="{Binding CountUnits}"
+                          SelectedValue="{Binding CountUnit}" Margin="0,5,0,0"/>
             </Grid>
         </StackPanel>
 

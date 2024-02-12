@@ -220,7 +220,6 @@ namespace BuildMaterials.ViewModels
             IsDocumentSelect = Visibility.Collapsed;
             Title = "ПС \"Учет товарооборота лесхоза\"";
         }
-        private readonly FilterDataGrid.FilterDataGrid materialsDataGrid;
 
         public MainWindowViewModel(MainWindow view) : this()
         {

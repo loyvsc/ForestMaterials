@@ -15,7 +15,7 @@
                  ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                  WindowStartupLocation="CenterScreen"                 
                  d:DataContext="{d:DesignInstance viewmodels:MainWindowViewModel}"
-                 MinHeight="480" MinWidth="760" Height="450" Width="760">
+                 MinHeight="450" MinWidth="760" Height="480" Width="760">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -48,7 +48,8 @@
                 <ui:MenuItem Header="О программме" Command="{Binding AboutProgrammCommand}"/>
             </ui:MenuItem>
         </Menu>
-        <TabControl Grid.Row="2" SelectionChanged="TabControl_SelectionChanged" Template="{StaticResource TabControlTemplate}">
+        <TabControl Grid.Row="2" SelectionChanged="TabControl_SelectionChanged"
+                    Template="{StaticResource TabControlTemplate}">
             <TabControl.Resources>
                 <Style TargetType="{x:Type ui:LoadingScreen}">
                     <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -56,13 +57,15 @@
                 </Style>
                 <Style TargetType="{x:Type ui:DataGrid}">
                     <Setter Property="ItemsSource" Value="{x:Null}"/>
+                    <Setter Property="Visibility" Value="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"/>
                 </Style>
             </TabControl.Resources>
             <TabItem Header="Лесопродукция" x:Name="materialsTab">
                 <Grid>
-                    <ui:LoadingScreen Visibility="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"
+                    <ui:LoadingScreen
                                       HorizontalAlignment="Center"/>
-                    <control:FilterDataGrid ItemsSource="{Binding MaterialsList}" Style="{StaticResource FilterDataGridStyle}"
+                    <control:FilterDataGrid 
+                        ItemsSource="{Binding MaterialsList}" Style="{StaticResource FilterDataGridStyle}"
                SelectedItem="{Binding SelectedTableItem}" x:Name="materialsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn MinWidth="45" IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
@@ -150,7 +153,7 @@
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="80" Header="Имя" Binding="{Binding Name,UpdateSourceTrigger=PropertyChanged}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="90" Header="Отчество" Binding="{Binding Pathnetic,UpdateSourceTrigger=PropertyChanged}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="130" Header="Номер телефона" Binding="{Binding PhoneNumber,UpdateSourceTrigger=PropertyChanged}"/>
-                            <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="180" Header="Серия и номер пасспорта" Binding="{Binding Passport.Number,UpdateSourceTrigger=PropertyChanged}"/>
+                            <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="180" Header="Серия и номер паспорта" Binding="{Binding Passport.Number,UpdateSourceTrigger=PropertyChanged}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="160" Header="Дата выдачи паспорта" Binding="{Binding Passport.IssueDate,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DateConverter}}"/>
                         </control:FilterDataGrid.Columns>
                     </control:FilterDataGrid>

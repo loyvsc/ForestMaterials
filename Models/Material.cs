@@ -28,7 +28,7 @@ namespace BuildMaterials.Models
             }
         }
         [ExportColumnName("Цена")]
-        public float? Price
+        public double? Price
         {
             get => price;
             set
@@ -102,7 +102,7 @@ namespace BuildMaterials.Models
         private string? shirina;
         private string? dlina;
         private string? name;
-        private float? price;
+        private double? price;
         private float? count;
         private string? countUnits;
         private DateTime enterDate;

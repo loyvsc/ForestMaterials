@@ -42,12 +42,9 @@ namespace BuildMaterials.ViewModels
             get => TTN.ResponseEmployee.ID;
             set
             {
-                if (value != null)
-                {
-                    _window.respText.Visibility = System.Windows.Visibility.Collapsed;
-                    TTN.ResponseEmployee.ID = value;
-                    OnPropertyChanged(nameof(TTN.ResponseEmployee.ID));
-                }
+                _window.respText.Visibility = System.Windows.Visibility.Collapsed;
+                TTN.ResponseEmployee.ID = value;
+                OnPropertyChanged(nameof(TTN.ResponseEmployee.ID));
             }
         }
 
