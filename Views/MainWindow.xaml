@@ -65,7 +65,7 @@
                     <ui:LoadingScreen
                                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid 
-                        ItemsSource="{Binding MaterialsList}" Style="{StaticResource FilterDataGridStyle}"
+                        ItemsSource="{Binding MaterialsList}"  
                SelectedItem="{Binding SelectedTableItem}" x:Name="materialsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn MinWidth="45" IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
@@ -86,7 +86,7 @@
                     <ui:LoadingScreen Visibility="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding EmployeesList,UpdateSourceTrigger=PropertyChanged}"
-                                                    SelectedItem="{Binding SelectedTableItem}" x:Name="employersDataGrid" Style="{StaticResource FilterDataGridStyle}">
+                                                    SelectedItem="{Binding SelectedTableItem}" x:Name="employersDataGrid"  >
                         <control:FilterDataGrid.Resources>
                             <controls:BindingProxy x:Key="proxy" Data="{Binding}"/>
                         </control:FilterDataGrid.Resources>
@@ -124,7 +124,7 @@
                     <ui:LoadingScreen Visibility="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding OrganizationsList,UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTableItem}"
-                                                    Style="{StaticResource FilterDataGridStyle}" x:Name="organizationsDataGrid">
+                                                      x:Name="organizationsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="50" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="50" Header="УНП" Binding="{Binding UNP}"/>
@@ -146,7 +146,7 @@
                     <ui:LoadingScreen Visibility="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding IndividualsList,UpdateSourceTrigger=PropertyChanged}"
-                            SelectedItem="{Binding SelectedTableItem}" x:Name="individualsDataGrid" Style="{StaticResource FilterDataGridStyle}">
+                            SelectedItem="{Binding SelectedTableItem}" x:Name="individualsDataGrid"  >
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="50" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="90" Header="Фамилия" Binding="{Binding Surname,UpdateSourceTrigger=PropertyChanged}"/>
@@ -162,7 +162,7 @@
             <TabItem Header="Автомобили" x:Name="automobilesTab">
                 <Grid>
                     <control:FilterDataGrid ItemsSource="{Binding AutomobilesList,UpdateSourceTrigger=PropertyChanged}"
-SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{StaticResource FilterDataGridStyle}">
+SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid"  >
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="50" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" MinWidth="50" Header="Модель" Binding="{Binding Name}"/>
@@ -180,7 +180,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding TTNList,UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource FilterDataGridStyle}" x:Name="ttnsDataGrid">
+                                                  x:Name="ttnsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DateConverter}}"/>
@@ -202,7 +202,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding TNsList,UpdateSourceTrigger=PropertyChanged}"
                             SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
-                            Style="{StaticResource FilterDataGridStyle}" x:Name="tnsDataGrid">
+                              x:Name="tnsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Договор" Binding="{Binding Contract}"/>
@@ -220,7 +220,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid Grid.Column="1" ItemsSource="{Binding AccountsList,UpdateSourceTrigger=PropertyChanged}"
                                                 SelectedItem="{Binding SelectedTableItem}" x:Name="accountsDataGrid"
-                                                Style="{StaticResource FilterDataGridStyle}">
+                                                 >
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="Дата" Binding="{Binding Date, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DateConverter}}"/>
@@ -236,7 +236,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                     <ui:LoadingScreen Visibility="{Binding IsUpdating,Converter={StaticResource BoolToVisibility}}"
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid Grid.Column="1" ItemsSource="{Binding ContractsList,UpdateSourceTrigger=PropertyChanged}" 
-                                                    Style="{StaticResource FilterDataGridStyle}"
+                                                     
                                                     SelectedItem="{Binding SelectedTableItem}" x:Name="contractsDataGrid">
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
@@ -273,7 +273,7 @@ SelectedItem="{Binding SelectedTableItem}" x:Name="automobilesDataGrid" Style="{
                       HorizontalAlignment="Center"/>
                     <control:FilterDataGrid ItemsSource="{Binding TradesList,UpdateSourceTrigger=PropertyChanged}"
                                             SelectedItem="{Binding SelectedTableItem,UpdateSourceTrigger=PropertyChanged}"
-                                        x:Name="uchetDataGrid"  Style="{StaticResource FilterDataGridStyle}">
+                                        x:Name="uchetDataGrid"   >
                         <control:FilterDataGrid.Columns>
                             <control:DataGridTextColumn MinWidth="30" IsColumnFiltered="True" Header="ID" Binding="{Binding ID}"/>
                             <control:DataGridTextColumn MinWidth="30" IsColumnFiltered="True" Header="Дата" Binding="{Binding Date}"/>

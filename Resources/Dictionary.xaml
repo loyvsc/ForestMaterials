@@ -38,16 +38,6 @@
         <Setter Property="WindowStyle" Value="None"/>
     </Style>
 
-    <Style TargetType="control:FilterDataGrid" x:Key="FilterDataGridStyle">
-        <Setter Property="FilterLanguage" Value="Russian"/>
-        <Setter Property="SelectionUnit" Value="FullRow"/>
-        <Setter Property="SelectionMode" Value="Single"/>
-        <Setter Property="IsReadOnly" Value="True"/>
-        <Setter Property="ColumnWidth" Value="*"/>
-        <Setter Property="AutoGenerateColumns" Value="False"/>
-        <Setter Property="Background" Value="{StaticResource WindowBackground}"/>
-    </Style>
-
     <Style TargetType="{x:Type DataGridCell}">
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
