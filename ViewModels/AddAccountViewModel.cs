@@ -15,7 +15,7 @@ namespace BuildMaterials.ViewModels
         private readonly AddAccountView _window = null!;
 
         public List<Organization> Organizations => App.DbContext.Organizations.ToList();
-        public List<Contract> Contracts => App.DbContext.Contracts.ToList().Where(x => x.Buyer.ID != 0).ToList();
+        public List<Contract> Contracts => App.DbContext.Contracts.ToList().Where(x => x.Buyer?.ID != 0).ToList();
 
         public AddAccountViewModel(AddAccountView window)
         {

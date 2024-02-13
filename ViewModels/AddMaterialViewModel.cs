@@ -43,7 +43,7 @@ namespace BuildMaterials.ViewModels
 
         private AddMaterialViewModel()
         {
-            CountUnits = new List<string>() { "Кубический метр", "Килограм" };
+            CountUnits = new List<string>() { "Кубический метр", "Килограмм" };
         }
 
         public AddMaterialViewModel(AddMaterialView window, Models.Material material) : this()
@@ -71,30 +71,22 @@ namespace BuildMaterials.ViewModels
             }
             else
             {
-                if (Material.ID != 0)
+                try
                 {
-                    try
+                    if (Material.ID != 0)
                     {
                         App.DbContext.Materials.Update(Material);
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
-                    }
-                }
-                else
-                {
-                    try
+                    else
                     {
                         Material.EnterDate = DateTime.Now.Date;
                         App.DbContext.Materials.Add(Material);
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
-                    }
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
             }            
         }

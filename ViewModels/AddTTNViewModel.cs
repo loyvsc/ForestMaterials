@@ -120,7 +120,7 @@ namespace BuildMaterials.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message,Title);
+                    _window.ShowDialogAsync(Title, "Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message);
                 }
             }
             else

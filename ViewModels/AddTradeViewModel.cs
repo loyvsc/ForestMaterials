@@ -115,29 +115,21 @@ namespace BuildMaterials.ViewModels
 
             if (Trade.IsValid)
             {
-                if (Trade.ID != 0)
+                try
                 {
-                    try
+                    if (Trade.ID != 0)
                     {
                         App.DbContext.Trades.Update(Trade);
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync(Title, "При сохранении изменений произошла ошибка: " + ex.Message);
-                    }
-                }
-                else
-                {
-                    try
+                    else
                     {
                         App.DbContext.Trades.Add(Trade);
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync(Title, "Произошла ошибка: " + ex.Message);
-                    }
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    _window.ShowDialogAsync(Title, "При сохранении изменений произошла ошибка: " + ex.Message);
                 }
             }
             else

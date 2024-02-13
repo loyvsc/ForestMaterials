@@ -8,7 +8,7 @@ namespace BuildMaterials.ViewModels
 {
     public class AddIndividualViewModel : ViewModelBase
     {
-        public PhoneNumberInputHelper PhoneNumberInput { get; } = new PhoneNumberInputHelper();
+        public PhoneNumberInputHelper PhoneNumberInput { get; set; } = new PhoneNumberInputHelper();
         public Individual Individual { get; set; }
 
         public ICommand CancelCommand => new AsyncRelayCommand(Close);

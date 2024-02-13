@@ -405,36 +405,44 @@ namespace BuildMaterials.ViewModels
             string path = save.FileName;
 
             DocumentExport export = new DocumentExport(view);
-            switch (selectedTab)
+
+            try
             {
-                case "tnTab":
-                    {
-                        export.SaveReport(path, SelectedTableItem as TN);
-                        break;
-                    }
-                case "ttnTab":
-                    {
-                        export.SaveReport(path, SelectedTableItem as TTN);
-                        break;
-                    }
-                case "acountTab":
-                    {
-                        if ((SelectedTableItem as Account).Buyer.ID == 0)
+                switch (selectedTab)
+                {
+                    case "tnTab":
                         {
-                            view.ShowDialogAsync("Выбрите документ!", "Экспорт документа");
+                            export.SaveReport(path, SelectedTableItem!as TN);
+                            break;
                         }
-                        export.SaveReport(path, SelectedTableItem as Account);
-                        break;
-                    }
-                case "contractTab":
-                    {
-                        export.SaveReport(path, SelectedTableItem as Contract);
-                        break;
-                    }
-                case "materialResponsibleTab":
-                    {
-                        break;
-                    }
+                    case "ttnTab":
+                        {
+                            export.SaveReport(path, SelectedTableItem as TTN);
+                            break;
+                        }
+                    case "acountTab":
+                        {
+                            if ((SelectedTableItem as Account).Buyer.ID == 0)
+                            {
+                                view.ShowDialogAsync("Выбрите документ!", "Экспорт документа");
+                            }
+                            export.SaveReport(path, SelectedTableItem as Account);
+                            break;
+                        }
+                    case "contractTab":
+                        {
+                            export.SaveReport(path, SelectedTableItem as Contract);
+                            break;
+                        }
+                    case "materialResponsibleTab":
+                        {
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message,Title);
             }
         }
         private async Task DeleteRow(object? obj)
@@ -583,6 +591,10 @@ namespace BuildMaterials.ViewModels
             {
                 return;
             }
+            catch (Exception ex)
+            {
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
+            }
             finally
             {
                 SelectedTableItem = null;
@@ -595,115 +607,123 @@ namespace BuildMaterials.ViewModels
                 view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                 return;
             }
-            switch (selectedTab)
+
+            try
             {
-                case "automobilesTab":
-                    {
-                        AddAutomobileView addMaterial = new AddAutomobileView();
-                        if (addMaterial.ShowDialog() == true)
+                switch (selectedTab)
+                {
+                    case "automobilesTab":
                         {
-                            AutomobilesList = App.DbContext.Automobiles.ToList();
+                            AddAutomobileView addMaterial = new AddAutomobileView();
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                AutomobilesList = App.DbContext.Automobiles.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "tnTab":
-                    {
-                        AddTNView addMaterial = new AddTNView();
-                        if (addMaterial.ShowDialog() == true)
+                    case "tnTab":
                         {
-                            TNsList = App.DbContext.TNs.ToList();
+                            AddTNView addMaterial = new AddTNView();
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                TNsList = App.DbContext.TNs.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "materialResponsibleTab":
-                    {
-                        AddMaterialResponseView addMaterial = new AddMaterialResponseView();
-                        if (addMaterial.ShowDialog() == true)
+                    case "materialResponsibleTab":
                         {
-                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            AddMaterialResponseView addMaterial = new AddMaterialResponseView();
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "materialsTab":
-                    {
-                        AddMaterialView addMaterial = new AddMaterialView();
-                        if (addMaterial.ShowDialog() == true)
+                    case "materialsTab":
                         {
-                            MaterialsList = App.DbContext.Materials.ToList();
+                            AddMaterialView addMaterial = new AddMaterialView();
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                MaterialsList = App.DbContext.Materials.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "employersTab":
-                    {
-                        AddEmployeeView add = new AddEmployeeView();
-                        if (CurrentEmployee.IsUserAdmin)
+                    case "employersTab":
                         {
+                            AddEmployeeView add = new AddEmployeeView();
+                            if (CurrentEmployee.IsUserAdmin)
+                            {
+                                if (add.ShowDialog() == true)
+                                {
+                                    EmployeesList = App.DbContext.Employees.ToList();
+                                }
+                            }
+                            else
+                            {
+                                view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
+                                return;
+                            }
+                            break;
+                        }
+                    case "individualsTab":
+                        {
+                            AddIndividualView add = new AddIndividualView();
                             if (add.ShowDialog() == true)
                             {
-                                EmployeesList = App.DbContext.Employees.ToList();
+                                IndividualsList = App.DbContext.Individuals.ToList();
                             }
+                            break;
                         }
-                        else
+                    case "orgTab":
                         {
-                            view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
-                            return;
+                            AddOrganizationView add = new AddOrganizationView();
+                            if (add.ShowDialog() == true)
+                            {
+                                OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "individualsTab":
-                    {
-                        AddIndividualView add = new AddIndividualView();
-                        if (add.ShowDialog() == true)
+                    case "uchetTab":
                         {
-                            IndividualsList = App.DbContext.Individuals.ToList();
+                            AddTradeView add = new AddTradeView();
+                            if (add.ShowDialog() == true)
+                            {
+                                TradesList = App.DbContext.Trades.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "orgTab":
-                    {
-                        AddOrganizationView add = new AddOrganizationView();
-                        if (add.ShowDialog() == true)
+                    case "ttnTab":
                         {
-                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
+                            AddTTNView add = new AddTTNView();
+                            if (add.ShowDialog() == true)
+                            {
+                                TTNList = App.DbContext.TTNs.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "uchetTab":
-                    {
-                        AddTradeView add = new AddTradeView();
-                        if (add.ShowDialog() == true)
+                    case "acountTab":
                         {
-                            TradesList = App.DbContext.Trades.ToList();
+                            AddAccountView add = new AddAccountView();
+                            if (add.ShowDialog() == true)
+                            {
+                                AccountsList = App.DbContext.Accounts.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "ttnTab":
-                    {
-                        AddTTNView add = new AddTTNView();
-                        if (add.ShowDialog() == true)
+                    case "contractTab":
                         {
-                            TTNList = App.DbContext.TTNs.ToList();
+                            AddContractView add = new AddContractView();
+                            if (add.ShowDialog() == true)
+                            {
+                                ContractsList = App.DbContext.Contracts.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "acountTab":
-                    {
-                        AddAccountView add = new AddAccountView();
-                        if (add.ShowDialog() == true)
-                        {
-                            AccountsList = App.DbContext.Accounts.ToList();
-                        }
-                        break;
-                    }
-                case "contractTab":
-                    {
-                        AddContractView add = new AddContractView();
-                        if (add.ShowDialog() == true)
-                        {
-                            ContractsList = App.DbContext.Contracts.ToList();
-                        }
-                        break;
-                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message,Title);
             }
         }
         private async Task EditRow(object? obj)
@@ -713,9 +733,10 @@ namespace BuildMaterials.ViewModels
                 view.ShowDialogAsync("У Вас отсутствуют нужные права!", Title);
                 return;
             }
-            if (SelectedTableItem != null)
-            {
+            if (SelectedTableItem == null) return;            
                 int id = SelectedTableItem.ID;
+            try
+            {
                 switch (selectedTab)
                 {
                     case "automobilesTab":
@@ -796,6 +817,10 @@ namespace BuildMaterials.ViewModels
                         }
                 }
             }
+            catch (Exception ex)
+            {
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
+            }
         }
         public FilterDataGrid.FilterDataGrid CurrentDataGrid { get; set; }
         private async Task ExportExcelWithSave(object? obj)
@@ -808,8 +833,6 @@ namespace BuildMaterials.ViewModels
             };
             if (savefile.ShowDialog() == true)
             {
-
-
                 try
                 {
                     var myClassType = CurrentDataGrid.ItemsSource.GetType().GetGenericArguments().Single();
@@ -840,182 +863,203 @@ namespace BuildMaterials.ViewModels
                 view.ShowDialogAsync("Выберите запись!", Title);
                 return;
             }
-            switch (selectedTab)
+            try
             {
-                case "automobilesTab":
-                    {
-                        var copy = SelectedTableItem as Automobile;
-                        copy.ID = 0;
-                        AddAutomobileView addMaterial = new AddAutomobileView();
-                        (addMaterial.DataContext as AddAutomobileViewModel).Automobile = copy;
-                        if (addMaterial.ShowDialog() == true)
+                switch (selectedTab)
+                {
+                    case "automobilesTab":
                         {
-                            AutomobilesList = App.DbContext.Automobiles.ToList();
+                            var copy = SelectedTableItem as Automobile;
+                            copy.ID = 0;
+                            AddAutomobileView addMaterial = new AddAutomobileView();
+                            (addMaterial.DataContext as AddAutomobileViewModel).Automobile = copy;
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                AutomobilesList = App.DbContext.Automobiles.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "materialResponsibleTab":
-                    {
-                        var copy = SelectedTableItem as MaterialResponse;
-                        copy.ID = 0;
-                        AddMaterialResponseView addMaterial = new AddMaterialResponseView();
-                        (addMaterial.DataContext as AddMaterialResponseViewModel).MaterialResponse = copy;
-                        if (addMaterial.ShowDialog() == true)
+                    case "materialResponsibleTab":
                         {
-                            MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            var copy = SelectedTableItem as MaterialResponse;
+                            copy.ID = 0;
+                            AddMaterialResponseView addMaterial = new AddMaterialResponseView();
+                            (addMaterial.DataContext as AddMaterialResponseViewModel).MaterialResponse = copy;
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                MaterialResponsesList = App.DbContext.MaterialResponse.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "materialsTab":
-                    {
-                        var copy = SelectedTableItem as Material;
-                        copy.ID = 0;
-                        AddMaterialView addMaterial = new AddMaterialView(copy);
-                        if (addMaterial.ShowDialog() == true)
+                    case "materialsTab":
                         {
-                            MaterialsList = App.DbContext.Materials.ToList();
+                            var copy = SelectedTableItem as Material;
+                            copy.ID = 0;
+                            AddMaterialView addMaterial = new AddMaterialView(copy);
+                            if (addMaterial.ShowDialog() == true)
+                            {
+                                MaterialsList = App.DbContext.Materials.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "employersTab":
-                    {
-                        if (CurrentEmployee.IsUserAdmin == false)
+                    case "employersTab":
                         {
-                            view.ShowDialogAsync("У Вас отсутствуют нужные права", Title);
-                            return;
+                            if (CurrentEmployee.IsUserAdmin == false)
+                            {
+                                view.ShowDialogAsync("У Вас отсутствуют нужные права", Title);
+                                return;
+                            }
+                            var copy = SelectedTableItem as Employee;
+                            copy.ID = 0;
+                            AddEmployeeView add = new AddEmployeeView(copy);
+                            if (add.ShowDialog() == true)
+                            {
+                                EmployeesList = App.DbContext.Employees.ToList();
+                            }
+                            break;
                         }
-                        var copy = SelectedTableItem as Employee;
-                        copy.ID = 0;
-                        AddEmployeeView add = new AddEmployeeView(copy);
-                        if (add.ShowDialog() == true)
+                    case "individualsTab":
                         {
-                            EmployeesList = App.DbContext.Employees.ToList();
+                            var copy = SelectedTableItem as Individual;
+                            copy.ID = 0;
+                            AddIndividualView add = new AddIndividualView(copy);
+                            if (add.ShowDialog() == true)
+                            {
+                                IndividualsList = App.DbContext.Individuals.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "individualsTab":
-                    {
-                        var copy = SelectedTableItem as Individual;
-                        copy.ID = 0;
-                        AddIndividualView add = new AddIndividualView(copy);
-                        if (add.ShowDialog() == true)
+                    case "orgTab":
                         {
-                            IndividualsList = App.DbContext.Individuals.ToList();
+                            var copy = SelectedTableItem as Organization;
+                            copy.ID = 0;
+                            AddOrganizationView add = new AddOrganizationView(copy);
+                            if (add.ShowDialog() == true)
+                            {
+                                OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "orgTab":
-                    {
-                        var copy = SelectedTableItem as Organization;
-                        copy.ID = 0;
-                        AddOrganizationView add = new AddOrganizationView(copy);
-                        if (add.ShowDialog() == true)
+                    case "uchetTab":
                         {
-                            OrganizationsList = App.DbContext.Organizations.Select("SELECT * FROM sellers;");
+                            var copy = SelectedTableItem as Trade;
+                            copy.ID = 0;
+                            AddTradeView add = new AddTradeView(copy);
+                            if (add.ShowDialog() == true)
+                            {
+                                TradesList = App.DbContext.Trades.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "uchetTab":
-                    {
-                        var copy = SelectedTableItem as Trade;
-                        copy.ID = 0;
-                        AddTradeView add = new AddTradeView(copy);
-                        if (add.ShowDialog() == true)
+                    case "ttnTab":
                         {
-                            TradesList = App.DbContext.Trades.ToList();
+                            var copy = SelectedTableItem as TTN;
+                            copy.ID = 0;
+                            AddTTNView add = new AddTTNView(copy);
+                            if (add.ShowDialog() == true)
+                            {
+                                TTNList = App.DbContext.TTNs.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "ttnTab":
-                    {
-                        var copy = SelectedTableItem as TTN;
-                        copy.ID = 0;
-                        AddTTNView add = new AddTTNView(copy);
-                        if (add.ShowDialog() == true)
+                    case "accountTab":
                         {
-                            TTNList = App.DbContext.TTNs.ToList();
+                            var copy = SelectedTableItem as Account;
+                            copy.ID = 0;
+                            AddAccountView add = new AddAccountView();
+                            (add.DataContext as AddAccountViewModel).Account = copy;
+                            if (add.ShowDialog() == true)
+                            {
+                                AccountsList = App.DbContext.Accounts.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "accountTab":
-                    {
-                        var copy = SelectedTableItem as Account;
-                        copy.ID = 0;
-                        AddAccountView add = new AddAccountView();
-                        (add.DataContext as AddAccountViewModel).Account = copy;
-                        if (add.ShowDialog() == true)
+                    case "contractTab":
                         {
-                            AccountsList = App.DbContext.Accounts.ToList();
+                            Contact copy = SelectedTableItem is Contact ? (Contact)SelectedTableItem : new Contact();
+                            copy.ID = 0;
+                            AddContractView add = new AddContractView();
+                            (add.DataContext as AddContactViewModel)!.Contact = copy;
+                            if (add.ShowDialog() == true)
+                            {
+                                ContractsList = App.DbContext.Contracts.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "contractTab":
-                    {
-                        Contact copy = SelectedTableItem is Contact ? (Contact)SelectedTableItem : new Contact();
-                        copy.ID = 0;
-                        AddContractView add = new AddContractView();
-                        (add.DataContext as AddContactViewModel)!.Contact = copy;
-                        if (add.ShowDialog() == true)
+                    case "tnTab":
                         {
-                            ContractsList = App.DbContext.Contracts.ToList();
+                            TN copy = SelectedTableItem is TN ? (TN)SelectedTableItem : new TN();
+                            copy.ID = 0;
+                            AddTNView add = new AddTNView();
+                            (add.DataContext as AddTNViewModel)!.TN = copy;
+                            if (add.ShowDialog() == true)
+                            {
+                                TNsList = App.DbContext.TNs.ToList();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "tnTab":
-                    {
-                        TN copy = SelectedTableItem is TN ? (TN)SelectedTableItem : new TN();
-                        copy.ID = 0;
-                        AddTNView add = new AddTNView();
-                        (add.DataContext as AddTNViewModel)!.TN = copy;
-                        if (add.ShowDialog() == true)
-                        {
-                            TNsList = App.DbContext.TNs.ToList();
-                        }
-                        break;
-                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
             }
         }
         private async Task Search(string text)
         {
             if (text.Equals(string.Empty))
             {
+                try
+                {
+                    switch (selectedTab)
+                    {
+                        case "materialsTab":
+                            {
+                                MaterialsList = App.DbContext.Materials.ToList();
+                                break;
+                            }
+                        case "employersTab":
+                            {
+                                EmployeesList = App.DbContext.Employees.ToList();
+                                break;
+                            }
+                        case "orgTab":
+                            {
+                                OrganizationsList = App.DbContext.Organizations.ToList();
+                                break;
+                            }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    view.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
+                }
+                return;
+            }
+            try
+            {
                 switch (selectedTab)
                 {
                     case "materialsTab":
                         {
-                            MaterialsList = App.DbContext.Materials.ToList();
+                            MaterialsList = App.DbContext.Materials.Search(text);
                             break;
                         }
                     case "employersTab":
                         {
-                            EmployeesList = App.DbContext.Employees.ToList();
+                            EmployeesList = App.DbContext.Employees.Search(text);
                             break;
                         }
                     case "orgTab":
                         {
-                            OrganizationsList = App.DbContext.Organizations.ToList();
+                            OrganizationsList = App.DbContext.Organizations.Search(text);
                             break;
                         }
                 }
-                return;
             }
-            switch (selectedTab)
+            catch (Exception ex)
             {
-                case "materialsTab":
-                    {
-                        MaterialsList = App.DbContext.Materials.Search(text);
-                        break;
-                    }
-                case "employersTab":
-                    {
-                        EmployeesList = App.DbContext.Employees.Search(text);
-                        break;
-                    }
-                case "orgTab":
-                    {
-                        OrganizationsList = App.DbContext.Organizations.Search(text);
-                        break;
-                    }
+                view.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
             }
         }
         #endregion

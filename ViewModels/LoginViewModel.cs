@@ -71,7 +71,7 @@ namespace BuildMaterials.ViewModels
                     MainWindow mainWindow = new MainWindow(SelectedEmploee);
                     mainWindow.Show();
                     System.Windows.Application.Current.MainWindow = mainWindow;
-                    _window?.Close();
+                    _window.Close();
                 }
                 else
                 {
@@ -83,6 +83,10 @@ namespace BuildMaterials.ViewModels
             catch (AutorizeException aEx)
             {
                 _window.ShowDialogAsync(aEx.Message, Title);
+            }
+            catch (Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка: " + ex.Message,Title);
             }
         }
     }

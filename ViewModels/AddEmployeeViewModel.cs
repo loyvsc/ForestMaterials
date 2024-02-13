@@ -46,33 +46,26 @@ namespace BuildMaterials.ViewModels
         {
             if (Employee.IsValid)
             {
-                if (Employee.ID != 0)
+                try
                 {
-                    try
+                    if (Employee.ID != 0)
                     {
                         App.DbContext.Employees.Update(Employee);
+
                         if ((App.Current.MainWindow.DataContext as MainWindowViewModel)?.CurrentEmployee?.ID == Employee.ID)
                         {
                             (App.Current.MainWindow.DataContext as MainWindowViewModel).CurrentEmployee = Employee;
                         }
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
-                    }
-                }
-                else
-                {
-                    try
+                    else
                     {
                         App.DbContext.Employees.Add(Employee);
-                        Close();
                     }
-                    catch (Exception ex)
-                    {
-                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
-                    }
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    _window.ShowDialogAsync("Произошла ошибка при сохранении изменений...\nОшибка: " + ex.Message, Title);
                 }
             }
             else

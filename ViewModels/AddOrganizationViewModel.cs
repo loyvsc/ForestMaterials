@@ -92,22 +92,36 @@ namespace BuildMaterials.ViewModels
         private async Task DeleteContact(object? obj)
         {
             if (SelectedContact == null) return;
-            SelectedContact.ForDelete = true;
-            Organization.Contacts.Remove(SelectedContact);
-            Operations.Add(SelectedContact);
+            try
+            {
+                SelectedContact.ForDelete = true;
+                Organization.Contacts.Remove(SelectedContact);
+                Operations.Add(SelectedContact);
+            }
+            catch(Exception ex)
+            {
+                _window.ShowDialogAsync("Произошла ошибка: "+ex.Message, Title);
+            }
         }
 
         private async Task EditContact(object? obj)
         {
             if (SelectedContact != null)
             {
-                AddContactView contact = new AddContactView(SelectedContact, this);
-                if (contact.ShowDialog() == true)
+                try
                 {
-                    Contact last = (Contact)Operations.Last();
-                    Organization.Contacts[Organization.Contacts.IndexOf(last)] = last;
+                    AddContactView contact = new AddContactView(SelectedContact, this);
+                    if (contact.ShowDialog() == true)
+                    {
+                        Contact last = (Contact)Operations.Last();
+                        Organization.Contacts[Organization.Contacts.IndexOf(last)] = last;
+                    }
                 }
-            }
+                catch(Exception ex)
+                {
+                    _window.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
+                }
+            }            
         }
 
         private async Task Close(object? obj = null) => _window.DialogResult = true;
@@ -178,22 +192,22 @@ namespace BuildMaterials.ViewModels
                 org.BIK = Organization.BIK;
                 org.CurrentSchet = Organization.CurrentSchet;
 
-                if (org.ID != 0)
+                try
                 {
-                    try
+                    if (org.ID != 0)
                     {
                         App.DbContext.Organizations.Update(org);
                     }
-                    catch
+                    else
                     {
-                        _window.ShowDialogAsync("Произошла ошибка при сохранении изменений!", Title);
-                        return;
+                        App.DbContext.Organizations.Add(org);
+                        Organization = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    App.DbContext.Organizations.Add(org);
-                    Organization = App.DbContext.Organizations.Select("SELECT * FROM sellers WHERE ID = (SELECT MAX(ID) FROM SELLERS)")[0];
+                    _window.ShowDialogAsync("Произошла ошибка: " + ex.Message, Title);
+                    return;
                 }
                 await CheckOperations();
                 Close();
